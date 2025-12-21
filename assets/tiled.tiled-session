@@ -1,0 +1,61 @@
+{
+    "Map/SizeTest": {
+        "height": 4300,
+        "width": 2
+    },
+    "activeFile": "untitled.tmx",
+    "expandedProjectPaths": [
+        "."
+    ],
+    "file.lastUsedOpenFilter": "All Files (*)",
+    "fileStates": {
+        "basictiles.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "testmap.tmx": {
+            "scale": 2.6184374999999998,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 158.30051318773127,
+                "y": 159.82814178302903
+            }
+        },
+        "things.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "untitled.tmx": {
+            "scale": 2,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 257.25,
+                "y": 129.25
+            }
+        }
+    },
+    "last.imagePath": "/home/pc/Desktop/Grundlagen_Programmierung/fopws2526projectfop-transprutsolution/assets",
+    "map.fixedSize": true,
+    "map.height": 16,
+    "map.lastUsedFormat": "tmx",
+    "map.tileHeight": 16,
+    "map.tileWidth": 16,
+    "map.width": 32,
+    "openFiles": [
+        "basictiles.tsx",
+        "things.tsx",
+        "untitled.tmx"
+    ],
+    "project": "tiled.tiled-project",
+    "recentFiles": [
+        "basictiles.tsx",
+        "things.tsx",
+        "untitled.tmx",
+        "testmap.tmx"
+    ],
+    "tileset.lastUsedFormat": "tsx",
+    "tileset.tileSize": {
+        "height": 16,
+        "width": 16
+    }
+}

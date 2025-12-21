@@ -1,8 +1,7 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Run Game" type="Application" factoryName="Application">
-    <option name="MAIN_CLASS_NAME" value="de.tum.cit.ase.maze.DesktopLauncher" />
-    <module name="itp2324testtestitp2324projectwork-exercise.desktop.main" />
-    <option name="VM_PARAMETERS" value="-XstartOnFirstThread" />
+    <option name="MAIN_CLASS_NAME" value="de.tum.cit.fop.maze.DesktopLauncher" />
+    <module name="fopws2526projectfop-transprutsolution.desktop.main" />
     <extension name="coverage">
       <pattern>
         <option name="PATTERN" value="de.tum.cit.ase.maze.*" />
