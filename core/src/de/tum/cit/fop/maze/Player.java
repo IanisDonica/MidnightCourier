@@ -27,7 +27,7 @@ public class Player extends Actor {
         to be polled every frame, and so that there is more flexibility for stuff
         like speed-up animations/cooldown etc.
      */
-    private boolean moveLeft, moveRight, moveUp, moveDown;
+    private boolean moveUp, moveDown, moveLeft, moveRight;
 
     // So they can later be remapped by the player
     private final int moveUpKeys = Input.Keys.W;
@@ -35,13 +35,18 @@ public class Player extends Actor {
     private final int moveLeftKeys = Input.Keys.A;
     private final int moveRightKeys = Input.Keys.D;
 
+    private float deltaX;
+    private float deltaY;
+    private float nextX;
+    private float nextY;
+
     private boolean moving;
 
 
     public Player(TiledMap map) {
         this.map = map;
         initialiseAnimations();
-        setSize(16,32);
+        setSize(1,2);
 
         this.collisionLayer = (TiledMapTileLayer) map.getLayers().get("Walls");
 
@@ -129,7 +134,7 @@ public class Player extends Actor {
     public void act(float delta) {
 
         super.act(delta);
-        float speed = 50f * delta;
+        float speed = 2f * delta;
 
         float deltaX = 0, deltaY = 0;
 
@@ -142,33 +147,58 @@ public class Player extends Actor {
 
         float nextX = deltaX + getX(), nextY = deltaY + getY();
 
-        if (!isCellBlocked(nextX, nextY, 16)) {
+        if (!isCellBlocked(nextX, nextY)) {
             this.setPosition(nextX, nextY);
         } else {
-            float halfX, halfY;
+            float halfX = (nextX - nextX % 1) + 0.5f;
+            float halfY = (nextY - nextY % 1) + 0.5f;
 
-            if (moveUp) {
-                halfY = nextY - nextY % 16;
-            } else if (moveDown) {
-                halfY = nextY + 16 - nextY % 16;
-            } else {
-                halfY = nextY;
-            }
+            // TODO Fix corder collision make code more clear
 
-            if (moveRight) {
-                halfX = nextX - nextX % 16;
-            } else if (moveLeft) {
-                halfX = nextX + 16 - nextX % 16;
+            //System.out.printf("HalfX/Y(%s:%s)%n", halfX, halfY);
+            //Xor operations (ie, only 1 movement direction)
+            if (moveUp ^ moveDown ^ moveLeft ^ moveRight) {
+                if (moveUp || moveDown) {
+                    if (!isCellBlocked(getX() - 0.001f, getY())) {
+                        this.setPosition(getX() - 0.001f, getY());
+                    } else {
+                        this.setY(halfY);
+                    }
+                } else {
+                    if (!isCellBlocked( getX(), getY() - 0.001f)) {
+                        this.setPosition(getX(), getY() - 0.001f);
+                    } else {
+                        this.setY(halfY);
+                    }
+                }
             } else {
-                halfX = nextX;
-            }
-
-            if (!isCellBlocked(nextX, halfY, 16)) {
-                this.setPosition(nextX, halfY);
-            } else if (!isCellBlocked(halfX, nextY, 16)) {
-                this.setPosition(halfX, nextY);
-            } else {
-                this.setPosition(halfX, halfY);
+                if (moveLeft && moveUp) {
+                    //Try and see if the X coordinate is the problem
+                    if (!isCellBlocked(halfX, nextY)) {
+                        setPosition(halfX, nextY);
+                    }
+                    // Try and see if the Y coordinate is the problem
+                    else if (!isCellBlocked(nextX, halfY)) {
+                        setPosition(nextX, halfY);
+                    }
+                    // Both are the problem
+                    else {
+                        setPosition(halfX, halfY);
+                    }
+                } else {
+                    // Try and see if the Y coordinate is the problem
+                    if (!isCellBlocked(nextX, halfY)) {
+                        setPosition(nextX, halfY);
+                    }
+                    //Try and see if the X coordinate is the problem
+                    else if (!isCellBlocked(halfX, nextY)) {
+                        setPosition(halfX, nextY);
+                    }
+                    // Both are the problem
+                    else {
+                        setPosition(halfX, halfY);
+                    }
+                }
             }
         }
 
@@ -176,14 +206,25 @@ public class Player extends Actor {
         stateTime += delta;
     }
 
-    private boolean isCellBlocked(float x, float y, float tileSize) {
-        // Convert world pixels to grid coordinates
-        int gridX = (int) ((x + 8) / tileSize);
-        int gridY = (int) ((y + 8 )/ tileSize);
+    private boolean isCellBlocked(float x, float y) {
+        float offsetX = 0, offsetY = 0;
+
+        float halfX = (x - x % 1) + 0.4f;
+        float halfY = (y - y % 1) + 0.4f;
+
+        if (getX() >= halfX && moveRight) {offsetX = 0.02f;}
+        if (getY() >= halfY && moveUp) {offsetY = 0.02f;}
+        if (!moving) { return false; }
+
+        int gridX = (int) (x + 0.5f - offsetX);
+        int gridY = (int) (y + 0.5f - offsetY);
+
+        //System.out.printf("Player(%s:%s), gridX:%s, gridY%s%n", getX(), getY(), gridX, gridY);
 
         TiledMapTileLayer.Cell cell = collisionLayer.getCell(gridX, gridY);
 
         // If the cell exists, it's a wall (or check for a "blocked" property)
+        //System.out.println(cell != null);
         return cell != null;
     }
 

@@ -42,10 +42,10 @@ public class GameScreen implements Screen {
     public GameScreen(MazeRunnerGame game) {
         this.game = game;
 
-        Viewport viewport = new FitViewport(512, 256);
+        Viewport viewport = new FitViewport(32, 16);
         this.stage = new Stage(viewport, game.getSpriteBatch());
         this.map = new TmxMapLoader().load("untitled.tmx");
-        mapRenderer = new OrthogonalTiledMapRenderer(map, 1f, game.getSpriteBatch());
+        mapRenderer = new OrthogonalTiledMapRenderer(map, 1/16f, game.getSpriteBatch());
 
         // Get the font from the game's skin
         font = game.getSkin().getFont("font");
@@ -82,24 +82,6 @@ public class GameScreen implements Screen {
 
         Actor label = stage.getRoot().findActor("instruction");
         Player player = stage.getRoot().findActor("player");
-        if (label != null) {
-            float textX = (float) (256 - ((Label)label).getPrefWidth() / 2 + Math.sin(sinusInput) * 50);
-            float textY = (float) (128 - ((Label)label).getPrefHeight() / 2 + Math.cos(sinusInput) * 50);
-            label.setPosition(textX, textY);
-            ((Label) label).setText(String.format("X - %s; Y - %s", player.getX() / 16, player.getY() / 16));
-            //player.setPosition(textX + ((Label)label).getPrefWidth() / 2 - player.getWidth() / 2, textY - ((Label)label).getPrefHeight() - 10);
-
-            /*
-            System.out.printf("X - %s; Y - %s; Delta - %s; cos - %s; prefW - %s%n",
-                    textX,
-                    textY,
-                    Gdx.graphics.getDeltaTime(),
-                    Math.cos(Gdx.graphics.getDeltaTime()),
-                    ((Label)label).getPrefWidth()
-            );
-             */
-        }
-
         stage.act(delta);
         stage.draw();
     }
@@ -124,8 +106,9 @@ public class GameScreen implements Screen {
         Label.LabelStyle labelStyle = new Label.LabelStyle(game.getSkin().getFont("font"), Color.WHITE);
         Label instructionLabel = new Label("Press ESC to go to menu", labelStyle);
         instructionLabel.setName("instruction");
+        instructionLabel.setFontScale(0.02f);
 
-        Player player = new Player(map, 256, 128);
+        Player player = new Player(map, 16, 8);
         player.setName("player");
 
         stage.addActor(player);
