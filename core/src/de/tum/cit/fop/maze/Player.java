@@ -156,6 +156,8 @@ public class Player extends Actor {
 
             //System.out.printf("HalfX/Y(%s:%s)%n", halfX, halfY);
             //Xor operations (ie, only 1 movement direction)
+            // TODO Make it so that the player can only move in one direction per axis,
+            //  the code here assumes that that is already the case.
             if (moveUp ^ moveDown ^ moveLeft ^ moveRight) {
                 if (moveUp || moveDown) {
                     if (!isCellBlocked(getX() - 0.001f, getY())) {
