@@ -50,7 +50,6 @@ public class Player extends Actor {
 
         this.collisionLayer = (TiledMapTileLayer) map.getLayers().get("Walls");
 
-
         this.addListener(new InputListener() {
             @Override
             public boolean keyDown(InputEvent event, int keycode) {
@@ -202,7 +201,11 @@ public class Player extends Actor {
             }
         }
 
-        if (moving) animationTime += delta;
+        if (moving) {
+            animationTime += delta;
+            this.getStage().getCamera().position.set(getX() + getWidth() / 2, getY() + getHeight() / 2, 0);
+            this.getStage().getCamera().update();
+        }
         stateTime += delta;
     }
 
@@ -223,18 +226,6 @@ public class Player extends Actor {
 
         TiledMapTileLayer.Cell cell = collisionLayer.getCell(gridX, gridY);
 
-        // If the cell exists, it's a wall (or check for a "blocked" property)
-        //System.out.println(cell != null);
         return cell != null;
     }
-
-    /*
-        TODO: this should be a method of a Entity
-        superclass that the Player and other entities
-        (BMW drivers for example) should extend
-    public boolean collisionCheck(int direction) {
-        this.moving = true;
-        return true;
-    }
-     */
 }
