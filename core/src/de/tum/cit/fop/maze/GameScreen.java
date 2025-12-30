@@ -28,6 +28,8 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
+import java.util.concurrent.TimeUnit;
+
 /**
  * The GameScreen class is responsible for rendering the gameplay screen.
  * It handles the game logic and rendering of the game elements.
@@ -47,14 +49,17 @@ public class GameScreen implements Screen {
     private FrameBuffer fboFog;
     private FrameBuffer collisionFbo;
     private ShapeRenderer collisionSR;
+    private FrameBuffer interFbo;
 
     private TextureRegion fboRegion;
     private TextureRegion fboFogRegion;
+    private TextureRegion interFboRegion;
     private TextureRegion collisionFboRegion;
 
     private ShaderProgram fogShader;
     private ShaderProgram grayScaleShader;
     private ShaderProgram collisionShader;
+    private ShaderProgram combinationShader;
 
     private OrthographicCamera uiCamera;
 
@@ -93,11 +98,20 @@ public class GameScreen implements Screen {
                 Gdx.files.internal("shaders/collision.frag")
         );
 
+        combinationShader = new ShaderProgram(
+                Gdx.files.internal("shaders/vertex.glsl"),
+                Gdx.files.internal("shaders/combination.frag")
+        );
+
         ((OrthographicCamera)stage.getCamera()).zoom = 1f;
         uiCamera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
         //Create a cocllision FBO based on the collision layer
         collisionFbo = new FrameBuffer(Pixmap.Format.RGBA8888, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), false);
+        interFbo = new FrameBuffer(Pixmap.Format.RGBA8888, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), false);
+        interFboRegion = new TextureRegion(interFbo.getColorBufferTexture());
+        interFboRegion.flip(false, true);
+
         generateFBO();
 
         stage.addListener(new InputListener() {
@@ -130,87 +144,87 @@ public class GameScreen implements Screen {
 
     @Override
     public void render(float delta) {
-        // TODO Combine shaders
-        fbo.begin();
-            ScreenUtils.clear(0, 0, 0, 1);
-            mapRenderer.setView((OrthographicCamera) stage.getCamera());
-            mapRenderer.render();
-
-            stage.act(delta);
-            stage.draw();
-        fbo.end();
-
+        stage.act(delta);
 
         Batch batch = stage.getBatch();
         OrthographicCamera camera = (OrthographicCamera) stage.getCamera();
 
+        float viewW = camera.viewportWidth * camera.zoom;
+        float viewH = camera.viewportHeight * camera.zoom;
+        float viewX = camera.position.x - viewW / 2f;
+        float viewY = camera.position.y - viewH / 2f;
+
+        // TODO Combine shaders
+        fbo.begin();
+            ScreenUtils.clear(0, 0, 0, 1);
+            mapRenderer.setView(camera);
+            mapRenderer.render();
+            stage.draw();
+        fbo.end();
+
         fboFog.begin();
             ScreenUtils.clear(0, 0, 0, 1);
-            batch.setProjectionMatrix(uiCamera.combined); // Easier than having to constantly update the Projection Matrices
+            batch.setProjectionMatrix(camera.combined);
             batch.setShader(fogShader);
 
             batch.begin();
                 fogShader.setUniformf("u_playerWorldPos", player.getX() + player.getWidth() / 2f, player.getY() + player.getHeight() / 2f);
                 fogShader.setUniformf("u_camWorldPos", camera.position.x, camera.position.y);
-                fogShader.setUniformf("u_worldViewSize", camera.viewportWidth * camera.zoom, camera.viewportHeight * camera.zoom);
+                fogShader.setUniformf("u_worldViewSize", viewW, viewH);
                 fogShader.setUniformf("u_radiusWorld", fogIntensity);
 
-                batch.draw(fboRegion, 0, 0, uiCamera.viewportWidth, uiCamera.viewportHeight);
+                batch.draw(fboRegion, viewX, viewY, viewW, viewH);
             batch.end();
         fboFog.end();
 
         stage.getViewport().apply();
-        batch.setProjectionMatrix(stage.getViewport().getCamera().combined);
 
-        //if (noireMode) { batch.setShader(grayScaleShader); }
-        batch.setShader(collisionShader);
-
-        batch.begin();
+        interFbo.begin();
             ScreenUtils.clear(0, 0, 0, 1);
+            batch.setProjectionMatrix(camera.combined);
+            batch.setShader(collisionShader);
+            batch.begin();
+                collisionFbo.getColorBufferTexture().bind(1);
+                Gdx.gl.glActiveTexture(GL20.GL_TEXTURE0);
 
-            collisionFbo.getColorBufferTexture().bind(1);
-            Gdx.gl.glActiveTexture(GL20.GL_TEXTURE0);
+                float uvWidth  = viewW / worldWidth;
+                float uvHeight = viewH / worldHeight;
+                float uvStartX = viewX / worldWidth;
+                float uvStartY = viewY / worldHeight;
 
-            float uvWidth = camera.viewportWidth * camera.zoom / worldWidth;
-            float uvHeight = camera.viewportHeight * camera.zoom / worldHeight;
+                collisionShader.setUniformi("u_mask", 1);
+                collisionShader.setUniformf("u_uvOffset", uvStartX, uvStartY);
+                collisionShader.setUniformf("u_uvScale", uvWidth, uvHeight);
 
-            float uvStartX = (camera.position.x - (camera.viewportWidth * camera.zoom / 2f)) / worldWidth;
-            float uvStartY = (camera.position.y - (camera.viewportHeight * camera.zoom / 2f)) / worldHeight;
+                batch.draw(fboRegion,viewX, viewY, viewW, viewH);
 
-            collisionShader.setUniformi("u_mask", 1);
-            collisionShader.setUniformf("u_uvOffset", uvStartX, uvStartY);
-            collisionShader.setUniformf("u_uvScale", uvWidth, uvHeight);
-
-            batch.draw(fboFogRegion,
-                    stage.getCamera().position.x - stage.getCamera().viewportWidth/2,
-                    stage.getCamera().position.y - stage.getCamera().viewportHeight/2,
-                    stage.getViewport().getWorldWidth(), stage.getViewport().getWorldHeight()
-            );
-        batch.end();
-
-        batch.setShader(null);
-        /*
-
-        Batch batch = stage.getBatch();
-
-        batch.setProjectionMatrix(stage.getViewport().getCamera().combined);
-        batch.setShader(collisionShader);
-
-        batch.begin();
-            ScreenUtils.clear(0, 0, 0, 1);
-
-            collisionFbo.getColorBufferTexture().bind(1);
-            Gdx.gl.glActiveTexture(GL20.GL_TEXTURE0);
-            collisionShader.setUniformi("u_mask", 1);
-
-            batch.draw(fboRegion,0,0, worldWidth, worldHeight);
-
-        batch.end();
-
+                System.out.printf("FBORegion: %s:%s%n",fboRegion.getRegionWidth(), fboRegion.getRegionHeight());
+            batch.end();
+        interFbo.end();
 
         stage.getViewport().apply();
-        batch.setProjectionMatrix(stage.getViewport().getCamera().combined);
-        batch.setShader(null); */
+
+        ScreenUtils.clear(0, 0, 0, 1);
+        batch.setProjectionMatrix(camera.combined);
+        batch.setShader(combinationShader);
+        batch.begin();
+            fboFog.getColorBufferTexture().bind(1);
+            Gdx.gl.glActiveTexture(GL20.GL_TEXTURE0);
+            combinationShader.setUniformi("u_mask", 1);
+
+            batch.draw(interFboRegion, viewX, viewY, viewW, viewH);
+
+            System.out.printf("fboFog: %s:%s%n",fboFog.getColorBufferTexture().getWidth(), fboFog.getColorBufferTexture().getHeight());
+            System.out.printf("%s  %s  %s %s %n",
+                    stage.getCamera().position.x - stage.getCamera().viewportWidth/2,
+                    stage.getCamera().position.y - stage.getCamera().viewportHeight/2,
+                    stage.getViewport().getWorldWidth(),
+                    stage.getViewport().getWorldHeight()
+            );
+            System.out.printf("interFboRegion: %s:%s%n",interFboRegion.getRegionWidth(), interFboRegion.getRegionHeight());
+
+        batch.end();
+        batch.setShader(null);
     }
 
     @Override
@@ -260,7 +274,9 @@ public class GameScreen implements Screen {
 
             collisionSR.setProjectionMatrix(stage.getCamera().combined);
             collisionSR.begin(ShapeRenderer.ShapeType.Filled);
-            collisionSR.setColor(new Color(0.5f, 0.5f, 0.5f, 1));
+            collisionSR.setColor(Color.WHITE);
+            collisionSR.rect(0,0, width, height);
+            collisionSR.setColor(new Color(0.3f, 0.3f, 0.3f, 1));
 
                 for (int i = 0; i < height; i++) {
                     for (int j = 0; j < width; j++) {

@@ -14,5 +14,5 @@ void main() {
     vec2 maskCoords = u_uvOffset + (v_texCoords * u_uvScale);
     vec4 maskColor = texture2D(u_mask, maskCoords);
 
-    gl_FragColor = vec4(sceneColor.r + maskColor.r / 2., sceneColor.g + maskColor.g / 2., sceneColor.b + maskColor.b / 2., sceneColor.a);
+    gl_FragColor = vec4(sceneColor.r - maskColor.r, sceneColor.g - maskColor.g, sceneColor.b - maskColor.b , sceneColor.a);
 }

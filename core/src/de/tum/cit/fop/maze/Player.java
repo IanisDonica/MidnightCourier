@@ -34,14 +34,11 @@ public class Player extends Actor {
     private final int moveDownKeys = Input.Keys.S;
     private final int moveLeftKeys = Input.Keys.A;
     private final int moveRightKeys = Input.Keys.D;
+    private final int sprintKeys = Input.Keys.SHIFT_LEFT;
 
-    private float deltaX;
-    private float deltaY;
-    private float nextX;
-    private float nextY;
 
     private boolean moving;
-
+    private boolean sprinting;
 
     public Player(TiledMap map) {
         this.map = map;
@@ -70,6 +67,10 @@ public class Player extends Actor {
                         moveRight = true;
                         yield true;
                     }
+                    case sprintKeys -> {
+                        sprinting = true;
+                        yield true;
+                    }
                     default -> false; // Key not handled
                 };
             }
@@ -91,6 +92,10 @@ public class Player extends Actor {
                     }
                     case moveRightKeys -> {
                         moveRight = false;
+                        yield true;
+                    }
+                    case sprintKeys -> {
+                        sprinting = false;
                         yield true;
                     }
                     default -> false;
@@ -134,6 +139,7 @@ public class Player extends Actor {
 
         super.act(delta);
         float speed = 2f * delta;
+        if (sprinting) { speed *= 5; }
 
         float deltaX = 0, deltaY = 0;
 
