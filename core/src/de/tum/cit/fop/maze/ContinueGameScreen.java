@@ -10,25 +10,13 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
-import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
-import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
-/**
- * The MenuScreen class is responsible for displaying the main menu of the game.
- * It extends the LibGDX Screen class and sets up the UI components for the menu.
- */
-public class MenuScreen implements Screen {
-
+public class ContinueGameScreen implements Screen {
     private final Stage stage;
 
-    /**
-     * Constructor for MenuScreen. Sets up the camera, viewport, stage, and UI elements.
-     *
-     * @param game The main game class, used to access global resources and methods.
-     */
-    public MenuScreen(MazeRunnerGame game) {
+    public ContinueGameScreen(MazeRunnerGame game){
         var camera = new OrthographicCamera();
         camera.zoom = 1.5f; // Set camera zoom for a closer view
 
@@ -40,49 +28,26 @@ public class MenuScreen implements Screen {
         stage.addActor(table); // Add the table to the stage
 
         // Add a label as a title
-        table.add(new Label("TestMenu", game.getSkin(), "title")).padBottom(80).row();
+        table.add(new Label("Select the save file:", game.getSkin(), "title")).padBottom(80).row();
 
         // Create and add a button to go to the game screen
-        TextButton newGame = new TextButton("New Game", game.getSkin());
-        table.add(newGame).width(300).row();
+        TextButton file1Button = new TextButton("File 1", game.getSkin());
+        table.add(file1Button).width(600).height(200).row();
 
-        TextButton continueGame = new TextButton("Load Game", game.getSkin());
-        table.add(continueGame).width(300).row();
+        TextButton file2Button = new TextButton("File 2", game.getSkin());
+        table.add(file2Button).width(600).height(200).row();
 
-        TextButton selectMap = new TextButton("Maps", game.getSkin());
-        table.add(selectMap).width(300).row();
+        TextButton file3Button = new TextButton("File 3", game.getSkin());
+        table.add(file3Button).width(600).height(200).row();
+        table.row();
 
-        TextButton settings = new TextButton("Settings", game.getSkin());
-        table.add(settings).width(300).row();
+        TextButton goToMenu = new TextButton("Go back to menu", game.getSkin());
+        table.add(goToMenu).width(600).height(200).row();
 
-        TextButton exit = new TextButton("Exit", game.getSkin());
-        table.add(exit).width(300).row();
-
-        newGame.addListener(new ChangeListener() {
+        goToMenu.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                game.goToNewGameScreen(); // Change to the game screen when button is pressed
-            }
-        });
-
-        continueGame.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent event, Actor actor) {
-                game.goToContinueGameScreen(); // Change to the game screen when button is pressed
-            }
-        });
-
-        settings.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent event, Actor actor) {
-                game.goToSettingsScreen(); // Change to the game screen when button is pressed
-            }
-        });
-
-        exit.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent event, Actor actor) {
-                Gdx.app.exit();
+                game.goToMenu();
             }
         });
     }
