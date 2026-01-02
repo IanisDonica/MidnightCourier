@@ -79,6 +79,39 @@ public class MazeRunnerGame extends Game {
     }
 
     /**
+     * Switches to the new game screen.
+     */
+    public void goToNewGameScreen(){
+        this.setScreen(new NewGameScreen(this)); // Set the current screen to GameScreen
+        if (menuScreen != null) {
+            menuScreen.dispose(); // Dispose the menu screen if it exists
+            menuScreen = null;
+        }
+    }
+
+    /**
+     * Switches to the continue game screen.
+     */
+    public void goToContinueGameScreen(){
+        this.setScreen(new ContinueGameScreen(this)); // Set the current screen to GameScreen
+        if (menuScreen != null) {
+            menuScreen.dispose(); // Dispose the menu screen if it exists
+            menuScreen = null;
+        }
+    }
+
+    /**
+     * Switches to the settings screen.
+     */
+    public void goToSettingsScreen() {
+        this.setScreen(new SettingsScreen(this)); // Set the current screen to GameScreen
+        if (menuScreen != null) {
+            menuScreen.dispose(); // Dispose the menu screen if it exists
+            menuScreen = null;
+        }
+    }
+
+    /**
      * Loads the character animation from the character.png file.
      */
     private void loadCharacterAnimation() {
@@ -122,4 +155,6 @@ public class MazeRunnerGame extends Game {
     public SpriteBatch getSpriteBatch() {
         return spriteBatch;
     }
+
+
 }

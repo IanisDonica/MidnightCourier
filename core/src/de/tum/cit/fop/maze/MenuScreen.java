@@ -32,7 +32,7 @@ public class MenuScreen implements Screen {
         var camera = new OrthographicCamera();
         camera.zoom = 1.5f; // Set camera zoom for a closer view
 
-        Viewport viewport = new FitViewport(1000,500, camera); // Create a viewport with the camera
+        Viewport viewport = new ScreenViewport(camera); // Create a viewport with the camera
         stage = new Stage(viewport, game.getSpriteBatch()); // Create a stage for UI elements
 
         Table table = new Table(); // Create a table for layout
@@ -40,15 +40,49 @@ public class MenuScreen implements Screen {
         stage.addActor(table); // Add the table to the stage
 
         // Add a label as a title
-        table.add(new Label("Hello World from the Menu!", game.getSkin(), "title")).padBottom(80).row();
+        table.add(new Label("TestMenu", game.getSkin(), "title")).padBottom(80).row();
 
         // Create and add a button to go to the game screen
-        TextButton goToGameButton = new TextButton("Go To Game", game.getSkin());
-        table.add(goToGameButton).width(300).row();
-        goToGameButton.addListener(new ChangeListener() {
+        TextButton newGame = new TextButton("New Game", game.getSkin());
+        table.add(newGame).width(300).row();
+
+        TextButton continueGame = new TextButton("Load Game", game.getSkin());
+        table.add(continueGame).width(300).row();
+
+        TextButton selectMap = new TextButton("Maps", game.getSkin());
+        table.add(selectMap).width(300).row();
+
+        TextButton settings = new TextButton("Settings", game.getSkin());
+        table.add(settings).width(300).row();
+
+        TextButton exit = new TextButton("Exit", game.getSkin());
+        table.add(exit).width(300).row();
+
+        newGame.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                game.goToGame(); // Change to the game screen when button is pressed
+                game.goToNewGameScreen(); // Change to the game screen when button is pressed
+            }
+        });
+
+        continueGame.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                game.goToContinueGameScreen(); // Change to the game screen when button is pressed
+            }
+        });
+
+        settings.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                game.goToSettingsScreen(); // Change to the game screen when button is pressed
+            }
+        });
+
+        exit.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                Gdx.app.exit();
             }
         });
     }
