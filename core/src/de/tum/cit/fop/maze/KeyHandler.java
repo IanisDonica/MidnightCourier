@@ -8,11 +8,11 @@ public class KeyHandler extends InputListener {
     private final Player player;
     private final GameScreen gameScreen;
     private final MazeRunnerGame game;
-    private final int moveUpKeys = Input.Keys.W;
-    private final int moveDownKeys = Input.Keys.S;
-    private final int moveLeftKeys = Input.Keys.A;
-    private final int moveRightKeys = Input.Keys.D;
-    private final int sprintKeys = Input.Keys.SHIFT_LEFT;
+    private final int[] moveUpKeys = {Input.Keys.W, Input.Keys.UP};
+    private final int[] moveDownKeys = {Input.Keys.S, Input.Keys.DOWN};
+    private final int[] moveLeftKeys = {Input.Keys.A,  Input.Keys.LEFT};
+    private final int[] moveRightKeys = {Input.Keys.D, Input.Keys.RIGHT};
+    private final int[] sprintKeys = {Input.Keys.SHIFT_LEFT};
 
     public KeyHandler(Player player, GameScreen gameScreen, MazeRunnerGame game) {
         this.player = player;
@@ -32,21 +32,35 @@ public class KeyHandler extends InputListener {
 
     private boolean handleKey(int keycode, boolean isDown) {
         // Player movement and sprint
-        if (keycode == moveUpKeys) {
-            player.setMoveUp(isDown);
-            return true;
-        } else if (keycode == moveDownKeys) {
-            player.setMoveDown(isDown);
-            return true;
-        } else if (keycode == moveLeftKeys) {
-            player.setMoveLeft(isDown);
-            return true;
-        } else if (keycode == moveRightKeys) {
-            player.setMoveRight(isDown);
-            return true;
-        } else if (keycode == sprintKeys) {
-            player.setSprinting(isDown);
-            return true;
+        for (int key : moveUpKeys) {
+            if (key == keycode) {
+                player.setMoveUp(isDown);
+                return true;
+            }
+        }
+        for (int key : moveDownKeys) {
+            if (key == keycode) {
+                player.setMoveDown(isDown);
+                return true;
+            }
+        }
+        for (int key : moveLeftKeys) {
+            if (key == keycode) {
+                player.setMoveLeft(isDown);
+                return true;
+            }
+        }
+        for (int key : moveRightKeys) {
+            if (key == keycode) {
+                player.setMoveRight(isDown);
+                return true;
+            }
+        }
+        for (int key : sprintKeys) {
+            if (key == keycode) {
+                player.setSprinting(isDown);
+                return true;
+            }
         }
 
         // GameScreen debug and menu (only on keyDown)

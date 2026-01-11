@@ -6,17 +6,11 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.maps.tiled.TiledMap;
-import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
-import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.utils.Array;
 
-public class Player extends Actor {
-    private Animation<TextureRegion> characterAnimation;
-    private float stateTime;
-    private float animationTime;
+public class Player extends Entity {
     private final CollisionHandler collisionHandler;
-    private float speed;
-
+    private float stateTime;
     /*
         Movement flags:
         When a keyDown event is registered, the specific flag is set to True,
@@ -26,6 +20,19 @@ public class Player extends Actor {
      */
     private boolean moveUp, moveDown, moveLeft, moveRight, moving;
     private boolean sprinting;
+
+    public Player(TiledMap map) {
+        initialiseAnimations();
+        setSize(1, 2);
+        this.collisionHandler = new CollisionHandler(map);
+    }
+
+    //Initialize the player on a specific coordinate point
+    public Player(TiledMap map, float x, float y) {
+        this(map);
+        setX(x);
+        setY(y);
+    }
 
     public void setMoveUp(boolean moveUp) {
         this.moveUp = moveUp;
@@ -47,27 +54,6 @@ public class Player extends Actor {
         this.sprinting = sprinting;
     }
 
-    public float getSpeed() {
-        return speed;
-    }
-
-    public void multiplySpeed(float speedMultiplier) {
-        this.speed *= speedMultiplier;
-    }
-
-    public Player(TiledMap map) {
-        initialiseAnimations();
-        setSize(1,2);
-        this.collisionHandler = new CollisionHandler(map);
-    }
-
-    //Initialize the player on a specific coordinate point
-    public Player(TiledMap map, float x, float y) {
-        this(map);
-        setX(x);
-        setY(y);
-    }
-
     private void initialiseAnimations() {
         Texture walkSheet = new Texture(Gdx.files.internal("character.png"));
 
@@ -75,18 +61,32 @@ public class Player extends Actor {
         int frameHeight = 32;
         int animationFrames = 4;
 
-        Array<TextureRegion> walkFrames = new Array<>(TextureRegion.class);
+        Array<TextureRegion> walkDownFrames = new Array<>(TextureRegion.class);
+        Array<TextureRegion> walkRightFrames = new Array<>(TextureRegion.class);
+        Array<TextureRegion> walkUpFrames = new Array<>(TextureRegion.class);
+        Array<TextureRegion> walkLeftFrames = new Array<>(TextureRegion.class);
 
         for (int col = 0; col < animationFrames; col++) {
-            walkFrames.add(new TextureRegion(walkSheet, col * frameWidth, 0, frameWidth, frameHeight));
+            walkDownFrames.add(new TextureRegion(walkSheet, col * frameWidth, 0, frameWidth, frameHeight));
+            walkRightFrames.add(new TextureRegion(walkSheet, col * frameWidth, 32, frameWidth, frameHeight));
+            walkUpFrames.add(new TextureRegion(walkSheet, col * frameWidth, 64, frameWidth, frameHeight));
+            walkLeftFrames.add(new TextureRegion(walkSheet, col * frameWidth, 96, frameWidth, frameHeight));
         }
 
-        characterAnimation = new Animation<>(0.1f, walkFrames);
+        downAnimation = new Animation<>(0.1f, walkDownFrames);
+        rightAnimation = new Animation<>(0.1f, walkRightFrames);
+        upAnimation = new Animation<>(0.1f, walkUpFrames);
+        leftAnimation = new Animation<>(0.1f, walkLeftFrames);
     }
 
     @Override
     public void draw(Batch batch, float parentAlpha) {
-        TextureRegion currentFrame = characterAnimation.getKeyFrame(animationTime, true);
+        TextureRegion currentFrame = switch (facingDirection) {
+            case 'l' -> leftAnimation.getKeyFrame(animationTime, true);
+            case 'r' -> rightAnimation.getKeyFrame(animationTime, true);
+            case 'u' -> upAnimation.getKeyFrame(animationTime, true);
+            default -> downAnimation.getKeyFrame(animationTime, true);
+        };
 
         batch.draw(currentFrame, getX(), getY(), getWidth(), getHeight());
     }
@@ -95,15 +95,15 @@ public class Player extends Actor {
     public void act(float delta) {
         super.act(delta);
         speed = 2.5f * delta;
-        if (sprinting) { speed *= 1.6f; }
+        if (sprinting) {speed *= 1.6f;}
 
         float deltaX = 0, deltaY = 0;
 
 
-        if (moveUp) { deltaY += speed;}
-        if (moveDown) { deltaY += -speed;}
-        if (moveLeft) { deltaX += -speed;}
-        if (moveRight) { deltaX += speed;}
+        if (moveUp) {deltaY += speed;}
+        if (moveDown) {deltaY += -speed;}
+        if (moveLeft) {deltaX += -speed;}
+        if (moveRight) {deltaX += speed;}
 
         moving = false;
         if (deltaX != 0 || deltaY != 0) {
@@ -115,10 +115,22 @@ public class Player extends Actor {
 
         float nextX = deltaX + getX(), nextY = deltaY + getY();
 
-        if (deltaY > 0 && collisionHandler.checkCollision(this, 'u')) setPosition(getX(), nextY);
-        if (deltaY < 0 && collisionHandler.checkCollision(this, 'd')) setPosition(getX(), nextY);
-        if (deltaX > 0 && collisionHandler.checkCollision(this, 'r')) setPosition(nextX, getY());
-        if (deltaX < 0 && collisionHandler.checkCollision(this, 'l')) setPosition(nextX, getY());
+        if (deltaY > 0 && collisionHandler.checkCollision(this, 'u')) {
+            setPosition(getX(), nextY);
+            facingDirection = 'u';
+        }
+        if (deltaY < 0 && collisionHandler.checkCollision(this, 'd')) {
+            setPosition(getX(), nextY);
+            facingDirection = 'd';
+        }
+        if (deltaX > 0 && collisionHandler.checkCollision(this, 'r')) {
+            setPosition(nextX, getY());
+            facingDirection = 'r';
+        }
+        if (deltaX < 0 && collisionHandler.checkCollision(this, 'l')) {
+            setPosition(nextX, getY());
+            facingDirection = 'l';
+        }
 
         if (moving) {
             animationTime += delta;
