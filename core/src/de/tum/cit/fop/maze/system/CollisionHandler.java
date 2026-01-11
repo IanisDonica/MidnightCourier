@@ -1,7 +1,8 @@
-package de.tum.cit.fop.maze;
+package de.tum.cit.fop.maze.system;
 
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
+import de.tum.cit.fop.maze.entity.Player;
 
 public class CollisionHandler {
     private final TiledMapTileLayer collisionLayer;

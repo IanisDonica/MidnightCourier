@@ -1,4 +1,4 @@
-package de.tum.cit.fop.maze;
+package de.tum.cit.fop.maze.entity;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
@@ -7,18 +7,12 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.utils.Array;
+import de.tum.cit.fop.maze.system.CollisionHandler;
 
 public class Player extends Entity {
     private final CollisionHandler collisionHandler;
     private float stateTime;
-    /*
-        Movement flags:
-        When a keyDown event is registered, the specific flag is set to True,
-        on a keyUp they are set to false. Did it so that the input doesn't have
-        to be polled every frame, and so that there is more flexibility for stuff
-        like speed-up animations/cooldown etc.
-     */
-    private boolean moveUp, moveDown, moveLeft, moveRight, moving;
+    private boolean moveUp, moveDown, moveLeft, moveRight;
     private boolean sprinting;
 
     public Player(TiledMap map) {
@@ -73,10 +67,10 @@ public class Player extends Entity {
             walkLeftFrames.add(new TextureRegion(walkSheet, col * frameWidth, 96, frameWidth, frameHeight));
         }
 
-        downAnimation = new Animation<>(0.1f, walkDownFrames);
-        rightAnimation = new Animation<>(0.1f, walkRightFrames);
-        upAnimation = new Animation<>(0.1f, walkUpFrames);
-        leftAnimation = new Animation<>(0.1f, walkLeftFrames);
+        downAnimation = new Animation<>(0.15f, walkDownFrames);
+        rightAnimation = new Animation<>(0.15f, walkRightFrames);
+        upAnimation = new Animation<>(0.15f, walkUpFrames);
+        leftAnimation = new Animation<>(0.15f, walkLeftFrames);
     }
 
     @Override
@@ -96,7 +90,6 @@ public class Player extends Entity {
         super.act(delta);
         speed = 2.5f * delta;
         if (sprinting) {speed *= 1.6f;}
-
         float deltaX = 0, deltaY = 0;
 
 
@@ -105,13 +98,11 @@ public class Player extends Entity {
         if (moveLeft) {deltaX += -speed;}
         if (moveRight) {deltaX += speed;}
 
-        moving = false;
         if (deltaX != 0 || deltaY != 0) {
             float length = (float) Math.sqrt(deltaX * deltaX + deltaY * deltaY);
             deltaX = deltaX * speed / length;
             deltaY = deltaY * speed / length;
-            moving = true;
-        }
+        } else return;
 
         float nextX = deltaX + getX(), nextY = deltaY + getY();
 
@@ -132,11 +123,9 @@ public class Player extends Entity {
             facingDirection = 'l';
         }
 
-        if (moving) {
-            animationTime += delta;
-            this.getStage().getCamera().position.set(getX() + getWidth() / 2, getY() + getHeight() / 2, 0);
-            this.getStage().getCamera().update();
-        }
+        animationTime += delta;
+        this.getStage().getCamera().position.set(getX() + getWidth() / 2, getY() + getHeight() / 2, 0);
+        this.getStage().getCamera().update();
         stateTime += delta;
     }
 

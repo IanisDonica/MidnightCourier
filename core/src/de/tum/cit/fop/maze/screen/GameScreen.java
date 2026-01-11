@@ -1,9 +1,12 @@
-package de.tum.cit.fop.maze;
+package de.tum.cit.fop.maze.screen;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.graphics.*;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
@@ -14,12 +17,13 @@ import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.Matrix4;
-import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import de.tum.cit.fop.maze.MazeRunnerGame;
+import de.tum.cit.fop.maze.entity.Player;
+import de.tum.cit.fop.maze.system.KeyHandler;
 
 /**
  * The GameScreen class is responsible for rendering the gameplay screen.
@@ -27,17 +31,20 @@ import com.badlogic.gdx.utils.viewport.Viewport;
  */
 public class GameScreen implements Screen {
 
+    public static final int WORLD_WIDTH = 32;
+    public static final int WORLD_HEIGHT = 16;
     private final MazeRunnerGame game;
     private final TiledMap map;
     private final OrthogonalTiledMapRenderer mapRenderer;
     private final Stage stage;
-    public static final int WORLD_WIDTH = 32;
-    public static final int WORLD_HEIGHT = 16;
+    private final ShaderProgram grayScaleShader;
+    private final ShaderProgram fogShader;
+    private final ShaderProgram collisionShader;
+    private final ShaderProgram combinationShader;
+    private final OrthographicCamera uiCamera;
     private float fogIntensity = 8f;
     private boolean noireMode = false;
-
     private FrameBuffer fbo;
-
     private TextureRegion fboRegion;
     private FrameBuffer noireFbo;
     private TextureRegion noireFboRegion;
@@ -45,27 +52,7 @@ public class GameScreen implements Screen {
     private FrameBuffer interFbo;
     private TextureRegion interFboRegion;
     private FrameBuffer collisionFbo;
-
-    private ShaderProgram grayScaleShader;
-    private ShaderProgram fogShader;
-    private ShaderProgram collisionShader;
-    private ShaderProgram combinationShader;
-
-    private OrthographicCamera uiCamera;
-
     private Player player;
-
-    public void adjustZoom(float amount) {
-        ((OrthographicCamera)stage.getCamera()).zoom += amount;
-    }
-
-    public void adjustFog(float amount) {
-        fogIntensity += amount;
-    }
-
-    public void toggleNoireMode() {
-        noireMode = !noireMode;
-    }
 
     /**
      * Constructor for GameScreen. Sets up the camera and font.
@@ -77,35 +64,32 @@ public class GameScreen implements Screen {
         Viewport viewport = new FitViewport(WORLD_WIDTH, WORLD_HEIGHT);
         stage = new Stage(viewport, game.getSpriteBatch());
         map = new TmxMapLoader().load("untitled.tmx");
-        mapRenderer = new OrthogonalTiledMapRenderer(map, 1/16f, game.getSpriteBatch());
+        mapRenderer = new OrthogonalTiledMapRenderer(map, 1 / 16f, game.getSpriteBatch());
         createFrameBuffers(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
-        grayScaleShader = new ShaderProgram(
-                Gdx.files.internal("shaders/vertex.glsl"),
-                Gdx.files.internal("shaders/grayscale.frag")
-        );
+        grayScaleShader = new ShaderProgram(Gdx.files.internal("shaders/vertex.glsl"), Gdx.files.internal("shaders/grayscale.frag"));
 
-        fogShader = new ShaderProgram(
-                Gdx.files.internal("shaders/vertex.glsl"),
-                Gdx.files.internal("shaders/fog.frag")
-        );
+        fogShader = new ShaderProgram(Gdx.files.internal("shaders/vertex.glsl"), Gdx.files.internal("shaders/fog.frag"));
+        collisionShader = new ShaderProgram(Gdx.files.internal("shaders/vertex.glsl"), Gdx.files.internal("shaders/collision.frag"));
+        combinationShader = new ShaderProgram(Gdx.files.internal("shaders/vertex.glsl"), Gdx.files.internal("shaders/combination.frag"));
 
-        collisionShader = new ShaderProgram(
-                Gdx.files.internal("shaders/vertex.glsl"),
-                Gdx.files.internal("shaders/collision.frag")
-        );
-
-        combinationShader = new ShaderProgram(
-                Gdx.files.internal("shaders/vertex.glsl"),
-                Gdx.files.internal("shaders/combination.frag")
-        );
-
-        ((OrthographicCamera)stage.getCamera()).zoom = 1f;
+        ((OrthographicCamera) stage.getCamera()).zoom = 1f;
         uiCamera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
         generateFBO();
     }
 
+    public void adjustZoom(float amount) {
+        ((OrthographicCamera) stage.getCamera()).zoom += amount;
+    }
+
+    public void adjustFog(float amount) {
+        fogIntensity += amount;
+    }
+
+    public void toggleNoireMode() {
+        noireMode = !noireMode;
+    }
 
     @Override
     public void render(float delta) {
@@ -129,7 +113,7 @@ public class GameScreen implements Screen {
         uiCamera.setToOrtho(false, width, height);
         uiCamera.update();
 
-        // Recreate FBOs to match new window size
+        // Recreate FBOs to match the new window size
         disposeFrameBuffers();
         createFrameBuffers(width, height);
     }

@@ -1,4 +1,4 @@
-package de.tum.cit.fop.maze;
+package de.tum.cit.fop.maze.screen;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
@@ -12,6 +12,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import de.tum.cit.fop.maze.MazeRunnerGame;
 
 public class ContinueGameScreen implements Screen {
     private final Stage stage;
@@ -66,7 +67,7 @@ public class ContinueGameScreen implements Screen {
 
     @Override
     public void dispose() {
-        // Dispose of the stage when screen is disposed
+        // Dispose of the stage when the screen is disposed
         stage.dispose();
     }
 

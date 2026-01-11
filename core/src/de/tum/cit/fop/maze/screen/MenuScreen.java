@@ -1,4 +1,4 @@
-package de.tum.cit.fop.maze;
+package de.tum.cit.fop.maze.screen;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
@@ -12,11 +12,22 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import de.tum.cit.fop.maze.MazeRunnerGame;
 
-public class NewGameScreen implements Screen {
+/**
+ * The MenuScreen class is responsible for displaying the main menu of the game.
+ * It extends the LibGDX Screen class and sets up the UI components for the menu.
+ */
+public class MenuScreen implements Screen {
+
     private final Stage stage;
 
-    public NewGameScreen(MazeRunnerGame game){
+    /**
+     * Constructor for MenuScreen. Sets up the camera, viewport, stage, and UI elements.
+     *
+     * @param game The main game class, used to access global resources and methods.
+     */
+    public MenuScreen(MazeRunnerGame game) {
         var camera = new OrthographicCamera();
         camera.zoom = 1.5f; // Set camera zoom for a closer view
 
@@ -28,32 +39,52 @@ public class NewGameScreen implements Screen {
         stage.addActor(table); // Add the table to the stage
 
         // Add a label as a title
-        table.add(new Label("The progress will be lost.\nAre you sure?", game.getSkin(), "title")).padBottom(80).row();
+        table.add(new Label("TestMenu", game.getSkin(), "title")).padBottom(80).row();
 
         // Create and add a button to go to the game screen
-        TextButton yesButton = new TextButton("Yes", game.getSkin());
-        table.add(yesButton).width(300);
+        TextButton newGame = new TextButton("New Game", game.getSkin());
+        table.add(newGame).width(300).row();
 
-        TextButton noButton = new TextButton("No", game.getSkin());
-        table.add(noButton).width(300);
+        TextButton continueGame = new TextButton("Load Game", game.getSkin());
+        table.add(continueGame).width(300).row();
 
-        table.row();
+        TextButton selectMap = new TextButton("Maps", game.getSkin());
+        table.add(selectMap).width(300).row();
 
-        yesButton.addListener(new ChangeListener() {
+        TextButton settings = new TextButton("Settings", game.getSkin());
+        table.add(settings).width(300).row();
+
+        TextButton exit = new TextButton("Exit", game.getSkin());
+        table.add(exit).width(300).row();
+
+        newGame.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                game.goToGame(); // Change to the game screen when button is pressed
-            }
-        });
-        noButton.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent event, Actor actor) {
-                game.goToMenu(); // Change to the game screen when button is pressed
+                game.goToNewGameScreen(); // Change to the game screen when the button is pressed
             }
         });
 
+        continueGame.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                game.goToContinueGameScreen(); // Change to the game screen when the button is pressed
+            }
+        });
+
+        settings.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                game.goToSettingsScreen(); // Change to the game screen when the button is pressed
+            }
+        });
+
+        exit.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                Gdx.app.exit();
+            }
+        });
     }
-
 
     @Override
     public void render(float delta) {
@@ -69,7 +100,7 @@ public class NewGameScreen implements Screen {
 
     @Override
     public void dispose() {
-        // Dispose of the stage when screen is disposed
+        // Dispose of the stage when the screen is disposed
         stage.dispose();
     }
 
