@@ -27,18 +27,31 @@ public class Player extends Actor {
         to be polled every frame, and so that there is more flexibility for stuff
         like speed-up animations/cooldown etc.
      */
-    private boolean moveUp, moveDown, moveLeft, moveRight;
+    private boolean moveUp, moveDown, moveLeft, moveRight, moving;
+    private boolean sprinting;
 
     // So they can later be remapped by the player
-    private final int moveUpKeys = Input.Keys.W;
-    private final int moveDownKeys = Input.Keys.S;
-    private final int moveLeftKeys = Input.Keys.A;
-    private final int moveRightKeys = Input.Keys.D;
-    private final int sprintKeys = Input.Keys.SHIFT_LEFT;
 
 
-    private boolean moving;
-    private boolean sprinting;
+    public void setMoveUp(boolean moveUp) {
+        this.moveUp = moveUp;
+    }
+
+    public void setMoveDown(boolean moveDown) {
+        this.moveDown = moveDown;
+    }
+
+    public void setMoveLeft(boolean moveLeft) {
+        this.moveLeft = moveLeft;
+    }
+
+    public void setMoveRight(boolean moveRight) {
+        this.moveRight = moveRight;
+    }
+
+    public void setSprinting(boolean sprinting) {
+        this.sprinting = sprinting;
+    }
 
     public Player(TiledMap map) {
         this.map = map;
@@ -46,62 +59,6 @@ public class Player extends Actor {
         setSize(1,2);
 
         this.collisionLayer = (TiledMapTileLayer) map.getLayers().get("Walls");
-
-        this.addListener(new InputListener() {
-            @Override
-            public boolean keyDown(InputEvent event, int keycode) {
-                return switch (keycode) {
-                    case moveUpKeys -> {
-                        moveUp = true;
-                        yield true;
-                    }
-                    case moveDownKeys -> {
-                        moveDown = true;
-                        yield true;
-                    }
-                    case moveLeftKeys -> {
-                        moveLeft = true;
-                        yield true;
-                    }
-                    case moveRightKeys -> {
-                        moveRight = true;
-                        yield true;
-                    }
-                    case sprintKeys -> {
-                        sprinting = true;
-                        yield true;
-                    }
-                    default -> false; // Key not handled
-                };
-            }
-
-            @Override
-            public boolean keyUp(InputEvent event, int keycode) {
-                return switch (keycode) {
-                    case moveUpKeys -> {
-                        moveUp = false;
-                        yield true;
-                    }
-                    case moveDownKeys -> {
-                        moveDown = false;
-                        yield true;
-                    }
-                    case moveLeftKeys -> {
-                        moveLeft = false;
-                        yield true;
-                    }
-                    case moveRightKeys -> {
-                        moveRight = false;
-                        yield true;
-                    }
-                    case sprintKeys -> {
-                        sprinting = false;
-                        yield true;
-                    }
-                    default -> false;
-                };
-            }
-        });
     }
 
     //Initialize the player on a specific coordinate point
@@ -139,16 +96,23 @@ public class Player extends Actor {
 
         super.act(delta);
         float speed = 2f * delta;
-        if (sprinting) { speed *= 5; }
+        if (sprinting) { speed *= 2f; }
 
         float deltaX = 0, deltaY = 0;
 
-        moving = false;
 
-        if (moveUp) { deltaY += speed; moving = true; }
-        if (moveDown) { deltaY += -speed; moving = true; }
-        if (moveLeft) { deltaX += -speed; moving = true; }
-        if (moveRight) { deltaX += speed; moving = true; }
+        if (moveUp) { deltaY += speed;}
+        if (moveDown) { deltaY += -speed;}
+        if (moveLeft) { deltaX += -speed;}
+        if (moveRight) { deltaX += speed;}
+
+        moving = false;
+        if (deltaX != 0 || deltaY != 0) {
+            float length = (float) Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+            deltaX = deltaX * speed / length;
+            deltaY = deltaY * speed / length;
+            moving = true;
+        }
 
         float nextX = deltaX + getX(), nextY = deltaY + getY();
 
