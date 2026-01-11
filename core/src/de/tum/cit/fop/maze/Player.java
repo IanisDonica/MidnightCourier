@@ -1,7 +1,6 @@
 package de.tum.cit.fop.maze;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Batch;
@@ -9,16 +8,14 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.utils.Array;
 
 public class Player extends Actor {
     private Animation<TextureRegion> characterAnimation;
     private float stateTime;
     private float animationTime;
-    private final TiledMap map;
-    private final TiledMapTileLayer collisionLayer;
+    private final CollisionHandler collisionHandler;
+    private float speed;
 
     /*
         Movement flags:
@@ -29,9 +26,6 @@ public class Player extends Actor {
      */
     private boolean moveUp, moveDown, moveLeft, moveRight, moving;
     private boolean sprinting;
-
-    // So they can later be remapped by the player
-
 
     public void setMoveUp(boolean moveUp) {
         this.moveUp = moveUp;
@@ -53,12 +47,18 @@ public class Player extends Actor {
         this.sprinting = sprinting;
     }
 
+    public float getSpeed() {
+        return speed;
+    }
+
+    public void multiplySpeed(float speedMultiplier) {
+        this.speed *= speedMultiplier;
+    }
+
     public Player(TiledMap map) {
-        this.map = map;
         initialiseAnimations();
         setSize(1,2);
-
-        this.collisionLayer = (TiledMapTileLayer) map.getLayers().get("Walls");
+        this.collisionHandler = new CollisionHandler(map);
     }
 
     //Initialize the player on a specific coordinate point
@@ -93,10 +93,9 @@ public class Player extends Actor {
 
     @Override
     public void act(float delta) {
-
         super.act(delta);
-        float speed = 2f * delta;
-        if (sprinting) { speed *= 2f; }
+        speed = 2.5f * delta;
+        if (sprinting) { speed *= 1.6f; }
 
         float deltaX = 0, deltaY = 0;
 
@@ -116,62 +115,10 @@ public class Player extends Actor {
 
         float nextX = deltaX + getX(), nextY = deltaY + getY();
 
-        if (!isCellBlocked(nextX, nextY)) {
-            this.setPosition(nextX, nextY);
-        } else {
-            float halfX = (nextX - nextX % 1) + 0.5f;
-            float halfY = (nextY - nextY % 1) + 0.5f;
-
-            // TODO Fix corder collision make code more clear
-
-            //System.out.printf("HalfX/Y(%s:%s)%n", halfX, halfY);
-            //Xor operations (ie, only 1 movement direction)
-            // TODO Make it so that the player can only move in one direction per axis,
-            //  the code here assumes that that is already the case.
-            if (moveUp ^ moveDown ^ moveLeft ^ moveRight) {
-                if (moveUp || moveDown) {
-                    if (!isCellBlocked(getX() - 0.001f, getY())) {
-                        this.setPosition(getX() - 0.001f, getY());
-                    } else {
-                        this.setY(halfY);
-                    }
-                } else {
-                    if (!isCellBlocked( getX(), getY() - 0.001f)) {
-                        this.setPosition(getX(), getY() - 0.001f);
-                    } else {
-                        this.setY(halfY);
-                    }
-                }
-            } else {
-                if (moveLeft && moveUp) {
-                    //Try and see if the X coordinate is the problem
-                    if (!isCellBlocked(halfX, nextY)) {
-                        setPosition(halfX, nextY);
-                    }
-                    // Try and see if the Y coordinate is the problem
-                    else if (!isCellBlocked(nextX, halfY)) {
-                        setPosition(nextX, halfY);
-                    }
-                    // Both are the problem
-                    else {
-                        setPosition(halfX, halfY);
-                    }
-                } else {
-                    // Try and see if the Y coordinate is the problem
-                    if (!isCellBlocked(nextX, halfY)) {
-                        setPosition(nextX, halfY);
-                    }
-                    //Try and see if the X coordinate is the problem
-                    else if (!isCellBlocked(halfX, nextY)) {
-                        setPosition(halfX, nextY);
-                    }
-                    // Both are the problem
-                    else {
-                        setPosition(halfX, halfY);
-                    }
-                }
-            }
-        }
+        if (deltaY > 0 && collisionHandler.checkCollision(this, 'u')) setPosition(getX(), nextY);
+        if (deltaY < 0 && collisionHandler.checkCollision(this, 'd')) setPosition(getX(), nextY);
+        if (deltaX > 0 && collisionHandler.checkCollision(this, 'r')) setPosition(nextX, getY());
+        if (deltaX < 0 && collisionHandler.checkCollision(this, 'l')) setPosition(nextX, getY());
 
         if (moving) {
             animationTime += delta;
@@ -181,23 +128,4 @@ public class Player extends Actor {
         stateTime += delta;
     }
 
-    private boolean isCellBlocked(float x, float y) {
-        float offsetX = 0, offsetY = 0;
-
-        float halfX = (x - x % 1) + 0.4f;
-        float halfY = (y - y % 1) + 0.4f;
-
-        if (getX() >= halfX && moveRight) {offsetX = 0.02f;}
-        if (getY() >= halfY && moveUp) {offsetY = 0.02f;}
-        if (!moving) { return false; }
-
-        int gridX = (int) (x + 0.5f - offsetX);
-        int gridY = (int) (y + 0.5f - offsetY);
-
-        //System.out.printf("Player(%s:%s), gridX:%s, gridY%s%n", getX(), getY(), gridX, gridY);
-
-        TiledMapTileLayer.Cell cell = collisionLayer.getCell(gridX, gridY);
-
-        return cell != null;
-    }
 }
