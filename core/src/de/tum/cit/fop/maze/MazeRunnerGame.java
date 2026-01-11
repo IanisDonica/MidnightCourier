@@ -32,7 +32,7 @@ public class MazeRunnerGame extends Game {
     /**
      * Constructor for MazeRunnerGame.
      *
-     * @param fileChooser The file chooser for the game, typically used in desktop environment.
+     * @param fileChooser The file chooser for the game, typically used in a desktop environment.
      */
     public MazeRunnerGame(NativeFileChooser fileChooser) {
         super();
@@ -133,14 +133,14 @@ public class MazeRunnerGame extends Game {
     }
 
     /**
-     * Cleans up resources when the game is disposed.
+     * Cleans up resources when the game is disposed of.
      */
     @Override
     public void dispose() {
         getScreen().hide(); // Hide the current screen
-        getScreen().dispose(); // Dispose the current screen
+        getScreen().dispose(); // Dispose of the current screen
         spriteBatch.dispose(); // Dispose the spriteBatch
-        skin.dispose(); // Dispose the skin
+        skin.dispose(); // Dispose of the skin
     }
 
     // Getter methods
