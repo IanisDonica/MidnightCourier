@@ -2,31 +2,21 @@ package de.tum.cit.fop.maze;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.audio.Music;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import com.badlogic.gdx.utils.Array;
+import de.tum.cit.fop.maze.screen.*;
 import games.spooky.gdx.nativefilechooser.NativeFileChooser;
 
 /**
  * The MazeRunnerGame class represents the core of the Maze Runner game.
  * It manages the screens and global resources like SpriteBatch and Skin.
  */
+
 public class MazeRunnerGame extends Game {
-    // Screens
     private MenuScreen menuScreen;
     private GameScreen gameScreen;
-
-    // Sprite Batch for rendering
     private SpriteBatch spriteBatch;
-
-    // UI Skin
     private Skin skin;
-
-    // Character animation downwards
 
     /**
      * Constructor for MazeRunnerGame.
@@ -79,7 +69,7 @@ public class MazeRunnerGame extends Game {
     /**
      * Switches to the new game screen.
      */
-    public void goToNewGameScreen(){
+    public void goToNewGameScreen() {
         this.setScreen(new NewGameScreen(this)); // Set the current screen to GameScreen
         if (menuScreen != null) {
             menuScreen.dispose(); // Dispose the menu screen if it exists
@@ -90,7 +80,7 @@ public class MazeRunnerGame extends Game {
     /**
      * Switches to the continue game screen.
      */
-    public void goToContinueGameScreen(){
+    public void goToContinueGameScreen() {
         this.setScreen(new ContinueGameScreen(this)); // Set the current screen to GameScreen
         if (menuScreen != null) {
             menuScreen.dispose(); // Dispose the menu screen if it exists
