@@ -2,6 +2,7 @@ package de.tum.cit.fop.maze.entity;
 
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 
 public class Entity extends Actor {
@@ -13,7 +14,6 @@ public class Entity extends Actor {
     protected float animationTime;
     protected float speed;
 
-
     public float getSpeed() {
         return speed;
     }
@@ -21,4 +21,8 @@ public class Entity extends Actor {
         this.speed *= speedMultiplier;
     }
 
+    public Entity(float x, float y) {
+        setX(x);
+        setY(y);
+    }
 }
