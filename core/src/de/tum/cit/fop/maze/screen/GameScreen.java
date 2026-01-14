@@ -23,6 +23,7 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import de.tum.cit.fop.maze.MazeRunnerGame;
 import de.tum.cit.fop.maze.entity.Player;
+import de.tum.cit.fop.maze.entity.collectible.HealthPickup;
 import de.tum.cit.fop.maze.system.KeyHandler;
 
 /**
@@ -53,6 +54,9 @@ public class GameScreen implements Screen {
     private TextureRegion interFboRegion;
     private FrameBuffer collisionFbo;
     private Player player;
+
+    //test
+    private HealthPickup healthPickup;
 
     /**
      * Constructor for GameScreen. Sets up the camera and font.
@@ -133,8 +137,10 @@ public class GameScreen implements Screen {
         Gdx.input.setInputProcessor(stage);
 
         player = new Player(map, 16, 8);
+        healthPickup = new HealthPickup(16, 12);
 
         stage.addActor(player);
+        stage.addActor(healthPickup);
         stage.setKeyboardFocus(player);
 
         stage.addListener(new KeyHandler(player, this, game));

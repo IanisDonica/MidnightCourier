@@ -9,23 +9,21 @@ import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.utils.Array;
 import de.tum.cit.fop.maze.system.CollisionHandler;
 
+import java.awt.*;
+
 public class Player extends Entity {
     private final CollisionHandler collisionHandler;
     private float stateTime;
     private boolean moveUp, moveDown, moveLeft, moveRight;
     private boolean sprinting;
-
-    public Player(TiledMap map) {
-        initialiseAnimations();
-        setSize(1, 2);
-        this.collisionHandler = new CollisionHandler(map);
-    }
+    private int hp = 3;
 
     //Initialize the player on a specific coordinate point
     public Player(TiledMap map, float x, float y) {
-        this(map);
-        setX(x);
-        setY(y);
+        super(x, y);
+        initialiseAnimations();
+        setSize(1, 2);
+        this.collisionHandler = new CollisionHandler(map);
     }
 
     public void setMoveUp(boolean moveUp) {
@@ -89,7 +87,7 @@ public class Player extends Entity {
     public void act(float delta) {
         super.act(delta);
         speed = 2.5f * delta;
-        if (sprinting) {speed *= 1.6f;}
+        if (sprinting) {speed *= 2f;}
         float deltaX = 0, deltaY = 0;
 
 
@@ -129,4 +127,11 @@ public class Player extends Entity {
         stateTime += delta;
     }
 
+    public void setHp(int hp) {
+        this.hp = hp;
+    }
+
+    public int getHp() {
+        return this.hp;
+    }
 }
