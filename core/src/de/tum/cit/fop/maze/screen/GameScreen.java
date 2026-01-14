@@ -19,6 +19,7 @@ import de.tum.cit.fop.maze.MazeRunnerGame;
 import de.tum.cit.fop.maze.entity.Player;
 import de.tum.cit.fop.maze.entity.collectible.HealthPickup;
 import de.tum.cit.fop.maze.system.KeyHandler;
+import de.tum.cit.fop.maze.system.PointManager;
 
 /**
  * The GameScreen class is responsible for rendering the gameplay screen.
@@ -40,6 +41,7 @@ public class GameScreen implements Screen {
     private FrameBuffer fbo;
     private TextureRegion fboRegion;
     private Player player;
+    public PointManager pointManager;
 
     //test
     private HealthPickup healthPickup;
@@ -65,6 +67,7 @@ public class GameScreen implements Screen {
 
         ((OrthographicCamera) stage.getCamera()).zoom = 1f;
         uiCamera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        pointManager = new PointManager();
     }
 
     public void adjustZoom(float amount) {
@@ -82,6 +85,8 @@ public class GameScreen implements Screen {
     @Override
     public void render(float delta) {
         stage.act(delta);
+        pointManager.act(delta);
+        System.out.println(pointManager.getPoints());
 
         Batch batch = stage.getBatch();
         OrthographicCamera camera = (OrthographicCamera) stage.getCamera();
@@ -105,16 +110,16 @@ public class GameScreen implements Screen {
         batch.setProjectionMatrix(camera.combined);
         batch.setShader(combinedShader);
         batch.begin();
-        // Set uniforms for fog
-        combinedShader.setUniformf("u_playerWorldPos", player.getX() + player.getWidth() / 2f, player.getY() + player.getHeight() / 2f);
-        combinedShader.setUniformf("u_camWorldPos", camera.position.x, camera.position.y);
-        combinedShader.setUniformf("u_worldViewSize", viewW, viewH);
-        combinedShader.setUniformf("u_radiusWorld", fogIntensity);
+            // Set uniforms for fog
+            combinedShader.setUniformf("u_playerWorldPos", player.getX() + player.getWidth() / 2f, player.getY() + player.getHeight() / 2f);
+            combinedShader.setUniformf("u_camWorldPos", camera.position.x, camera.position.y);
+            combinedShader.setUniformf("u_worldViewSize", viewW, viewH);
+            combinedShader.setUniformf("u_radiusWorld", fogIntensity);
 
-        combinedShader.setUniformi("u_noireMode", noireMode ? 1 : 0);
+            combinedShader.setUniformi("u_noireMode", noireMode ? 1 : 0);
 
-        // Draw the base world FBO
-        batch.draw(fboRegion, viewX, viewY, viewW, viewH);
+            // Draw the base world FBO
+            batch.draw(fboRegion, viewX, viewY, viewW, viewH);
         batch.end();
         batch.setShader(null);
     }
@@ -148,10 +153,12 @@ public class GameScreen implements Screen {
         Gdx.input.setInputProcessor(stage);
 
         player = new Player(map, 16, 8);
-        healthPickup = new HealthPickup(16, 12);
+        healthPickup = new HealthPickup(16, 12, pointManager);
 
         stage.addActor(player);
         stage.addActor(healthPickup);
+        healthPickup.setZIndex(0);
+        player.setZIndex(1);
         stage.setKeyboardFocus(player);
 
         stage.addListener(new KeyHandler(player, this, game));
