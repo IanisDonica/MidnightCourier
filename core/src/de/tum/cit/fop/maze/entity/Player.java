@@ -17,6 +17,7 @@ public class Player extends Entity {
     private boolean moveUp, moveDown, moveLeft, moveRight;
     private boolean sprinting;
     private int hp = 3;
+    private float speedUpTimer = 0;
 
     //Initialize the player on a specific coordinate point
     public Player(TiledMap map, float x, float y) {
@@ -90,6 +91,10 @@ public class Player extends Entity {
         if (sprinting) {speed *= 2f;}
         float deltaX = 0, deltaY = 0;
 
+        if (speedUpTimer > 0) {
+            speed *= 2.5f;
+            speedUpTimer -= delta; //This can go into the negatives but it shouldn't really be a big deal
+        }
 
         if (moveUp) {deltaY += speed;}
         if (moveDown) {deltaY += -speed;}
@@ -127,11 +132,17 @@ public class Player extends Entity {
         stateTime += delta;
     }
 
+    public void drinkEnergyDrink() {
+        //This method seems useless, but it its mostly for later in order to handle sounds / screen effects etc.
+        speedUpTimer = 5f;
+    }
+
     public void setHp(int hp) {
         this.hp = hp;
     }
-
     public int getHp() {
         return this.hp;
     }
+
+
 }
