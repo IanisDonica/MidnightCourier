@@ -5,15 +5,19 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import de.tum.cit.fop.maze.entity.Entity;
 import de.tum.cit.fop.maze.entity.Player;
+import de.tum.cit.fop.maze.system.PointManager;
 
 public class Collectible extends Entity {
     protected final Rectangle bounds = new Rectangle();
     protected Player player;
+    protected final PointManager pointManager;
+
     private boolean addedToStageFired = false;
 
-    public Collectible(float x, float y, int w, int h) {
-        super(x,y);
-        setSize(w,h);
+    public Collectible(float x, float y, int w, int h, PointManager pointManager) {
+        super(x, y);
+        setSize(w, h);
+        this.pointManager = pointManager;
     }
 
     @Override

@@ -25,6 +25,7 @@ import de.tum.cit.fop.maze.MazeRunnerGame;
 import de.tum.cit.fop.maze.entity.Player;
 import de.tum.cit.fop.maze.entity.collectible.HealthPickup;
 import de.tum.cit.fop.maze.system.KeyHandler;
+import de.tum.cit.fop.maze.system.PointManager;
 
 /**
  * The GameScreen class is responsible for rendering the gameplay screen.
@@ -54,6 +55,7 @@ public class GameScreen implements Screen {
     private TextureRegion interFboRegion;
     private FrameBuffer collisionFbo;
     private Player player;
+    public PointManager pointManager;
 
     //test
     private HealthPickup healthPickup;
@@ -81,6 +83,7 @@ public class GameScreen implements Screen {
         uiCamera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
         generateFBO();
+        pointManager = new PointManager();
     }
 
     public void adjustZoom(float amount) {
@@ -98,6 +101,8 @@ public class GameScreen implements Screen {
     @Override
     public void render(float delta) {
         stage.act(delta);
+        pointManager.act(delta);
+        System.out.println(pointManager.getPoints());
 
         Batch batch = stage.getBatch();
         OrthographicCamera camera = (OrthographicCamera) stage.getCamera();
@@ -137,10 +142,12 @@ public class GameScreen implements Screen {
         Gdx.input.setInputProcessor(stage);
 
         player = new Player(map, 16, 8);
-        healthPickup = new HealthPickup(16, 12);
+        healthPickup = new HealthPickup(16, 12, pointManager);
 
         stage.addActor(player);
         stage.addActor(healthPickup);
+        healthPickup.setZIndex(0);
+        player.setZIndex(1);
         stage.setKeyboardFocus(player);
 
         stage.addListener(new KeyHandler(player, this, game));
