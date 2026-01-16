@@ -1,15 +1,13 @@
 package de.tum.cit.fop.maze.system;
 
-import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
-import de.tum.cit.fop.maze.entity.Entity;
 import de.tum.cit.fop.maze.entity.Player;
 
 public class CollisionHandler {
     private final TiledMapTileLayer collisionLayer;
 
-    public CollisionHandler(TiledMap map) {
-        this.collisionLayer = (TiledMapTileLayer) map.getLayers().get("Walls");
+    public CollisionHandler(TiledMapTileLayer collisionLayer) {
+        this.collisionLayer = collisionLayer;
     }
 
     public boolean checkCollision(Player player, char direction) {

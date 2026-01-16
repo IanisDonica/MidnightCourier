@@ -11,6 +11,7 @@ import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
+import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
@@ -43,6 +44,7 @@ public class GameScreen implements Screen {
     private Player player;
     public PointManager pointManager;
     private final MapLoader mapLoader = new MapLoader();
+    private final String propertiesPath = "maps/level-1.properties";
 
     /**
      * Constructor for GameScreen. Sets up the camera and font.
@@ -150,10 +152,11 @@ public class GameScreen implements Screen {
     public void show() {
         Gdx.input.setInputProcessor(stage);
 
-        player = new Player(map, 16, 8);
+        TiledMapTileLayer collisionLayer = mapLoader.buildCollisionLayerFromProperties(map, propertiesPath);
+        player = new Player(collisionLayer, 16, 8);
 
         stage.addActor(player);
-        mapLoader.spawnCollectiblesFromProperties(stage, pointManager, "maps/level-1.properties");
+        mapLoader.spawnCollectiblesFromProperties(stage, pointManager, propertiesPath);
         player.toFront();
         stage.setKeyboardFocus(player);
 
