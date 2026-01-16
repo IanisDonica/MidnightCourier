@@ -144,6 +144,10 @@ public class Player extends Entity {
         System.out.println("layer has key");
     }
 
+    public boolean hasKey() {
+        return hasKey;
+    }
+
     public void setHp(int hp) {
         this.hp = hp;
     }
