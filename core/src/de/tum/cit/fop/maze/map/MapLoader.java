@@ -9,6 +9,7 @@ import de.tum.cit.fop.maze.entity.collectible.ExitDoor;
 import de.tum.cit.fop.maze.entity.collectible.HealthPickup;
 import de.tum.cit.fop.maze.entity.collectible.Key;
 import de.tum.cit.fop.maze.entity.obstacle.Obstacle;
+import de.tum.cit.fop.maze.entity.obstacle.Trap;
 import de.tum.cit.fop.maze.system.PointManager;
 import java.io.InputStream;
 import java.util.Map;
@@ -79,8 +80,8 @@ public class MapLoader {
                     ExitDoor exitDoor = new ExitDoor(x, y);
                     stage.addActor(exitDoor);
                 } else if (value == 8) {
-                    Obstacle obstacle = new Obstacle(x, y, 1, 1, 0, 0, 0f);
-                    stage.addActor(obstacle);
+                    Trap trap = new Trap(x, y);
+                    stage.addActor(trap);
                 }
             } catch (NumberFormatException ignored) {
                 // Bad coords.
