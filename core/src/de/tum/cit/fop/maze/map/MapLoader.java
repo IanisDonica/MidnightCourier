@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import de.tum.cit.fop.maze.entity.collectible.EnergyDrink;
 import de.tum.cit.fop.maze.entity.collectible.HealthPickup;
+import de.tum.cit.fop.maze.entity.collectible.Key;
 import de.tum.cit.fop.maze.system.PointManager;
 import java.io.InputStream;
 import java.util.Map;
@@ -30,11 +31,12 @@ public class MapLoader {
                 if (value == 3) {
                     HealthPickup pickup = new HealthPickup(x, y, pointManager);
                     stage.addActor(pickup);
-                    pickup.setZIndex(0);
                 } else if (value == 2) {
                     EnergyDrink drink = new EnergyDrink(x, y, pointManager);
                     stage.addActor(drink);
-                    drink.setZIndex(0);
+                } else if (value == 5) {
+                    Key keyGame = new Key(x, y, pointManager);
+                    stage.addActor(keyGame);
                 }
             } catch (NumberFormatException ignored) {
                 // Bad coords.
