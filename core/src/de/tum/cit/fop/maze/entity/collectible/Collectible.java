@@ -14,18 +14,20 @@ import de.tum.cit.fop.maze.entity.Entity;
 import de.tum.cit.fop.maze.entity.Player;
 import de.tum.cit.fop.maze.system.PointManager;
 
-public class Collectible extends Entity {
+public class Collectible extends Actor {
     protected final Rectangle bounds = new Rectangle();
     protected Player player;
     protected final PointManager pointManager;
     protected Animation<TextureRegion> spinAnimation;
     private boolean pickedUp = false;
     private int pickUpFrameCounter = 32;
+    protected float animationTime;
 
     private boolean addedToStageFired = false;
 
     public Collectible(float x, float y, int w, int h, PointManager pointManager) {
-        super(x, y);
+        setX(x);
+        setY(y);
         setSize(w, h);
         this.pointManager = pointManager;
         this.animationTime = MathUtils.random(0f, 1f);
