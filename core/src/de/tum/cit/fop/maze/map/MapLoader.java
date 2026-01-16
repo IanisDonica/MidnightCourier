@@ -3,6 +3,7 @@ package de.tum.cit.fop.maze.map;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import de.tum.cit.fop.maze.entity.collectible.EnergyDrink;
+import de.tum.cit.fop.maze.entity.collectible.ExitDoor;
 import de.tum.cit.fop.maze.entity.collectible.HealthPickup;
 import de.tum.cit.fop.maze.entity.collectible.Key;
 import de.tum.cit.fop.maze.system.PointManager;
@@ -31,12 +32,15 @@ public class MapLoader {
                 if (value == 3) {
                     HealthPickup pickup = new HealthPickup(x, y, pointManager);
                     stage.addActor(pickup);
-                } else if (value == 2) {
+                } else if (value == 6) {
                     EnergyDrink drink = new EnergyDrink(x, y, pointManager);
                     stage.addActor(drink);
                 } else if (value == 5) {
                     Key keyGame = new Key(x, y, pointManager);
                     stage.addActor(keyGame);
+                } else if (value == 2) {
+                    ExitDoor exitDoor = new ExitDoor(x, y);
+                    stage.addActor(exitDoor);
                 }
             } catch (NumberFormatException ignored) {
                 // Bad coords.
