@@ -5,7 +5,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.maps.tiled.TiledMap;
+import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.utils.Array;
 import de.tum.cit.fop.maze.system.CollisionHandler;
 
@@ -21,11 +21,11 @@ public class Player extends Entity {
     private boolean hasKey = false;
 
     //Initialize the player on a specific coordinate point
-    public Player(TiledMap map, float x, float y) {
+    public Player(TiledMapTileLayer collisionLayer, float x, float y) {
         super(x, y);
         initialiseAnimations();
         setSize(1, 2);
-        this.collisionHandler = new CollisionHandler(map);
+        this.collisionHandler = new CollisionHandler(collisionLayer);
     }
 
     public void setMoveUp(boolean moveUp) {
