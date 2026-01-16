@@ -14,6 +14,7 @@ public class ExitDoor extends Collectible {
     @Override
     protected void collision() {
         if (this.player.hasKey()) {
+            // TODO Implement something nicer lmao
             throw new RuntimeException("You won congrats");
         }
     }

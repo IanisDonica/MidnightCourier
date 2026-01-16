@@ -13,12 +13,15 @@ import java.awt.*;
 
 public class Player extends Entity {
     private final CollisionHandler collisionHandler;
-    private float stateTime;
+    protected Animation<TextureRegion> stunnedAnimation;
     private boolean moveUp, moveDown, moveLeft, moveRight;
     private boolean sprinting;
     private int hp = 3;
     private float speedUpTimer = 0;
     private boolean hasKey = false;
+    private boolean stunned = false;
+    private float stunDuration;
+    private char lastInputDirection = 'd';
 
     //Initialize the player on a specific coordinate point
     public Player(TiledMapTileLayer collisionLayer, float x, float y) {
@@ -30,18 +33,30 @@ public class Player extends Entity {
 
     public void setMoveUp(boolean moveUp) {
         this.moveUp = moveUp;
+        if (moveUp) {
+            lastInputDirection = 'u';
+        }
     }
 
     public void setMoveDown(boolean moveDown) {
         this.moveDown = moveDown;
+        if (moveDown) {
+            lastInputDirection = 'd';
+        }
     }
 
     public void setMoveLeft(boolean moveLeft) {
         this.moveLeft = moveLeft;
+        if (moveLeft) {
+            lastInputDirection = 'l';
+        }
     }
 
     public void setMoveRight(boolean moveRight) {
         this.moveRight = moveRight;
+        if (moveRight) {
+            lastInputDirection = 'r';
+        }
     }
 
     public void setSprinting(boolean sprinting) {
@@ -59,28 +74,46 @@ public class Player extends Entity {
         Array<TextureRegion> walkRightFrames = new Array<>(TextureRegion.class);
         Array<TextureRegion> walkUpFrames = new Array<>(TextureRegion.class);
         Array<TextureRegion> walkLeftFrames = new Array<>(TextureRegion.class);
+        Array<TextureRegion> stunnedFrames = new Array<>(TextureRegion.class);
 
         for (int col = 0; col < animationFrames; col++) {
             walkDownFrames.add(new TextureRegion(walkSheet, col * frameWidth, 0, frameWidth, frameHeight));
             walkRightFrames.add(new TextureRegion(walkSheet, col * frameWidth, 32, frameWidth, frameHeight));
             walkUpFrames.add(new TextureRegion(walkSheet, col * frameWidth, 64, frameWidth, frameHeight));
             walkLeftFrames.add(new TextureRegion(walkSheet, col * frameWidth, 96, frameWidth, frameHeight));
+            stunnedFrames.add(new TextureRegion(walkSheet, 80 + col * frameWidth, 96, frameWidth, frameHeight));
         }
 
         downAnimation = new Animation<>(0.15f, walkDownFrames);
         rightAnimation = new Animation<>(0.15f, walkRightFrames);
         upAnimation = new Animation<>(0.15f, walkUpFrames);
         leftAnimation = new Animation<>(0.15f, walkLeftFrames);
+        stunnedAnimation = new Animation<>(0.15f, stunnedFrames);
+    }
+
+    public void damage(int damage) {
+        hp -= damage;
+        if (hp < 1) {
+            //TODO make it nice
+            throw new RuntimeException("You died");
+        }
+        stunned = true;
+        stunDuration = 0.5f;
     }
 
     @Override
     public void draw(Batch batch, float parentAlpha) {
-        TextureRegion currentFrame = switch (facingDirection) {
-            case 'l' -> leftAnimation.getKeyFrame(animationTime, true);
-            case 'r' -> rightAnimation.getKeyFrame(animationTime, true);
-            case 'u' -> upAnimation.getKeyFrame(animationTime, true);
-            default -> downAnimation.getKeyFrame(animationTime, true);
-        };
+        TextureRegion currentFrame;
+        if (stunned) {
+            currentFrame = stunnedAnimation.getKeyFrame(animationTime, true);
+        } else {
+            currentFrame = switch (facingDirection) {
+                case 'l' -> leftAnimation.getKeyFrame(animationTime, true);
+                case 'r' -> rightAnimation.getKeyFrame(animationTime, true);
+                case 'u' -> upAnimation.getKeyFrame(animationTime, true);
+                default -> downAnimation.getKeyFrame(animationTime, true);
+            };
+        }
 
         batch.draw(currentFrame, getX(), getY(), getWidth(), getHeight());
     }
@@ -97,10 +130,24 @@ public class Player extends Entity {
             speedUpTimer -= delta; //This can go into the negatives but it shouldn't really be a big deal
         }
 
-        if (moveUp) {deltaY += speed;}
-        if (moveDown) {deltaY += -speed;}
-        if (moveLeft) {deltaX += -speed;}
-        if (moveRight) {deltaX += speed;}
+        if (!stunned) {
+            if (moveUp) {deltaY += speed;}
+            if (moveDown) {deltaY -= speed;}
+            if (moveLeft) {deltaX -= speed;}
+            if (moveRight) {deltaX += speed;}
+        } else {
+            switch (lastInputDirection) {
+                case 'u' -> deltaY -= speed * 10;
+                case 'd' -> deltaY += speed * 10;
+                case 'l' -> deltaX += speed * 10;
+                case 'r' -> deltaX -= speed * 10;
+                default -> deltaX += speed * 10;
+            }
+            stunDuration -= delta;
+            if (stunDuration < 0) {
+                stunned = false;
+            }
+        }
 
         if (deltaX != 0 || deltaY != 0) {
             float length = (float) Math.sqrt(deltaX * deltaX + deltaY * deltaY);
@@ -130,7 +177,6 @@ public class Player extends Entity {
         animationTime += delta;
         this.getStage().getCamera().position.set(getX() + getWidth() / 2, getY() + getHeight() / 2, 0);
         this.getStage().getCamera().update();
-        stateTime += delta;
     }
 
     public void drinkEnergyDrink() {
@@ -155,5 +201,7 @@ public class Player extends Entity {
         return this.hp;
     }
 
-
+    public boolean isStunned() {
+        return stunned;
+    }
 }
