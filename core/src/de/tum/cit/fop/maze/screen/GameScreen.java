@@ -154,7 +154,7 @@ public class GameScreen implements Screen {
 
         stage.addActor(player);
         mapLoader.spawnCollectiblesFromProperties(stage, pointManager, "maps/level-1.properties");
-        player.setZIndex(3);
+        player.toFront();
         stage.setKeyboardFocus(player);
 
         stage.addListener(new KeyHandler(player, this, game));

@@ -18,6 +18,7 @@ public class Player extends Entity {
     private boolean sprinting;
     private int hp = 3;
     private float speedUpTimer = 0;
+    private boolean hasKey = false;
 
     //Initialize the player on a specific coordinate point
     public Player(TiledMap map, float x, float y) {
@@ -135,6 +136,12 @@ public class Player extends Entity {
     public void drinkEnergyDrink() {
         //This method seems useless, but it its mostly for later in order to handle sounds / screen effects etc.
         speedUpTimer = 5f;
+    }
+
+    public void pickupKey() {
+        // For more complex logic later
+        this.hasKey = true;
+        System.out.println("layer has key");
     }
 
     public void setHp(int hp) {
