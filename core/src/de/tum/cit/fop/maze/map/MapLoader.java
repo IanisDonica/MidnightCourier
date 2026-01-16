@@ -13,29 +13,25 @@ public class MapLoader {
     public void spawnCollectiblesFromProperties(Stage stage, PointManager pointManager, String propertiesPath) {
         Properties props = new Properties();
 
+        // CHeck if the map actually exists, if it doesn't crash the game, cause
+        // otherwise it would be unplayable without a key
         try (InputStream input = Gdx.files.internal(propertiesPath).read()) {
             props.load(input);
         } catch (Exception ex) {
-            Gdx.app.error("MapLoader", "Propert file mising: " + propertiesPath, ex);
-            return;
+            throw new RuntimeException("Property file doesn't exist");
         }
 
         for (Map.Entry<Object, Object> entry : props.entrySet()) {
-            String key = String.valueOf(entry.getKey()).trim();
+            String key = String.valueOf(entry.getKey());
             String[] parts = key.split(",");
-            if (parts.length != 2) {
-                continue;
-            }
-
             try {
-                int x = Integer.parseInt(parts[0].trim());
-                int y = Integer.parseInt(parts[1].trim());
-                String value = String.valueOf(entry.getValue()).trim();
-                if ("3".equals(value)) {
+                int x = Integer.parseInt(parts[0]), y = Integer.parseInt(parts[1]);
+                int value = Integer.parseInt(String.valueOf(entry.getValue()));
+                if (value == 3) {
                     HealthPickup pickup = new HealthPickup(x, y, pointManager);
                     stage.addActor(pickup);
                     pickup.setZIndex(0);
-                } else if ("2".equals(value)) {
+                } else if (value == 2) {
                     EnergyDrink drink = new EnergyDrink(x, y, pointManager);
                     stage.addActor(drink);
                     drink.setZIndex(0);
