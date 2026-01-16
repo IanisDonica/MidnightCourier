@@ -1,6 +1,7 @@
 package de.tum.cit.fop.maze.entity.collectible;
 
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import de.tum.cit.fop.maze.entity.Entity;
@@ -18,6 +19,7 @@ public class Collectible extends Entity {
         super(x, y);
         setSize(w, h);
         this.pointManager = pointManager;
+        this.animationTime = MathUtils.random(0f, 1f);
     }
 
     @Override

@@ -17,8 +17,7 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import de.tum.cit.fop.maze.MazeRunnerGame;
 import de.tum.cit.fop.maze.entity.Player;
-import de.tum.cit.fop.maze.entity.collectible.EnergyDrink;
-import de.tum.cit.fop.maze.entity.collectible.HealthPickup;
+import de.tum.cit.fop.maze.map.MapLoader;
 import de.tum.cit.fop.maze.system.KeyHandler;
 import de.tum.cit.fop.maze.system.PointManager;
 
@@ -43,10 +42,7 @@ public class GameScreen implements Screen {
     private TextureRegion fboRegion;
     private Player player;
     public PointManager pointManager;
-
-    //test
-    private HealthPickup healthPickup;
-    private EnergyDrink energyDrink;
+    private final MapLoader mapLoader = new MapLoader();
 
     /**
      * Constructor for GameScreen. Sets up the camera and font.
@@ -156,16 +152,9 @@ public class GameScreen implements Screen {
 
         player = new Player(map, 16, 8);
 
-        // Temporary for debuging
-        healthPickup = new HealthPickup(16, 12, pointManager);
-        energyDrink = new EnergyDrink(17, 12, pointManager);
-
         stage.addActor(player);
-        stage.addActor(healthPickup);
-        stage.addActor(energyDrink);
-        healthPickup.setZIndex(0);
-        energyDrink.setZIndex(0);
-        player.setZIndex(1);
+        mapLoader.spawnCollectiblesFromProperties(stage, pointManager, "maps/level-1.properties");
+        player.setZIndex(3);
         stage.setKeyboardFocus(player);
 
         stage.addListener(new KeyHandler(player, this, game));
