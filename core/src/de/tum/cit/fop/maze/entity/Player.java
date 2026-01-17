@@ -16,7 +16,7 @@ public class Player extends Entity {
     protected Animation<TextureRegion> stunnedAnimation;
     private boolean moveUp, moveDown, moveLeft, moveRight;
     private boolean sprinting;
-    private int hp = 3;
+    private int hp = 10;
     private float speedUpTimer = 0;
     private boolean hasKey = false;
     private boolean stunned = false;

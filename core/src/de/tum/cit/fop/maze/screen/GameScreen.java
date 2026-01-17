@@ -44,7 +44,7 @@ public class GameScreen implements Screen {
     private final ShaderProgram collisionShader;
     private final ShaderProgram combinationShader;
     private final OrthographicCamera uiCamera;
-    private float fogIntensity = 8f;
+    private float fogIntensity = 20f;
     private boolean noireMode = false;
     private FrameBuffer fbo;
     private TextureRegion fboRegion;
@@ -141,12 +141,12 @@ public class GameScreen implements Screen {
         TiledMapTileLayer collisionLayer = mapLoader.buildCollisionLayerFromProperties(map, propertiesPath);
         generateFBO(collisionLayer);
         player = new Player(collisionLayer, 16, 8);
-
         stage.addActor(player);
-        mapLoader.spawnCollectiblesFromProperties(stage, pointManager, propertiesPath);
-        player.toFront();
-        stage.setKeyboardFocus(player);
 
+        mapLoader.spawnCollectiblesFromProperties(stage, pointManager, collisionLayer, propertiesPath);
+
+        stage.setKeyboardFocus(player);
+        player.toFront();
         stage.addListener(new KeyHandler(player, this, game));
 
         stage.getCamera().position.set(16 + player.getWidth() / 2, 8 + player.getHeight() / 2, 0);
