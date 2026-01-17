@@ -8,6 +8,7 @@ import de.tum.cit.fop.maze.entity.collectible.EnergyDrink;
 import de.tum.cit.fop.maze.entity.collectible.ExitDoor;
 import de.tum.cit.fop.maze.entity.collectible.HealthPickup;
 import de.tum.cit.fop.maze.entity.collectible.Key;
+import de.tum.cit.fop.maze.entity.obstacle.Enemy;
 import de.tum.cit.fop.maze.entity.obstacle.Obstacle;
 import de.tum.cit.fop.maze.entity.obstacle.Trap;
 import de.tum.cit.fop.maze.system.PointManager;
@@ -50,7 +51,7 @@ public class MapLoader {
         return layer;
     }
 
-    public void spawnCollectiblesFromProperties(Stage stage, PointManager pointManager, String propertiesPath) {
+    public void spawnCollectiblesFromProperties(Stage stage, PointManager pointManager, TiledMapTileLayer collisionLayer, String propertiesPath) {
         Properties props = new Properties();
 
         // CHeck if the map actually exists, if it doesn't crash the game, cause
@@ -82,6 +83,9 @@ public class MapLoader {
                 } else if (value == 8) {
                     Trap trap = new Trap(x, y);
                     stage.addActor(trap);
+                } else if (value == 4) {
+                    Enemy enemy = new Enemy(collisionLayer, x, y);
+                    stage.addActor(enemy);
                 }
             } catch (NumberFormatException ignored) {
                 // Bad coords.

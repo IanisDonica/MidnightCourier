@@ -15,7 +15,7 @@ public class MapObject extends Actor {
         super.act(delta);
         animationTime += delta;
 
-        if (!addedToStageFired && getStage() != null) {
+        if (!addedToStageFired) {
             addedToStageFired = true;
             onAddedToStage();
         }
