@@ -26,8 +26,6 @@ public class Collectible extends MapObject {
 
     protected void initSpinAnimation(int startX, int rowY, int frameCount) {
         Texture textureSheet = new Texture(Gdx.files.internal("objects.png"));
-        int frameWidth = 16;
-        int frameHeight = 16;
         Array<TextureRegion> spinFrames = new Array<>(TextureRegion.class);
         for (int col = 0; col < frameCount; col++) {
             spinFrames.add(new TextureRegion(textureSheet, startX + col * frameWidth, rowY, frameWidth, frameHeight));

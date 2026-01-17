@@ -8,7 +8,8 @@ public class MapObject extends Actor {
     protected final Rectangle bounds = new Rectangle();
     protected Player player;
     protected float animationTime;
-    private boolean addedToStageFired = false;
+    protected final static int frameWidth = 16, frameHeight = 16;
+    protected boolean addedToStageFired = false;
 
     @Override
     public void act(float delta) {
