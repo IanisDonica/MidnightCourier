@@ -12,10 +12,19 @@ import de.tum.cit.fop.maze.entity.collectible.Collectible;
 import java.util.ArrayList;
 
 public class Enemy extends Obstacle {
+    private enum EnemyState {
+        CHASING,
+        PATROLLING,
+        PATROL_WAIT,
+        RETREATING,
+        RETREAT_WAIT
+    }
+
     private static final float PATH_RECALC_INTERVAL = 0.5f;
     private static final float TARGET_EPS = 0.05f;
     private static final float CENTER_EPS = 0.02f;
     private static final float PATROL_SPEED_SCALE = 0.5f;
+    private static final int VISION_RANGE_TILES = 6;
     private final TiledMapTileLayer collisionLayer;
     private final int mapWidth;
     private final int mapHeight;
@@ -31,6 +40,7 @@ public class Enemy extends Obstacle {
     private int lastGoalX = Integer.MIN_VALUE;
     private int lastGoalY = Integer.MIN_VALUE;
     private int lastRetreatToken = 0;
+    private EnemyState state = EnemyState.CHASING; //Initial state
 
     public Enemy(TiledMapTileLayer collisionLayer, float x, float y) {
         super(x, y, 1,1, 0,0,3);
@@ -59,52 +69,52 @@ public class Enemy extends Obstacle {
 
     @Override
     public void act(float delta) {
-        //TODO simplify the logic, add comments to code, dont waste time on this code, ill deal with it.
         super.act(delta);
 
         // Did another Enemy call a globalRetreat? If yes retreat, if no don't
         if (lastRetreatToken != globalRetreatToken) {
             lastRetreatToken = globalRetreatToken;
-            if (chaseBehavior.getChaseTimer() > 0) {
-                startRetreat();
+            if (state != EnemyState.RETREATING && state != EnemyState.RETREAT_WAIT) {
+                enterRetreating();
             }
         }
 
-        // Waiting after a retreat?
-        if (retreatBehavior.isWaiting()) {
-            //Does updating the time change that?
-            if (retreatBehavior.updateWait(delta)) {
-                // Yes: start patroling
-                chaseBehavior.reset();
-                startPatrol();
-            }
-            // No: Then keep waiting
-            return;
-        }
-
-        if (patrolBehavior.isPatrolling() && !path.isEmpty() && pathIndex >= path.size() && isCenteredOnTile()) {
-            patrolBehavior.startWaiting();
-            pathRecalcTimer = 0f;
-        }
-
-        if (patrolBehavior.updateWait(delta)) {
-            startPatrol();
-            pathRecalcTimer = 0f;
-        }
-
-        if (patrolBehavior.isActive() && canSeePlayer()) {
-            patrolBehavior.clear();
-            resetPathing();
-            chaseBehavior.reset();
-        }
-
-        if (!retreatBehavior.isRetreating() && !patrolBehavior.isActive() && chaseBehavior.shouldRetreat(delta)) {
-            startRetreat();
-        }
-
-        if (retreatBehavior.isRetreating() && !path.isEmpty() && pathIndex >= path.size() && isCenteredOnTile()) {
-            retreatBehavior.startWaiting();
-            pathRecalcTimer = 0f;
+        switch (state) {
+            case RETREAT_WAIT:
+                if (retreatBehavior.updateWait(delta)) {
+                    chaseBehavior.reset();
+                    enterPatrolling();
+                }
+                return;
+            case PATROL_WAIT:
+                if (patrolBehavior.updateWait(delta)) {
+                    enterPatrolling();
+                }
+                return;
+            case PATROLLING:
+                if (canSeePlayer()) {
+                    enterChasing();
+                    break;
+                }
+                if (!path.isEmpty() && pathIndex >= path.size() && isCenteredOnTile()) {
+                    enterPatrolWait();
+                    return;
+                }
+                break;
+            case CHASING:
+                if (chaseBehavior.shouldRetreat(canSeePlayer(), delta)) {
+                    enterRetreating();
+                    return;
+                }
+                break;
+            case RETREATING:
+                if (!path.isEmpty() && pathIndex >= path.size() && isCenteredOnTile()) {
+                    enterRetreatWait();
+                    return;
+                }
+                break;
+            default:
+                break;
         }
 
         pathRecalcTimer -= delta;
@@ -149,7 +159,7 @@ public class Enemy extends Obstacle {
             return;
         }
 
-        float speedScale = (patrolBehavior.isActive() || retreatBehavior.isRetreating()) ? PATROL_SPEED_SCALE : 1f;
+        float speedScale = (state == EnemyState.PATROLLING || state == EnemyState.RETREATING) ? PATROL_SPEED_SCALE : 1f;
         float step = Math.min(speed * speedScale * delta, dist);
         setPosition(getX() + (dx / dist) * step, getY() + (dy / dist) * step);
     }
@@ -172,11 +182,11 @@ public class Enemy extends Obstacle {
 
     @Override
     protected void collision() {
-        if (!player.isStunned() && !retreatBehavior.isRetreating()) {
+        if (!player.isStunned() && state != EnemyState.RETREATING && state != EnemyState.RETREAT_WAIT) {
             player.damage(1);
             globalRetreatToken++; //causes all enemies to go into retreat
             lastRetreatToken = globalRetreatToken;
-            startRetreat();
+            enterRetreating();
         }
     }
 
@@ -185,17 +195,21 @@ public class Enemy extends Obstacle {
         int startY = clampTileY(getY() + getHeight() / 2f);
         int goalX;
         int goalY;
-        if (retreatBehavior.isRetreating()) {
-            GridPoint2 target = retreatBehavior.getRetreatTarget();
-            goalX = clampTileX(target.x);
-            goalY = clampTileY(target.y);
-        } else if (patrolBehavior.isPatrolling()) {
-            GridPoint2 target = patrolBehavior.getPatrolTarget();
-            goalX = clampTileX(target.x);
-            goalY = clampTileY(target.y);
-        } else {
-            goalX = clampTileX(player.getX() + player.getWidth() / 2f);
-            goalY = clampTileY(player.getY() + player.getHeight() / 2f);
+        switch (state) {
+            case RETREATING:
+                GridPoint2 retreatTarget = retreatBehavior.getRetreatTarget();
+                goalX = clampTileX(retreatTarget.x);
+                goalY = clampTileY(retreatTarget.y);
+                break;
+            case PATROLLING:
+                GridPoint2 patrolTarget = patrolBehavior.getPatrolTarget();
+                goalX = clampTileX(patrolTarget.x);
+                goalY = clampTileY(patrolTarget.y);
+                break;
+            default:
+                goalX = clampTileX(player.getX() + player.getWidth() / 2f);
+                goalY = clampTileY(player.getY() + player.getHeight() / 2f);
+                break;
         }
         return new int[]{startX, startY, goalX, goalY};
     }
@@ -220,6 +234,10 @@ public class Enemy extends Obstacle {
         int startY = clampTileY(getY() + getHeight() / 2f);
         int goalX = clampTileX(player.getX() + player.getWidth() / 2f);
         int goalY = clampTileY(player.getY() + player.getHeight() / 2f);
+
+        if (Math.abs(goalX - startX) > VISION_RANGE_TILES || Math.abs(goalY - startY) > VISION_RANGE_TILES) {
+            return false;
+        }
 
         int dx = Math.abs(goalX - startX);
         int dy = Math.abs(goalY - startY);
@@ -263,16 +281,37 @@ public class Enemy extends Obstacle {
         return pathfinder.clampCoord(MathUtils.floor(centerY), mapHeight);
     }
 
-    private void startRetreat() {
+    private void enterRetreating() {
+        state = EnemyState.RETREATING;
         patrolBehavior.clear();
         retreatBehavior.startRetreat();
         resetPathing();
         chaseBehavior.reset();
     }
 
-    private void startPatrol() {
+    private void enterPatrolling() {
+        state = EnemyState.PATROLLING;
         patrolBehavior.startPatrol();
         resetPathing();
+    }
+
+    private void enterPatrolWait() {
+        state = EnemyState.PATROL_WAIT;
+        patrolBehavior.startWaiting();
+        pathRecalcTimer = 0f;
+    }
+
+    private void enterRetreatWait() {
+        state = EnemyState.RETREAT_WAIT;
+        retreatBehavior.startWaiting();
+        pathRecalcTimer = 0f;
+    }
+
+    private void enterChasing() {
+        state = EnemyState.CHASING;
+        patrolBehavior.clear();
+        resetPathing();
+        chaseBehavior.reset();
     }
 
     private void resetPathing() {
