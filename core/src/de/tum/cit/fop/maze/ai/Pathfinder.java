@@ -4,10 +4,13 @@ import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.math.GridPoint2;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.PriorityQueue;
 
 public class Pathfinder {
+    private static final int[] DIR_X = {1, -1, 0, 0};
+    private static final int[] DIR_Y = {0, 0, 1, -1};
     private final TiledMapTileLayer collisionLayer;
 
     public Pathfinder(TiledMapTileLayer collisionLayer) {
@@ -17,6 +20,11 @@ public class Pathfinder {
     public ArrayList<GridPoint2> findPath(int startX, int startY, int goalX, int goalY) {
         int width = collisionLayer.getWidth();
         int height = collisionLayer.getHeight();
+
+        startX = clampCoord(startX, width);
+        startY = clampCoord(startY, height);
+        goalX = clampCoord(goalX, width);
+        goalY = clampCoord(goalY, height);
 
         GridPoint2 start = findClosestWalkable(startX, startY);
         GridPoint2 goal = findClosestWalkable(goalX, goalY);
@@ -30,18 +38,13 @@ public class Pathfinder {
         float[][] gScore = new float[width][height];
         boolean[][] closed = new boolean[width][height];
         for (int x = 0; x < width; x++) {
-            for (int y = 0; y < height; y++) {
-                gScore[x][y] = Float.POSITIVE_INFINITY;
-            }
+            Arrays.fill(gScore[x], Float.POSITIVE_INFINITY);
         }
 
         PriorityQueue<Node> open = new PriorityQueue<>(Comparator.comparingDouble(n -> n.f));
         Node startNode = new Node(start.x, start.y, 0f, manhattan(start.x, start.y, goal.x, goal.y), null);
         gScore[start.x][start.y] = 0f;
         open.add(startNode);
-
-        int[] dx = {1, -1, 0, 0};
-        int[] dy = {0, 0, 1, -1};
 
         while (!open.isEmpty()) {
             Node current = open.poll();
@@ -54,8 +57,8 @@ public class Pathfinder {
             closed[current.x][current.y] = true;
 
             for (int i = 0; i < 4; i++) {
-                int nx = current.x + dx[i];
-                int ny = current.y + dy[i];
+                int nx = current.x + DIR_X[i];
+                int ny = current.y + DIR_Y[i];
                 if (!isWalkable(nx, ny) || closed[nx][ny]) {
                     continue;
                 }
@@ -72,7 +75,7 @@ public class Pathfinder {
     }
 
     // Sometimes due floating point precision (or the player going out of bounds),
-    // the coordinates can be -1 or width/height, this them to the min max values allowed
+    // the coordinates can be -1 or width/height, clamp them to the min/max allowed.
     public int clampCoord(int value, int maxExclusive) {
         if (value < 0) {
             return 0;
@@ -83,20 +86,18 @@ public class Pathfinder {
         return value;
     }
 
-    // THis gets called once the algo sees the taget node, from there is creates a path by following the nodes backwords to the player
     private ArrayList<GridPoint2> reconstructPath(Node node, int startX, int startY) {
-        ArrayList<GridPoint2> result = new ArrayList<>();
+        ArrayDeque<GridPoint2> reversed = new ArrayDeque<>();
         Node current = node;
         while (current != null) {
             if (!(current.x == startX && current.y == startY)) {
-                result.add(0, new GridPoint2(current.x, current.y));
+                reversed.addFirst(new GridPoint2(current.x, current.y));
             }
             current = current.parent;
         }
-        return result;
+        return new ArrayList<>(reversed);
     }
 
-    // The A-star heuristic, manhattan since we are in a grid
     private float manhattan(int x, int y, int goalX, int goalY) {
         return Math.abs(goalX - x) + Math.abs(goalY - y);
     }
@@ -108,7 +109,6 @@ public class Pathfinder {
         return collisionLayer.getCell(x, y) == null;
     }
 
-    //BFS cloest walkable
     private GridPoint2 findClosestWalkable(int startX, int startY) {
         if (isWalkable(startX, startY)) {
             return new GridPoint2(startX, startY);
@@ -121,14 +121,11 @@ public class Pathfinder {
         queue.add(new GridPoint2(startX, startY));
         visited[startX][startY] = true;
 
-        int[] dx = {1, -1, 0, 0};
-        int[] dy = {0, 0, 1, -1};
-
         while (!queue.isEmpty()) {
             GridPoint2 current = queue.poll();
             for (int i = 0; i < 4; i++) {
-                int nx = current.x + dx[i];
-                int ny = current.y + dy[i];
+                int nx = current.x + DIR_X[i];
+                int ny = current.y + DIR_Y[i];
                 if (nx < 0 || ny < 0 || nx >= width || ny >= height || visited[nx][ny]) {
                     continue;
                 }
@@ -142,7 +139,6 @@ public class Pathfinder {
         return null;
     }
 
-    // Abstraction class, this is prob overkill, but it's way easier to work with this class
     private static class Node {
         private final int x;
         private final int y;

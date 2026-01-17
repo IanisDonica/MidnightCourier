@@ -3,15 +3,18 @@ package de.tum.cit.fop.maze.ai;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.scenes.scene2d.Stage;
 
 public class PatrolBehaviour extends AIBehaviour {
-    private static final float MIN_WAIT = 0.5f;
-    private static final float MAX_WAIT = 2f;
+    private static final float MIN_WAIT = 10f;
+    private static final float MAX_WAIT = 20f;
     private GridPoint2 patrolTarget = null;
     private boolean waiting = false;
     private float waitTimer = 0f;
     private float waitDuration = 0f;
+
+    public PatrolBehaviour(int width, int height, TiledMapTileLayer collisionLayer) {
+        super(width, height, collisionLayer);
+    }
 
     public boolean isPatrolling() {
         return patrolTarget != null;
@@ -29,10 +32,8 @@ public class PatrolBehaviour extends AIBehaviour {
         return patrolTarget;
     }
 
-    public void startPatrol(TiledMapTileLayer collisionLayer, Stage stage) {
-        int width = collisionLayer.getWidth();
-        int height = collisionLayer.getHeight();
-        patrolTarget = findRandomFreeTile(width, height, stage);
+    public void startPatrol() {
+        patrolTarget = findRandomFreeTile();
         waiting = false;
         waitTimer = 0f;
         waitDuration = 0f;

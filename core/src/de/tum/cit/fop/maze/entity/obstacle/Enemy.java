@@ -3,6 +3,7 @@ package de.tum.cit.fop.maze.entity.obstacle;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.scenes.scene2d.Stage;
 import de.tum.cit.fop.maze.ai.ChaseBehavior;
 import de.tum.cit.fop.maze.ai.Pathfinder;
 import de.tum.cit.fop.maze.ai.PatrolBehaviour;
@@ -11,7 +12,13 @@ import de.tum.cit.fop.maze.entity.collectible.Collectible;
 import java.util.ArrayList;
 
 public class Enemy extends Obstacle {
+    private static final float PATH_RECALC_INTERVAL = 0.5f;
+    private static final float TARGET_EPS = 0.05f;
+    private static final float CENTER_EPS = 0.02f;
+    private static final float PATROL_SPEED_SCALE = 0.5f;
     private final TiledMapTileLayer collisionLayer;
+    private final int mapWidth;
+    private final int mapHeight;
     private final float speed;
     private final Pathfinder pathfinder;
     private final ChaseBehavior chaseBehavior;
@@ -21,24 +28,29 @@ public class Enemy extends Obstacle {
     private ArrayList<GridPoint2> path = new ArrayList<>();
     private int pathIndex = 0;
     private float pathRecalcTimer = 0f;
-    private static final float PATH_RECALC_INTERVAL = 0.5f;
     private int lastGoalX = Integer.MIN_VALUE;
     private int lastGoalY = Integer.MIN_VALUE;
     private int lastRetreatToken = 0;
 
     public Enemy(TiledMapTileLayer collisionLayer, float x, float y) {
-        super(x, y, 1,1, 0,0,1);
+        super(x, y, 1,1, 0,0,3);
         this.collisionLayer = collisionLayer;
         this.pathfinder = new Pathfinder(collisionLayer);
-        this.chaseBehavior = new ChaseBehavior();
-        this.retreatBehavior = new RetreatBehavior();
-        this.patrolBehavior = new PatrolBehaviour();
+        this.mapWidth = collisionLayer.getWidth();
+        this.mapHeight = collisionLayer.getHeight();
+        this.chaseBehavior = new ChaseBehavior(mapWidth, mapHeight, collisionLayer);
+        this.retreatBehavior = new RetreatBehavior(mapWidth, mapHeight, collisionLayer);
+        this.patrolBehavior = new PatrolBehaviour(mapWidth, mapHeight, collisionLayer);
         this.speed = 5f;
     }
 
     @Override
     protected void onAddedToStage() {
         super.onAddedToStage();
+        Stage stage = getStage();
+        chaseBehavior.setStage(stage);
+        retreatBehavior.setStage(stage);
+        patrolBehavior.setStage(stage);
         int[] coords = computePathCoords();
         path = pathfinder.findPath(coords[0], coords[1], coords[2], coords[3]);
         pathIndex = 0;
@@ -48,85 +60,69 @@ public class Enemy extends Obstacle {
     @Override
     public void act(float delta) {
         super.act(delta);
-        if (player != null) {
-            if (lastRetreatToken != globalRetreatToken) {
-                lastRetreatToken = globalRetreatToken;
-                patrolBehavior.clear();
-                GridPoint2 currentTile = getCurrentTile();
-                retreatBehavior.startRetreat(collisionLayer, getStage(), currentTile.x, currentTile.y);
-                path.clear();
-                pathIndex = 0;
+
+
+        // Did another Enemy call a globalRetreat? If yes retreat, if no don't
+        if (lastRetreatToken != globalRetreatToken) {
+            lastRetreatToken = globalRetreatToken;
+            startRetreat();
+        }
+
+        // Waiting after a retreat?
+        if (retreatBehavior.isWaiting()) {
+            //Does updating the time change that?
+            if (retreatBehavior.updateWait(delta)) {
+                // Yes: start patroling
                 chaseBehavior.reset();
-                pathRecalcTimer = 0f;
+                startPatrol();
             }
-            if (retreatBehavior.isWaiting()) {
-                if (retreatBehavior.updateWait(delta)) {
-                    chaseBehavior.reset();
-                    pathRecalcTimer = 0f;
-                    patrolBehavior.startPatrol(collisionLayer, getStage());
-                    path.clear();
-                    pathIndex = 0;
-                }
-                return;
-            }
+            // No: Then keep waiting
+            return;
+        }
 
-            if (patrolBehavior.isWaiting()) {
-                if (patrolBehavior.updateWait(delta)) {
-                    patrolBehavior.startPatrol(collisionLayer, getStage());
-                    path.clear();
-                    pathIndex = 0;
-                    pathRecalcTimer = 0f;
-                }
-                return;
-            }
+        if (patrolBehavior.isWaiting() && patrolBehavior.updateWait(delta)) {
+            startPatrol();
+        }
 
-            if (patrolBehavior.isActive() && canSeePlayer()) {
-                patrolBehavior.clear();
-                path.clear();
+
+        if (patrolBehavior.isActive() && canSeePlayer()) {
+            patrolBehavior.clear();
+            resetPathing();
+            chaseBehavior.reset();
+        }
+
+        if (patrolBehavior.isPatrolling() && !path.isEmpty() && pathIndex >= path.size() && isCenteredOnTile()) {
+            patrolBehavior.startWaiting();
+            pathRecalcTimer = 0f;
+            return;
+        }
+
+        if (!retreatBehavior.isRetreating() && !patrolBehavior.isActive() && chaseBehavior.shouldRetreat(delta)) {
+            startRetreat();
+        }
+
+        if (retreatBehavior.isRetreating() && !path.isEmpty() && pathIndex >= path.size() && isCenteredOnTile()) {
+            retreatBehavior.startWaiting();
+            pathRecalcTimer = 0f;
+        }
+
+        pathRecalcTimer -= delta;
+        boolean pathExhausted = pathIndex >= path.size();
+        if (pathRecalcTimer <= 0f && isCenteredOnTile()) {
+            boolean needsRepath = path.isEmpty() || pathExhausted;
+            int[] coords = computePathCoords();
+            int goalX = coords[2];
+            int goalY = coords[3];
+            if (!needsRepath) {
+                boolean goalChanged = goalX != lastGoalX || goalY != lastGoalY;
+                needsRepath = goalChanged;
+            }
+            if (needsRepath) {
+                path = pathfinder.findPath(coords[0], coords[1], goalX, goalY);
                 pathIndex = 0;
-                chaseBehavior.reset();
-                pathRecalcTimer = 0f;
-            }
-
-            if (patrolBehavior.isPatrolling() && !path.isEmpty() && pathIndex >= path.size() && isCenteredOnTile()) {
-                patrolBehavior.startWaiting();
-                pathRecalcTimer = 0f;
-                return;
-            }
-
-            if (!retreatBehavior.isRetreating() && !patrolBehavior.isActive() && chaseBehavior.shouldRetreat(delta)) {
-                patrolBehavior.clear();
-                GridPoint2 currentTile = getCurrentTile();
-                retreatBehavior.startRetreat(collisionLayer, getStage(), currentTile.x, currentTile.y);
-                path.clear();
-                pathIndex = 0;
-                chaseBehavior.reset();
-                pathRecalcTimer = 0f;
-            }
-
-            if (retreatBehavior.isRetreating() && pathIndex >= path.size() && isCenteredOnTile()) {
-                retreatBehavior.startWaiting();
-                pathRecalcTimer = 0f;
-            }
-
-            pathRecalcTimer -= delta;
-            boolean pathExhausted = pathIndex >= path.size();
-            if (pathRecalcTimer <= 0f && isCenteredOnTile()) {
-                boolean needsRepath = path.isEmpty() || pathExhausted;
-                int[] coords = computePathCoords();
-                int goalX = coords[2];
-                int goalY = coords[3];
-                if (!needsRepath) {
-                    boolean goalChanged = goalX != lastGoalX || goalY != lastGoalY;
-                    needsRepath = goalChanged;
-                }
-                if (needsRepath) {
-                    path = pathfinder.findPath(coords[0], coords[1], goalX, goalY);
-                    pathIndex = 0;
-                    lastGoalX = goalX;
-                    lastGoalY = goalY;
-                    pathRecalcTimer = PATH_RECALC_INTERVAL;
-                }
+                lastGoalX = goalX;
+                lastGoalY = goalY;
+                pathRecalcTimer = PATH_RECALC_INTERVAL;
             }
         }
 
@@ -134,8 +130,6 @@ public class Enemy extends Obstacle {
     }
 
     private void followPath(float delta) {
-        //Sometimes the block doesnt end up on the center and as a result either gets stuck or crashes,
-        //this is a simple way to prevent that
         if (pathIndex >= path.size()) {
             moveToTileCenter(delta);
             return;
@@ -149,12 +143,12 @@ public class Enemy extends Obstacle {
         float dy = targetY - centerY;
         float dist = (float) Math.sqrt(dx * dx + dy * dy);
 
-        if (dist < 0.05f) {
+        if (dist < TARGET_EPS) {
             pathIndex++;
             return;
         }
 
-        float speedScale = patrolBehavior.isActive() ? 0.5f : 1f;
+        float speedScale = patrolBehavior.isActive() ? PATROL_SPEED_SCALE : 1f;
         float step = Math.min(speed * speedScale * delta, dist);
         setPosition(getX() + (dx / dist) * step, getY() + (dy / dist) * step);
     }
@@ -167,7 +161,7 @@ public class Enemy extends Obstacle {
         float dx = targetX - centerX;
         float dy = targetY - centerY;
         float dist = (float) Math.sqrt(dx * dx + dy * dy);
-        if (dist < 0.05f) {
+        if (dist < TARGET_EPS) {
             setPosition(getX() + dx, getY() + dy);
             return;
         }
@@ -179,56 +173,32 @@ public class Enemy extends Obstacle {
     protected void collision() {
         if (!player.isStunned() && !retreatBehavior.isRetreating()) {
             player.damage(1);
-            triggerGlobalRetreat();
+            globalRetreatToken++; //causes all enemies to go into retreat
             lastRetreatToken = globalRetreatToken;
-            patrolBehavior.clear();
-            GridPoint2 currentTile = getCurrentTile();
-            retreatBehavior.startRetreat(collisionLayer, getStage(), currentTile.x, currentTile.y);
-            path.clear();
-            pathIndex = 0;
-            chaseBehavior.reset();
-            pathRecalcTimer = 0f;
+            startRetreat();
         }
     }
 
     private int[] computePathCoords() {
-        int width = collisionLayer.getWidth();
-        int height = collisionLayer.getHeight();
-
-        //A* Node coordinate are integers, entity are floats, so we clamp them to int
-        GridPoint2 current = getCurrentTile();
-        int startX = current.x;
-        int startY = current.y;
+        int startX = clampTileX(getX() + getWidth() / 2f);
+        int startY = clampTileY(getY() + getHeight() / 2f);
         int goalX;
         int goalY;
         if (retreatBehavior.isRetreating()) {
             GridPoint2 target = retreatBehavior.getRetreatTarget();
-            goalX = pathfinder.clampCoord(target.x, width);
-            goalY = pathfinder.clampCoord(target.y, height);
+            goalX = clampTileX(target.x);
+            goalY = clampTileY(target.y);
         } else if (patrolBehavior.isPatrolling()) {
             GridPoint2 target = patrolBehavior.getPatrolTarget();
-            goalX = pathfinder.clampCoord(target.x, width);
-            goalY = pathfinder.clampCoord(target.y, height);
+            goalX = clampTileX(target.x);
+            goalY = clampTileY(target.y);
         } else {
-            goalX = pathfinder.clampCoord(MathUtils.floor(player.getX() + player.getWidth() / 2f), width);
-            goalY = pathfinder.clampCoord(MathUtils.floor(player.getY() + player.getHeight() / 2f), height);
+            goalX = clampTileX(player.getX() + player.getWidth() / 2f);
+            goalY = clampTileY(player.getY() + player.getHeight() / 2f);
         }
         return new int[]{startX, startY, goalX, goalY};
     }
 
-    private GridPoint2 getCurrentTile() {
-        int width = collisionLayer.getWidth();
-        int height = collisionLayer.getHeight();
-        int startX = pathfinder.clampCoord(MathUtils.floor(getX() + getWidth() / 2f), width);
-        int startY = pathfinder.clampCoord(MathUtils.floor(getY() + getHeight() / 2f), height);
-        return new GridPoint2(startX, startY);
-    }
-
-    /*
-       If the enemy decides to adjust path while not in the center of a tile, it tends to looks pretty wonky and jerky
-       this check makes sure that the enemy only moves from tile to tile, not from half tile to half time,
-       you can remove it and see how it looks without it if you wanna see why I added it.
-     */
     private boolean isCenteredOnTile() {
         float centerX = getX() + getWidth() / 2f;
         float centerY = getY() + getHeight() / 2f;
@@ -237,9 +207,7 @@ public class Enemy extends Obstacle {
         float dx = targetX - centerX;
         float dy = targetY - centerY;
 
-        // If its 0.02f units away its close enough to the center
-        float eps = 0.02f;
-        if (Math.abs(dx) < eps && Math.abs(dy) < eps) {
+        if (Math.abs(dx) < CENTER_EPS && Math.abs(dy) < CENTER_EPS) {
             setPosition(getX() + dx, getY() + dy);
             return true;
         }
@@ -247,12 +215,10 @@ public class Enemy extends Obstacle {
     }
 
     private boolean canSeePlayer() {
-        int width = collisionLayer.getWidth();
-        int height = collisionLayer.getHeight();
-        int startX = pathfinder.clampCoord(MathUtils.floor(getX() + getWidth() / 2f), width);
-        int startY = pathfinder.clampCoord(MathUtils.floor(getY() + getHeight() / 2f), height);
-        int goalX = pathfinder.clampCoord(MathUtils.floor(player.getX() + player.getWidth() / 2f), width);
-        int goalY = pathfinder.clampCoord(MathUtils.floor(player.getY() + player.getHeight() / 2f), height);
+        int startX = clampTileX(getX() + getWidth() / 2f);
+        int startY = clampTileY(getY() + getHeight() / 2f);
+        int goalX = clampTileX(player.getX() + player.getWidth() / 2f);
+        int goalY = clampTileY(player.getY() + player.getHeight() / 2f);
 
         int dx = Math.abs(goalX - startX);
         int dy = Math.abs(goalY - startY);
@@ -282,12 +248,39 @@ public class Enemy extends Obstacle {
     }
 
     private boolean isWalkable(int x, int y) {
-        if (x < 0 || y < 0 || x >= collisionLayer.getWidth() || y >= collisionLayer.getHeight()) {
+        if (x < 0 || y < 0 || x >= mapWidth || y >= mapHeight) {
             return false;
         }
         return collisionLayer.getCell(x, y) == null;
     }
 
+    private int clampTileX(float centerX) {
+        return pathfinder.clampCoord(MathUtils.floor(centerX), mapWidth);
+    }
+
+    private int clampTileY(float centerY) {
+        return pathfinder.clampCoord(MathUtils.floor(centerY), mapHeight);
+    }
+
+    private void startRetreat() {
+        patrolBehavior.clear();
+        retreatBehavior.startRetreat();
+        resetPathing();
+        chaseBehavior.reset();
+    }
+
+    private void startPatrol() {
+        patrolBehavior.startPatrol();
+        resetPathing();
+    }
+
+    private void resetPathing() {
+        path.clear();
+        pathIndex = 0;
+        pathRecalcTimer = 0f;
+        lastGoalX = Integer.MIN_VALUE;
+        lastGoalY = Integer.MIN_VALUE;
+    }
 
     private void ensureAboveCollectibles() {
         if (getStage() == null) {
@@ -310,9 +303,5 @@ public class Enemy extends Obstacle {
             }
             setZIndex(targetZ);
         }
-    }
-
-    private static void triggerGlobalRetreat() {
-        globalRetreatToken++;
     }
 }

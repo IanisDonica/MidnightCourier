@@ -10,26 +10,27 @@ import com.badlogic.gdx.utils.Array;
 
 public class Obstacle extends MapObject {
     private Animation<TextureRegion> animation;
+    int textureOffsetX, textureOffsetY, animationFrames;
 
-    public Obstacle(float x, float y, int w, int h, int textureOffsetX, int textureOffsetY, float animationTime) {
+    public Obstacle(float x, float y, int w, int h, int textureOffsetX, int textureOffsetY, int animationFrames) {
         setPosition(x, y);
         setSize(w, h);
-        this.animationTime = animationTime;
-        initAnimation(textureOffsetX, textureOffsetY);
+        this.animationFrames = animationFrames;
+        this.textureOffsetX = textureOffsetX;
+        this.textureOffsetY = textureOffsetY;
+        initAnimation();
     }
 
-    private void initAnimation(int textureOffsetX, int textureOffsetY) {
+    private void initAnimation() {
+        //This is kinda duplicate, but it will later be usefull
         Texture textureSheet = new Texture(Gdx.files.internal("objects.png"));
-        int frameWidth = 16;
-        int frameHeight = 16;
         Array<TextureRegion> frames = new Array<>(TextureRegion.class);
-        frames.add(new TextureRegion(textureSheet, textureOffsetX, textureOffsetY, frameWidth, frameHeight));
-        animation = new Animation<>(0.25f, frames);
-    }
 
-    @Override
-    public void act(float delta) {
-        super.act(delta);
+        for (int col = 0; col < animationFrames; col++) {
+            frames.add(new TextureRegion(textureSheet, textureOffsetX + col * frameWidth, textureOffsetY, frameWidth, frameHeight));
+        }
+
+        animation = new Animation<>(0.25f, frames);
     }
 
     @Override
