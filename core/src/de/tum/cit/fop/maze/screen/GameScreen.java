@@ -86,7 +86,7 @@ public class GameScreen implements Screen {
     public void render(float delta) {
         stage.act(delta);
         pointManager.act(delta);
-        System.out.println(pointManager.getPoints());
+        //System.out.println(pointManager.getPoints());
 
         Batch batch = stage.getBatch();
         OrthographicCamera camera = (OrthographicCamera) stage.getCamera();

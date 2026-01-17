@@ -6,6 +6,10 @@ public class ChaseBehavior extends AIBehaviour {
     private static final float MAX_CHASE_TIME = 5f;
     private float chaseTimer = 0f;
 
+    public float getChaseTimer() {
+        return chaseTimer;
+    }
+
     public ChaseBehavior(int width, int height, TiledMapTileLayer collisionLayer) {
         super(width, height, collisionLayer);
     }

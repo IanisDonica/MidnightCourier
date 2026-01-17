@@ -59,13 +59,15 @@ public class Enemy extends Obstacle {
 
     @Override
     public void act(float delta) {
+        //TODO simplify the logic, add comments to code, dont waste time on this code, ill deal with it.
         super.act(delta);
-
 
         // Did another Enemy call a globalRetreat? If yes retreat, if no don't
         if (lastRetreatToken != globalRetreatToken) {
             lastRetreatToken = globalRetreatToken;
-            startRetreat();
+            if (chaseBehavior.getChaseTimer() > 0) {
+                startRetreat();
+            }
         }
 
         // Waiting after a retreat?
@@ -80,21 +82,20 @@ public class Enemy extends Obstacle {
             return;
         }
 
-        if (patrolBehavior.isWaiting() && patrolBehavior.updateWait(delta)) {
-            startPatrol();
+        if (patrolBehavior.isPatrolling() && !path.isEmpty() && pathIndex >= path.size() && isCenteredOnTile()) {
+            patrolBehavior.startWaiting();
+            pathRecalcTimer = 0f;
         }
 
+        if (patrolBehavior.updateWait(delta)) {
+            startPatrol();
+            pathRecalcTimer = 0f;
+        }
 
         if (patrolBehavior.isActive() && canSeePlayer()) {
             patrolBehavior.clear();
             resetPathing();
             chaseBehavior.reset();
-        }
-
-        if (patrolBehavior.isPatrolling() && !path.isEmpty() && pathIndex >= path.size() && isCenteredOnTile()) {
-            patrolBehavior.startWaiting();
-            pathRecalcTimer = 0f;
-            return;
         }
 
         if (!retreatBehavior.isRetreating() && !patrolBehavior.isActive() && chaseBehavior.shouldRetreat(delta)) {
@@ -148,7 +149,7 @@ public class Enemy extends Obstacle {
             return;
         }
 
-        float speedScale = patrolBehavior.isActive() ? PATROL_SPEED_SCALE : 1f;
+        float speedScale = (patrolBehavior.isActive() || retreatBehavior.isRetreating()) ? PATROL_SPEED_SCALE : 1f;
         float step = Math.min(speed * speedScale * delta, dist);
         setPosition(getX() + (dx / dist) * step, getY() + (dy / dist) * step);
     }
