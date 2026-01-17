@@ -52,7 +52,8 @@ public class Enemy extends Obstacle {
             if (lastRetreatToken != globalRetreatToken) {
                 lastRetreatToken = globalRetreatToken;
                 patrolBehavior.clear();
-                retreatBehavior.startRetreat(collisionLayer, getStage());
+                GridPoint2 currentTile = getCurrentTile();
+                retreatBehavior.startRetreat(collisionLayer, getStage(), currentTile.x, currentTile.y);
                 path.clear();
                 pathIndex = 0;
                 chaseBehavior.reset();
@@ -79,6 +80,14 @@ public class Enemy extends Obstacle {
                 return;
             }
 
+            if (patrolBehavior.isActive() && canSeePlayer()) {
+                patrolBehavior.clear();
+                path.clear();
+                pathIndex = 0;
+                chaseBehavior.reset();
+                pathRecalcTimer = 0f;
+            }
+
             if (patrolBehavior.isPatrolling() && !path.isEmpty() && pathIndex >= path.size() && isCenteredOnTile()) {
                 patrolBehavior.startWaiting();
                 pathRecalcTimer = 0f;
@@ -87,7 +96,8 @@ public class Enemy extends Obstacle {
 
             if (!retreatBehavior.isRetreating() && !patrolBehavior.isActive() && chaseBehavior.shouldRetreat(delta)) {
                 patrolBehavior.clear();
-                retreatBehavior.startRetreat(collisionLayer, getStage());
+                GridPoint2 currentTile = getCurrentTile();
+                retreatBehavior.startRetreat(collisionLayer, getStage(), currentTile.x, currentTile.y);
                 path.clear();
                 pathIndex = 0;
                 chaseBehavior.reset();
@@ -172,7 +182,8 @@ public class Enemy extends Obstacle {
             triggerGlobalRetreat();
             lastRetreatToken = globalRetreatToken;
             patrolBehavior.clear();
-            retreatBehavior.startRetreat(collisionLayer, getStage());
+            GridPoint2 currentTile = getCurrentTile();
+            retreatBehavior.startRetreat(collisionLayer, getStage(), currentTile.x, currentTile.y);
             path.clear();
             pathIndex = 0;
             chaseBehavior.reset();
@@ -185,8 +196,9 @@ public class Enemy extends Obstacle {
         int height = collisionLayer.getHeight();
 
         //A* Node coordinate are integers, entity are floats, so we clamp them to int
-        int startX = pathfinder.clampCoord(MathUtils.floor(getX() + getWidth() / 2f), width);
-        int startY = pathfinder.clampCoord(MathUtils.floor(getY() + getHeight() / 2f), height);
+        GridPoint2 current = getCurrentTile();
+        int startX = current.x;
+        int startY = current.y;
         int goalX;
         int goalY;
         if (retreatBehavior.isRetreating()) {
@@ -202,6 +214,14 @@ public class Enemy extends Obstacle {
             goalY = pathfinder.clampCoord(MathUtils.floor(player.getY() + player.getHeight() / 2f), height);
         }
         return new int[]{startX, startY, goalX, goalY};
+    }
+
+    private GridPoint2 getCurrentTile() {
+        int width = collisionLayer.getWidth();
+        int height = collisionLayer.getHeight();
+        int startX = pathfinder.clampCoord(MathUtils.floor(getX() + getWidth() / 2f), width);
+        int startY = pathfinder.clampCoord(MathUtils.floor(getY() + getHeight() / 2f), height);
+        return new GridPoint2(startX, startY);
     }
 
     /*
@@ -224,6 +244,48 @@ public class Enemy extends Obstacle {
             return true;
         }
         return false;
+    }
+
+    private boolean canSeePlayer() {
+        int width = collisionLayer.getWidth();
+        int height = collisionLayer.getHeight();
+        int startX = pathfinder.clampCoord(MathUtils.floor(getX() + getWidth() / 2f), width);
+        int startY = pathfinder.clampCoord(MathUtils.floor(getY() + getHeight() / 2f), height);
+        int goalX = pathfinder.clampCoord(MathUtils.floor(player.getX() + player.getWidth() / 2f), width);
+        int goalY = pathfinder.clampCoord(MathUtils.floor(player.getY() + player.getHeight() / 2f), height);
+
+        int dx = Math.abs(goalX - startX);
+        int dy = Math.abs(goalY - startY);
+        int sx = startX < goalX ? 1 : -1;
+        int sy = startY < goalY ? 1 : -1;
+        int err = dx - dy;
+        int x = startX;
+        int y = startY;
+
+        while (true) {
+            if (!isWalkable(x, y) && !(x == startX && y == startY)) {
+                return false;
+            }
+            if (x == goalX && y == goalY) {
+                return true;
+            }
+            int e2 = 2 * err;
+            if (e2 > -dy) {
+                err -= dy;
+                x += sx;
+            }
+            if (e2 < dx) {
+                err += dx;
+                y += sy;
+            }
+        }
+    }
+
+    private boolean isWalkable(int x, int y) {
+        if (x < 0 || y < 0 || x >= collisionLayer.getWidth() || y >= collisionLayer.getHeight()) {
+            return false;
+        }
+        return collisionLayer.getCell(x, y) == null;
     }
 
 
