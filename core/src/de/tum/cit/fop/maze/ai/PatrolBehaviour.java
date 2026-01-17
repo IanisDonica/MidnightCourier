@@ -5,8 +5,8 @@ import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.MathUtils;
 
 public class PatrolBehaviour extends AIBehaviour {
-    private static final float MIN_WAIT = 10f;
-    private static final float MAX_WAIT = 20f;
+    private static final float MIN_WAIT = 0.5f;
+    private static final float MAX_WAIT = 2f;
     private GridPoint2 patrolTarget = null;
     private boolean waiting = false;
     private float waitTimer = 0f;
