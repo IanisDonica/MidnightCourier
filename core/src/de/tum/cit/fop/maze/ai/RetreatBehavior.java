@@ -22,10 +22,10 @@ public class RetreatBehavior extends AIBehaviour {
         return retreatTarget;
     }
 
-    public void startRetreat(TiledMapTileLayer collisionLayer, Stage stage) {
+    public void startRetreat(TiledMapTileLayer collisionLayer, Stage stage, int currentX, int currentY) {
         int width = collisionLayer.getWidth();
         int height = collisionLayer.getHeight();
-        retreatTarget = findRandomFreeTile(width, height, stage);
+        retreatTarget = findRandomFreeTileAvoiding(width, height, stage, currentX, currentY);
         waiting = false;
         waitTimer = 0f;
     }
