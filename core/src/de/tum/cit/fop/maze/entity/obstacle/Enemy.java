@@ -37,10 +37,10 @@ public class Enemy extends Obstacle {
     private ArrayList<GridPoint2> path = new ArrayList<>();
     private int pathIndex = 0;
     private float pathRecalcTimer = 0f;
-    private int lastGoalX = Integer.MIN_VALUE;
+    private int lastGoalX = Integer.MIN_VALUE; // TODO Remove this
     private int lastGoalY = Integer.MIN_VALUE;
     private int lastRetreatToken = 0;
-    private EnemyState state = EnemyState.CHASING; //Initial state
+    private EnemyState state = EnemyState.CHASING; // Initial state
 
     public Enemy(TiledMapTileLayer collisionLayer, float x, float y) {
         super(x, y, 1,1, 0,0,3);
@@ -69,9 +69,10 @@ public class Enemy extends Obstacle {
 
     @Override
     public void act(float delta) {
+        //TODO remove duplicate code
         super.act(delta);
 
-        // Did another Enemy call a globalRetreat? If yes retreat, if no don't
+        // If a global retreat has been called, only retreat if you are actually chasing the enemy.
         if (lastRetreatToken != globalRetreatToken) {
             lastRetreatToken = globalRetreatToken;
             if (state != EnemyState.RETREATING && state != EnemyState.RETREAT_WAIT) {
@@ -184,7 +185,7 @@ public class Enemy extends Obstacle {
     protected void collision() {
         if (!player.isStunned() && state != EnemyState.RETREATING && state != EnemyState.RETREAT_WAIT) {
             player.damage(1);
-            globalRetreatToken++; //causes all enemies to go into retreat
+            globalRetreatToken++; // causes all enemies to go into retreat
             lastRetreatToken = globalRetreatToken;
             enterRetreating();
         }
@@ -322,6 +323,7 @@ public class Enemy extends Obstacle {
         lastGoalY = Integer.MIN_VALUE;
     }
 
+    //TODO see if this is needed
     private void ensureAboveCollectibles() {
         if (getStage() == null) {
             return;
