@@ -18,6 +18,7 @@ public class PointManager {
     private float offset = 0;
     private float safetyTime = 5f; // the amount of time for which points wont go down
     private float elapsedTime = 0f;
+    private boolean requestSent = false;
 
     public double getPoints() {
         return points + timePoints;
@@ -93,17 +94,20 @@ public class PointManager {
         file.writeString(payloadForFile, false, "UTF-8");
 
         // Send one record to the server as a fire and forget HTTP request
-        Net.HttpRequest request = new Net.HttpRequest(Net.HttpMethods.POST);
-        request.setUrl(ENDPOINT);
-        request.setHeader("Content-Type", "application/json");
-        request.setContent(recordJson);
+        if (!requestSent) {
+            requestSent = true;
+            Net.HttpRequest request = new Net.HttpRequest(Net.HttpMethods.POST);
+            request.setUrl(ENDPOINT);
+            request.setHeader("Content-Type", "application/json");
+            request.setContent(recordJson);
 
-        Gdx.net.sendHttpRequest(request, new Net.HttpResponseListener() {
-            //Even tho its a fire and forget request, its still required to have a
-            //listener, and override the methods, i just left them blank
-            @Override public void handleHttpResponse(Net.HttpResponse httpResponse) {}
-            @Override public void failed(Throwable t) {}
-            @Override public void cancelled() {}
-        });
+            Gdx.net.sendHttpRequest(request, new Net.HttpResponseListener() {
+                //Even tho its a fire and forget request, its still required to have a
+                //listener, and override the methods, i just left them blank
+                @Override public void handleHttpResponse(Net.HttpResponse httpResponse) {}
+                @Override public void failed(Throwable t) {}
+                @Override public void cancelled() {}
+            });
+        }
     }
 }
