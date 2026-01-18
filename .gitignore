@@ -36,6 +36,7 @@ local.properties
 .settings/
 .loadpath
 .recommenders
+.idea/runConfigurations/Run_Game.xml
 
 # External tool builders
 .externalToolBuilders/
