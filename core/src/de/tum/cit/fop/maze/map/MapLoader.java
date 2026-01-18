@@ -78,7 +78,7 @@ public class MapLoader {
                     Key keyGame = new Key(x, y, pointManager);
                     stage.addActor(keyGame);
                 } else if (value == 2) {
-                    ExitDoor exitDoor = new ExitDoor(x, y);
+                    ExitDoor exitDoor = new ExitDoor(x, y, pointManager);
                     stage.addActor(exitDoor);
                 } else if (value == 8) {
                     Trap trap = new Trap(x, y);
