@@ -16,7 +16,6 @@ public class ExitDoor extends Collectible {
         if (this.player.hasKey()) {
             // TODO Implement something nicer lmao
             this.pointManager.saveScore(this.player.getHp());
-            throw new RuntimeException("You won congrats");
         }
     }
 }
