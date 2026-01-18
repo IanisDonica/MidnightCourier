@@ -3,8 +3,7 @@
     <option name="ALTERNATIVE_JRE_PATH" value="corretto-17" />
     <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
     <option name="MAIN_CLASS_NAME" value="de.tum.cit.fop.maze.DesktopLauncher" />
-    <module name="glovobranch.desktop.main" />
-    <option name="VM_PARAMETERS" value="-XstartOnFirstThread" />
+    <module name="fopws2526projectfop-transprutsolution.desktop.main" />
     <extension name="coverage">
       <pattern>
         <option name="PATTERN" value="de.tum.cit.ase.maze.*" />
