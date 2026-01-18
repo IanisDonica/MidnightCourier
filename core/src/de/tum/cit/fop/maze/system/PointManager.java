@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 
 public class PointManager {
     private static final String FILE_PATH = "assets/data/highscore.json";
-    private static final String ENDPOINT = "http://127.0.0.1:8000/api/scores/";
+    private static final String ENDPOINT = "https://webservertransprut-production.up.railway.app/api/scores/";
     private double points = 0;
     private double timePoints = 100000;
     private float offset = 0;

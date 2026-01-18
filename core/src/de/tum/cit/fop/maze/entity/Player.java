@@ -187,7 +187,6 @@ public class Player extends Entity {
     public void pickupKey() {
         // For more complex logic later
         this.hasKey = true;
-        System.out.println("layer has key");
     }
 
     public boolean hasKey() {
