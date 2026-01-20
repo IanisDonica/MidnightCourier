@@ -10,6 +10,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import de.tum.cit.fop.maze.MazeRunnerGame;
@@ -21,7 +22,7 @@ public class NewGameScreen implements Screen {
         var camera = new OrthographicCamera();
         camera.zoom = 1.5f; // Set camera zoom for a closer view
 
-        Viewport viewport = new ScreenViewport(camera); // Create a viewport with the camera
+        Viewport viewport = new FitViewport(1920, 1080); // Create a viewport with the camera
         stage = new Stage(viewport, game.getSpriteBatch()); // Create a stage for UI elements
 
         Table table = new Table(); // Create a table for layout
@@ -49,7 +50,7 @@ public class NewGameScreen implements Screen {
         noButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                game.goToMenu(); // Change to the game screen when the button is pressed
+                game.goToMenu(); // Change to the main menu screen when the button is pressed
             }
         });
 
