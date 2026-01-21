@@ -6,19 +6,19 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.viewport.FitViewport;
-import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import de.tum.cit.fop.maze.MazeRunnerGame;
 
-public class SettingsScreen implements Screen {
+import java.util.HashMap;
+import java.util.Map;
+
+public class SettingsControlsScreen implements Screen {
     private final Stage stage;
 
-    public SettingsScreen(MazeRunnerGame game){
+    public SettingsControlsScreen(MazeRunnerGame game){
         var camera = new OrthographicCamera();
         camera.zoom = 1.5f; // Set camera zoom for a closer view
 
@@ -30,38 +30,49 @@ public class SettingsScreen implements Screen {
         stage.addActor(table); // Add the table to the stage
 
         // Add a label as a title
-        table.add(new Label("Settings", game.getSkin(), "title")).padBottom(80).row();
+        table.add(new Label("Settings: Controls", game.getSkin(), "title")).padBottom(80).row();
 
-        // Create and add a button to go to the game screen
 
-        TextButton controlSettings = new TextButton("Controls", game.getSkin());
-        table.add(controlSettings).width(500).row();
-
-        TextButton videoSettings = new TextButton("Video", game.getSkin());
-        table.add(videoSettings).width(500).row();
-
-        TextButton audioSettings = new TextButton("Audio", game.getSkin());
-        table.add(audioSettings).width(500).row();
-
-        TextButton gameSettings = new TextButton("Game", game.getSkin());
-        table.add(gameSettings).width(500).row();
-
-        TextButton goBack = new TextButton("Back to the Menu", game.getSkin());
-        table.add(goBack).width(500).row();
-
-        goBack.addListener(new ChangeListener() {
+        TextButton applyAndReturn = new TextButton("Apply", game.getSkin());
+        applyAndReturn.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                game.goToMenu(); // Change to the game screen when the button is pressed
+                //TODO: add here settings-saving.
+                game.goToSettingsGameScreen(); // Change to the game screen when the button is pressed
             }
         });
 
-        controlSettings.addListener(new ChangeListener() {
+        TextButton cancelAndReturn = new TextButton("Cancel", game.getSkin());
+        cancelAndReturn.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                game.goToSettingsControlsScreen(); // Change to the settings:controls screen when the button is pressed
+                game.goToSettingsScreen(); // Change to the game screen when the button is pressed
             }
         });
+
+        Table keybindsTable = new Table();
+
+        // i made it using map so you can access the required button.
+        Map<String, Button> stringToButton = new HashMap<>();
+        stringToButton.put("Up", new TextButton("W", game.getSkin()));
+        stringToButton.put("Down", new TextButton("S", game.getSkin()));
+        stringToButton.put("Left", new TextButton("A", game.getSkin()));
+        stringToButton.put("Right", new TextButton("D", game.getSkin()));
+
+        // here you can put the AddListener to the buttons
+        // TODO make AddListener logic for every button.
+
+        for (var button : stringToButton.keySet()){
+            keybindsTable.add(new Label(button, game.getSkin()));
+            keybindsTable.add(stringToButton.get(button)).row();
+        }
+
+        ScrollPane scrollPane = new ScrollPane(keybindsTable); // in case of many keybindings, we can scroll!
+
+        table.add(scrollPane).row();
+        table.add(applyAndReturn);
+        table.add(cancelAndReturn);
+
     }
 
 

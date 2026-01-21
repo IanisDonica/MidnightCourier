@@ -15,6 +15,7 @@ import games.spooky.gdx.nativefilechooser.NativeFileChooser;
 public class MazeRunnerGame extends Game {
     private MenuScreen menuScreen;
     private GameScreen gameScreen;
+    private SettingsScreen settingsScreen;
     private SpriteBatch spriteBatch;
     private Skin skin;
 
@@ -96,6 +97,54 @@ public class MazeRunnerGame extends Game {
         if (menuScreen != null) {
             menuScreen.dispose(); // Dispose the menu screen if it exists
             menuScreen = null;
+        }
+    }
+
+    public void goToSettingsControlsScreen() {
+        this.setScreen(new SettingsControlsScreen(this)); // Set the current screen to GameScreen
+        if (settingsScreen != null) {
+            settingsScreen.dispose(); // Dispose the menu screen if it exists
+            settingsScreen = null;
+        }
+    }
+
+    public void goToSettingsVideoScreen() {
+        this.setScreen(new SettingsScreen(this)); // Set the current screen to GameScreen
+        if (settingsScreen != null) {
+            settingsScreen.dispose(); // Dispose the menu screen if it exists
+            settingsScreen = null;
+        }
+    }
+
+    public void goToSettingsAudioScreen() {
+        this.setScreen(new SettingsScreen(this)); // Set the current screen to GameScreen
+        if (settingsScreen != null) {
+            settingsScreen.dispose(); // Dispose the menu screen if it exists
+            settingsScreen = null;
+        }
+    }
+
+    public void goToSettingsGameScreen() {
+        this.setScreen(new SettingsControlsScreen(this)); // Set the current screen to GameScreen
+        if(settingsScreen != null){
+            settingsScreen.dispose(); // Dispose the menu screen if it exists
+            settingsScreen = null;
+        }
+    }
+
+    public void goToGameOverScreen() {
+        this.setScreen(new GameOverScreen(this)); // Set the current screen to GameScreen
+        if(settingsScreen != null){
+            settingsScreen.dispose(); // Dispose the menu screen if it exists
+            settingsScreen = null;
+        }
+    }
+
+    public void goToVictoryScreen() {
+        this.setScreen(new VictoryScreen(this)); // Set the current screen to GameScreen
+        if(settingsScreen != null){
+            settingsScreen.dispose(); // Dispose the menu screen if it exists
+            settingsScreen = null;
         }
     }
 

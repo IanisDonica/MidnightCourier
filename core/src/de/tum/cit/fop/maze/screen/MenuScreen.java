@@ -72,6 +72,13 @@ public class MenuScreen implements Screen {
             }
         });
 
+        selectMap.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                //game.goToContinueGameScreen(); // Change to the game screen when the button is pressed
+            }
+        });
+
         settings.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {

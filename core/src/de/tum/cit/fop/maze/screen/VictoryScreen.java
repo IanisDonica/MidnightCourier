@@ -11,59 +11,41 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.viewport.FitViewport;
-import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import de.tum.cit.fop.maze.MazeRunnerGame;
 
-public class SettingsScreen implements Screen {
+public class VictoryScreen implements Screen {
     private final Stage stage;
 
-    public SettingsScreen(MazeRunnerGame game){
+    public VictoryScreen(MazeRunnerGame game){
         var camera = new OrthographicCamera();
         camera.zoom = 1.5f; // Set camera zoom for a closer view
 
         Viewport viewport = new FitViewport(1920, 1080);
         stage = new Stage(viewport, game.getSpriteBatch()); // Create a stage for UI elements
-
-        Table table = new Table(); // Create a table for layout
-        table.setFillParent(true); // Make the table fill the stage
-        stage.addActor(table); // Add the table to the stage
-
-        // Add a label as a title
-        table.add(new Label("Settings", game.getSkin(), "title")).padBottom(80).row();
-
-        // Create and add a button to go to the game screen
-
-        TextButton controlSettings = new TextButton("Controls", game.getSkin());
-        table.add(controlSettings).width(500).row();
-
-        TextButton videoSettings = new TextButton("Video", game.getSkin());
-        table.add(videoSettings).width(500).row();
-
-        TextButton audioSettings = new TextButton("Audio", game.getSkin());
-        table.add(audioSettings).width(500).row();
-
-        TextButton gameSettings = new TextButton("Game", game.getSkin());
-        table.add(gameSettings).width(500).row();
-
-        TextButton goBack = new TextButton("Back to the Menu", game.getSkin());
-        table.add(goBack).width(500).row();
-
-        goBack.addListener(new ChangeListener() {
+        Table table = new Table();
+        stage.addActor(table);
+        table.setFillParent(true);
+        table.add(new Label("Victory!", game.getSkin(), "title")).padBottom(80).row();
+        TextButton mainMenuButton = new TextButton("Main Menu", game.getSkin());
+        mainMenuButton.addListener(new ChangeListener() {
             @Override
-            public void changed(ChangeEvent event, Actor actor) {
-                game.goToMenu(); // Change to the game screen when the button is pressed
+            public void changed(ChangeEvent changeEvent, Actor actor) {
+                game.goToMenu();
             }
         });
 
-        controlSettings.addListener(new ChangeListener() {
+        TextButton nextLevelButton = new TextButton("Next Level", game.getSkin());
+        nextLevelButton.addListener(new ChangeListener() {
             @Override
-            public void changed(ChangeEvent event, Actor actor) {
-                game.goToSettingsControlsScreen(); // Change to the settings:controls screen when the button is pressed
+            public void changed(ChangeEvent changeEvent, Actor actor) {
+                // TODO next level button functionality
             }
         });
+
+        table.add(nextLevelButton).row();
+        table.add(mainMenuButton);
     }
-
 
     @Override
     public void render(float delta) {
