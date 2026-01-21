@@ -19,8 +19,8 @@ import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.ScreenUtils;
-import com.badlogic.gdx.utils.viewport.FitViewport;
-import com.badlogic.gdx.utils.viewport.Viewport;
+import com.badlogic.gdx.utils.viewport.*;
+import de.tum.cit.fop.maze.HUD;
 import de.tum.cit.fop.maze.MazeRunnerGame;
 import de.tum.cit.fop.maze.entity.Player;
 import de.tum.cit.fop.maze.map.MapLoader;
@@ -58,6 +58,7 @@ public class GameScreen implements Screen {
     public PointManager pointManager;
     private final MapLoader mapLoader = new MapLoader();
     private final String propertiesPath = "maps/level-1.properties";
+    private HUD hud;
 
     /**
      * Constructor for GameScreen. Sets up the camera and font.
@@ -66,7 +67,8 @@ public class GameScreen implements Screen {
      */
     public GameScreen(MazeRunnerGame game) {
         this.game = game;
-        Viewport viewport = new FitViewport(WORLD_WIDTH, WORLD_HEIGHT);
+        this.hud = new HUD(game);
+        Viewport viewport = new ExtendViewport(WORLD_WIDTH, WORLD_HEIGHT);
         stage = new Stage(viewport, game.getSpriteBatch());
         map = new TmxMapLoader().load("untitled.tmx");
         mapRenderer = new OrthogonalTiledMapRenderer(map, 1 / 16f, game.getSpriteBatch());
@@ -110,6 +112,11 @@ public class GameScreen implements Screen {
         float viewY = camera.position.y - viewH / 2f;
 
         renderWorld(batch, camera, viewX, viewY, viewW, viewH);
+
+        // render hud
+        hud.update(player.getHp(), pointManager.getPoints(), player.hasKey());
+        hud.getStage().act(delta);
+        hud.getStage().draw();
     }
 
     @Override
