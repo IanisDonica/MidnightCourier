@@ -55,6 +55,13 @@ public class SettingsScreen implements Screen {
                 game.goToMenu(); // Change to the game screen when the button is pressed
             }
         });
+
+        controlSettings.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                game.goToSettingsControlsScreen(); // Change to the settings:controls screen when the button is pressed
+            }
+        });
     }
 
 
