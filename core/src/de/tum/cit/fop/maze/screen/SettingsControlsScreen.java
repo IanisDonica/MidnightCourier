@@ -5,20 +5,29 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import de.tum.cit.fop.maze.MazeRunnerGame;
+import de.tum.cit.fop.maze.system.ConfigManager;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class SettingsControlsScreen implements Screen {
     private final Stage stage;
+    private final ConfigManager configManager;
+    private String rebindingAction = null;
+    private TextButton rebindingButton = null;
+    private final Map<String, TextButton> actionButtons = new HashMap<>();
 
-    public SettingsControlsScreen(MazeRunnerGame game){
+    public SettingsControlsScreen(MazeRunnerGame game) {
+        this.configManager = game.getConfigManager();
+
         var camera = new OrthographicCamera();
         camera.zoom = 1.5f; // Set camera zoom for a closer view
 
@@ -30,51 +39,85 @@ public class SettingsControlsScreen implements Screen {
         stage.addActor(table); // Add the table to the stage
 
         // Add a label as a title
-        table.add(new Label("Settings: Controls", game.getSkin(), "title")).padBottom(80).row();
-
-
-        TextButton applyAndReturn = new TextButton("Apply", game.getSkin());
-        applyAndReturn.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent event, Actor actor) {
-                //TODO: add here settings-saving.
-                game.goToSettingsGameScreen(); // Change to the game screen when the button is pressed
-            }
-        });
-
-        TextButton cancelAndReturn = new TextButton("Cancel", game.getSkin());
-        cancelAndReturn.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent event, Actor actor) {
-                game.goToSettingsScreen(); // Change to the game screen when the button is pressed
-            }
-        });
+        table.add(new Label("Settings: Controls", game.getSkin(), "title")).colspan(2).padBottom(80).row();
 
         Table keybindsTable = new Table();
+        keybindsTable.pad(20);
 
-        // i made it using map so you can access the required button.
-        Map<String, Button> stringToButton = new HashMap<>();
-        stringToButton.put("Up", new TextButton("W", game.getSkin()));
-        stringToButton.put("Down", new TextButton("S", game.getSkin()));
-        stringToButton.put("Left", new TextButton("A", game.getSkin()));
-        stringToButton.put("Right", new TextButton("D", game.getSkin()));
+        String[] actions = {"up", "down", "left", "right", "sprint", "pause", "zoomIn", "zoomOut", "moreFog", "lessFog", "noire"};
 
-        // here you can put the AddListener to the buttons
-        // TODO make AddListener logic for every button.
+        for (String action : actions) {
+            Label actionLabel = new Label(action.toUpperCase(), game.getSkin());
+            final String currentAction = action;
+            TextButton keyButton = new TextButton(configManager.getKeyBindingName(action), game.getSkin());
+            actionButtons.put(action, keyButton);
 
-        for (var button : stringToButton.keySet()){
-            keybindsTable.add(new Label(button, game.getSkin()));
-            keybindsTable.add(stringToButton.get(button)).row();
+            keyButton.addListener(new ChangeListener() {
+                @Override
+                public void changed(ChangeEvent event, Actor actor) {
+                    if (rebindingAction != null && rebindingButton != null) {
+                        rebindingButton.setText(configManager.getKeyBindingName(rebindingAction));
+                    }
+                    rebindingAction = currentAction;
+                    rebindingButton = keyButton;
+                    keyButton.setText("Press any key...");
+                }
+            });
+
+            keybindsTable.add(actionLabel).left().padRight(20);
+            keybindsTable.add(keyButton).width(300).padBottom(10).row();
         }
 
-        ScrollPane scrollPane = new ScrollPane(keybindsTable); // in case of many keybindings, we can scroll!
+        stage.addListener(new InputListener() {
+            @Override
+            public boolean keyDown(InputEvent event, int keycode) {
+                if (rebindingAction != null) {
+                    // Check for conflicts
+                    String conflictingAction = configManager.getActionForKey(keycode);
+                    if (conflictingAction != null && !conflictingAction.equals(rebindingAction)) {
+                        unbindButton(conflictingAction);
+                    }
 
-        table.add(scrollPane).row();
-        table.add(applyAndReturn);
-        table.add(cancelAndReturn);
+                    // Rebind current button
+                    configManager.setKeyBinding(rebindingAction, keycode);
+                    if (rebindingButton != null) {
+                        rebindingButton.setText(configManager.getKeyBindingName(rebindingAction));
+                    }
 
+                    // Reset action and buttons to null for the next rebinding
+                    rebindingAction = null;
+                    rebindingButton = null;
+                    return true;
+                }
+                return false;
+            }
+        });
+
+        ScrollPane scrollPane = new ScrollPane(keybindsTable, game.getSkin());
+        scrollPane.setFadeScrollBars(false);
+        scrollPane.setScrollingDisabled(true, false); // Disable horizontal scrolling, enable vertical
+        stage.setScrollFocus(scrollPane);
+        table.add(scrollPane).size(800, 600).expand().fill().colspan(2).row();
+
+        TextButton backButton = new TextButton("Back", game.getSkin());
+        backButton.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                configManager.saveKeyBindings();
+                game.goToSettingsScreen();
+            }
+        });
+
+        table.add(backButton).colspan(2).padTop(20);
     }
 
+    private void unbindButton(String action) {
+        configManager.setKeyBinding(action, com.badlogic.gdx.Input.Keys.UNKNOWN);
+        TextButton conflictingButton = actionButtons.get(action);
+        if (conflictingButton != null) {
+            conflictingButton.setText(configManager.getKeyBindingName(action));
+        }
+    }
 
     @Override
     public void render(float delta) {

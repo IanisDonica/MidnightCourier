@@ -5,9 +5,12 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import de.tum.cit.fop.maze.screen.*;
+import de.tum.cit.fop.maze.system.ConfigManager;
 import de.tum.cit.fop.maze.system.GameState;
 import de.tum.cit.fop.maze.system.SaveManager;
 import games.spooky.gdx.nativefilechooser.NativeFileChooser;
+
+import java.io.ObjectInputFilter;
 
 /**
  * The MazeRunnerGame class represents the core of the Maze Runner game.
@@ -20,6 +23,7 @@ public class MazeRunnerGame extends Game {
     private SettingsScreen settingsScreen;
     private SpriteBatch spriteBatch;
     private Skin skin;
+    private final ConfigManager configManager;
 
     /**
      * Constructor for MazeRunnerGame.
@@ -28,6 +32,8 @@ public class MazeRunnerGame extends Game {
      */
     public MazeRunnerGame(NativeFileChooser fileChooser) {
         super();
+        configManager = new ConfigManager();
+        configManager.loadKeyBindings();
     }
 
     /**
@@ -176,5 +182,8 @@ public class MazeRunnerGame extends Game {
         return spriteBatch;
     }
 
+    public ConfigManager getConfigManager() {
+        return configManager;
+    }
 
 }
