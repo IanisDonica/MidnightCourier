@@ -11,16 +11,13 @@ public class KeyHandler extends InputListener {
     private final Player player;
     private final GameScreen gameScreen;
     private final MazeRunnerGame game;
-    private final int[] moveUpKeys = {Input.Keys.W, Input.Keys.UP};
-    private final int[] moveDownKeys = {Input.Keys.S, Input.Keys.DOWN};
-    private final int[] moveLeftKeys = {Input.Keys.A, Input.Keys.LEFT};
-    private final int[] moveRightKeys = {Input.Keys.D, Input.Keys.RIGHT};
-    private final int[] sprintKeys = {Input.Keys.SHIFT_LEFT};
+    private final ConfigManager configManager;
 
     public KeyHandler(Player player, GameScreen gameScreen, MazeRunnerGame game) {
         this.player = player;
         this.gameScreen = gameScreen;
         this.game = game;
+        configManager = game.getConfigManager();
     }
 
     @Override
@@ -39,27 +36,27 @@ public class KeyHandler extends InputListener {
 
         // GameScreen debug and menu (only on keyDown)
         if (isDown) {
-            if (keycode == Input.Keys.ESCAPE) {
+            if (keycode == configManager.getKeyBinding("pause")) {
                 game.goToMenu();
                 return true;
             }
-            if (keycode == Input.Keys.NUMPAD_ADD) {
+            if (keycode == configManager.getKeyBinding("zoomIn")) {
                 gameScreen.adjustZoom(0.1f);
                 return true;
             }
-            if (keycode == Input.Keys.NUMPAD_SUBTRACT) {
+            if (keycode == configManager.getKeyBinding("zoomOut")) {
                 gameScreen.adjustZoom(-0.1f);
                 return true;
             }
-            if (keycode == Input.Keys.NUMPAD_9) {
+            if (keycode == configManager.getKeyBinding("moreFog")) {
                 gameScreen.adjustFog(0.5f);
                 return true;
             }
-            if (keycode == Input.Keys.NUMPAD_8) {
+            if (keycode == configManager.getKeyBinding("lessFog")) {
                 gameScreen.adjustFog(-0.5f);
                 return true;
             }
-            if (keycode == Input.Keys.NUMPAD_7) {
+            if (keycode == configManager.getKeyBinding("noire")) {
                 gameScreen.toggleNoireMode();
                 return true;
             }
@@ -69,36 +66,30 @@ public class KeyHandler extends InputListener {
     }
 
     private boolean checkMovementKeys(int keycode, boolean isDown) {
-        for (int key : moveUpKeys) {
-            if (key == keycode) {
+            if (keycode == configManager.getKeyBinding("up")) {
                 player.setMoveUp(isDown);
                 return true;
             }
-        }
-        for (int key : moveDownKeys) {
-            if (key == keycode) {
+            if (keycode == configManager.getKeyBinding("down")) {
                 player.setMoveDown(isDown);
                 return true;
             }
-        }
-        for (int key : moveLeftKeys) {
-            if (key == keycode) {
+            if (keycode == configManager.getKeyBinding("left")) {
                 player.setMoveLeft(isDown);
                 return true;
             }
-        }
-        for (int key : moveRightKeys) {
-            if (key == keycode) {
+            if (keycode == configManager.getKeyBinding("right")) {
                 player.setMoveRight(isDown);
                 return true;
             }
-        }
-        for (int key : sprintKeys) {
-            if (key == keycode) {
+            if (keycode == configManager.getKeyBinding("sprint")) {
                 player.setSprinting(isDown);
                 return true;
             }
-        }
         return false;
+    }
+
+    public ConfigManager getConfigManager() {
+        return configManager;
     }
 }
