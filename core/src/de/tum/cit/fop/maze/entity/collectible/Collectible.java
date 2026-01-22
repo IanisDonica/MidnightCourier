@@ -15,13 +15,24 @@ public class Collectible extends MapObject {
     protected Animation<TextureRegion> spinAnimation;
     private boolean pickedUp = false;
     private int pickUpFrameCounter = 32;
+    private final float spawnX, spawnY;
 
     public Collectible(float x, float y, int w, int h, PointManager pointManager) {
         setX(x);
         setY(y);
+        this.spawnX = x;
+        this.spawnY = y;
         setSize(w, h);
         this.pointManager = pointManager;
         this.animationTime = MathUtils.random(0f, 1f);
+    }
+
+    public float getSpawnX() {
+        return spawnX;
+    }
+
+    public float getSpawnY() {
+        return spawnY;
     }
 
     protected void initSpinAnimation(int startX, int rowY, int frameCount) {

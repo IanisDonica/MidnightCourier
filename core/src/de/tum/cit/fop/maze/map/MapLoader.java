@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import de.tum.cit.fop.maze.entity.collectible.Collectible;
 import de.tum.cit.fop.maze.entity.collectible.EnergyDrink;
 import de.tum.cit.fop.maze.entity.collectible.ExitDoor;
 import de.tum.cit.fop.maze.entity.collectible.HealthPickup;
@@ -13,6 +14,8 @@ import de.tum.cit.fop.maze.entity.obstacle.Obstacle;
 import de.tum.cit.fop.maze.entity.obstacle.Trap;
 import de.tum.cit.fop.maze.system.PointManager;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
@@ -51,7 +54,7 @@ public class MapLoader {
         return layer;
     }
 
-    public void spawnCollectiblesFromProperties(Stage stage, PointManager pointManager, TiledMapTileLayer collisionLayer, String propertiesPath) {
+    public void spawnEntitiesFromProperties(Stage stage, PointManager pointManager, TiledMapTileLayer collisionLayer, String propertiesPath, List<Enemy> enemies, List<Collectible> collectibles) {
         Properties props = new Properties();
 
         // CHeck if the map actually exists, if it doesn't crash the game, cause
@@ -71,21 +74,28 @@ public class MapLoader {
                 if (value == 3) {
                     HealthPickup pickup = new HealthPickup(x, y, pointManager);
                     stage.addActor(pickup);
+                    collectibles.add(pickup);
                 } else if (value == 6) {
                     EnergyDrink drink = new EnergyDrink(x, y, pointManager);
                     stage.addActor(drink);
+                    collectibles.add(drink);
                 } else if (value == 5) {
                     Key keyGame = new Key(x, y, pointManager);
                     stage.addActor(keyGame);
+                    collectibles.add(keyGame);
                 } else if (value == 2) {
                     ExitDoor exitDoor = new ExitDoor(x, y, pointManager);
                     stage.addActor(exitDoor);
+                    collectibles.add(exitDoor);
                 } else if (value == 8) {
                     Trap trap = new Trap(x, y);
                     stage.addActor(trap);
+                    // Traps are obstacles but not enemies, for now we don't save their state
+                    // if they are static.
                 } else if (value == 4) {
                     Enemy enemy = new Enemy(collisionLayer, x, y);
                     stage.addActor(enemy);
+                    enemies.add(enemy);
                 }
             } catch (NumberFormatException ignored) {
                 // Bad coords.

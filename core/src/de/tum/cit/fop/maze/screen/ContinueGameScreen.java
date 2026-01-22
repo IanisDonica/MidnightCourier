@@ -14,6 +14,8 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import de.tum.cit.fop.maze.MazeRunnerGame;
+import de.tum.cit.fop.maze.system.GameState;
+import de.tum.cit.fop.maze.system.SaveManager;
 
 public class ContinueGameScreen implements Screen {
     private final Stage stage;
@@ -32,7 +34,16 @@ public class ContinueGameScreen implements Screen {
         // Add a label as a title
         table.add(new Label("Select the save file:", game.getSkin(), "title")).padBottom(80).row();
 
-        // Create and add a button to go to the game screen
+
+        TextButton autosaveButton = new TextButton("Autosave", game.getSkin());
+        table.add(autosaveButton).width(600).height(200).row();
+        autosaveButton.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                game.goToGame(SaveManager.loadGame("autosave"));
+            }
+        });
+
         TextButton file1Button = new TextButton("File 1", game.getSkin());
         table.add(file1Button).width(600).height(200).row();
 
