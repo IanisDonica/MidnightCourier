@@ -24,8 +24,10 @@ import de.tum.cit.fop.maze.HUD;
 import de.tum.cit.fop.maze.MazeRunnerGame;
 import de.tum.cit.fop.maze.entity.Player;
 import de.tum.cit.fop.maze.map.MapLoader;
-import de.tum.cit.fop.maze.system.KeyHandler;
-import de.tum.cit.fop.maze.system.PointManager;
+import de.tum.cit.fop.maze.system.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The GameScreen class is responsible for rendering the gameplay screen.
@@ -36,7 +38,8 @@ public class GameScreen implements Screen {
     public static final int WORLD_WIDTH = 32;
     public static final int WORLD_HEIGHT = 16;
     private final MazeRunnerGame game;
-    private final TiledMap map;
+    private TiledMap map;
+    private final TiledMapTileLayer  collisionLayer;
     private final OrthogonalTiledMapRenderer mapRenderer;
     private final Stage stage;
     private final ShaderProgram grayScaleShader;
@@ -57,8 +60,12 @@ public class GameScreen implements Screen {
     private Player player;
     public PointManager pointManager;
     private final MapLoader mapLoader = new MapLoader();
+    private final String mapPath = "untitled.tmx";
     private final String propertiesPath = "maps/level-1.properties";
-    private HUD hud;
+    private final HUD hud;
+    private final List<de.tum.cit.fop.maze.entity.obstacle.Enemy> enemies = new ArrayList<>();
+    private final List<de.tum.cit.fop.maze.entity.collectible.Collectible> collectibles = new ArrayList<>();
+    private GameState initialGameState;
 
     /**
      * Constructor for GameScreen. Sets up the camera and font.
@@ -70,19 +77,49 @@ public class GameScreen implements Screen {
         this.hud = new HUD(game);
         Viewport viewport = new ExtendViewport(WORLD_WIDTH, WORLD_HEIGHT);
         stage = new Stage(viewport, game.getSpriteBatch());
-        map = new TmxMapLoader().load("untitled.tmx");
+        map = new TmxMapLoader().load(mapPath);
         mapRenderer = new OrthogonalTiledMapRenderer(map, 1 / 16f, game.getSpriteBatch());
         createFrameBuffers(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-
         grayScaleShader = new ShaderProgram(Gdx.files.internal("shaders/vertex.glsl"), Gdx.files.internal("shaders/grayscale.frag"));
-
         fogShader = new ShaderProgram(Gdx.files.internal("shaders/vertex.glsl"), Gdx.files.internal("shaders/fog.frag"));
         collisionShader = new ShaderProgram(Gdx.files.internal("shaders/vertex.glsl"), Gdx.files.internal("shaders/collision.frag"));
         combinationShader = new ShaderProgram(Gdx.files.internal("shaders/vertex.glsl"), Gdx.files.internal("shaders/combination.frag"));
-
         ((OrthographicCamera) stage.getCamera()).zoom = 1f;
         uiCamera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         pointManager = new PointManager();
+        collisionLayer = mapLoader.buildCollisionLayerFromProperties(map, propertiesPath);
+        generateFBO();
+        player = new Player(collisionLayer, 16, 8);
+
+    }
+
+    public GameScreen(MazeRunnerGame game, GameState gameState) {
+        this.game = game;
+        this.initialGameState = gameState;
+        this.hud = new HUD(game);
+        this.map = new TmxMapLoader().load(gameState.mapPath);
+
+        Viewport viewport = new ExtendViewport(WORLD_WIDTH, WORLD_HEIGHT);
+        stage = new Stage(viewport, game.getSpriteBatch());
+        mapRenderer = new OrthogonalTiledMapRenderer(map, 1 / 16f, game.getSpriteBatch());
+        createFrameBuffers(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        grayScaleShader = new ShaderProgram(Gdx.files.internal("shaders/vertex.glsl"), Gdx.files.internal("shaders/grayscale.frag"));
+        fogShader = new ShaderProgram(Gdx.files.internal("shaders/vertex.glsl"), Gdx.files.internal("shaders/fog.frag"));
+        collisionShader = new ShaderProgram(Gdx.files.internal("shaders/vertex.glsl"), Gdx.files.internal("shaders/collision.frag"));
+        combinationShader = new ShaderProgram(Gdx.files.internal("shaders/vertex.glsl"), Gdx.files.internal("shaders/combination.frag"));
+        ((OrthographicCamera) stage.getCamera()).zoom = 1f;
+        uiCamera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        collisionLayer = mapLoader.buildCollisionLayerFromProperties(map, propertiesPath);
+        generateFBO();
+        player = new Player(collisionLayer, 16, 8);
+
+        this.player.setX(gameState.playerX);
+        this.player.setY(gameState.playerY);
+        if (gameState.hasKey) player.pickupKey();
+        this. pointManager = gameState.pointManager;
+//        this.pointManager.setPoints(gameState.score);
+//        this.pointManager.setTimePoints(gameState.timePoints);
+        this.player.setHp(gameState.playerLives);
     }
 
     public void adjustZoom(float amount) {
@@ -117,6 +154,20 @@ public class GameScreen implements Screen {
         hud.update(player.getHp(), pointManager.getPoints(), player.hasKey());
         hud.getStage().act(delta);
         hud.getStage().draw();
+
+        List<EnemyData> enemyDataList = new ArrayList<>();
+        List<CollectibleData> collectibleDataList = new ArrayList<>();
+
+        for (de.tum.cit.fop.maze.entity.obstacle.Enemy enemy : enemies) {
+            enemyDataList.add(new EnemyData(enemy.getX(), enemy.getY()));
+        }
+        for (de.tum.cit.fop.maze.entity.collectible.Collectible collectible : collectibles) {
+            // We use the initial coordinates as ID.
+            collectibleDataList.add(new CollectibleData(collectible.getSpawnX(), collectible.getSpawnY(), collectible.getPickedUp()));
+        }
+
+        GameState gameState = new GameState(mapPath, player.getX(), player.getY(), player.getHp(), pointManager, player.hasKey(), enemyDataList, collectibleDataList);
+        SaveManager.saveGame(gameState);
     }
 
     @Override
@@ -133,24 +184,44 @@ public class GameScreen implements Screen {
 
     @Override
     public void pause() {
-        // implement pause
+
     }
 
     @Override
     public void resume() {
-        // implement resume
+        // implement resumeAS
     }
 
     @Override
     public void show() {
         Gdx.input.setInputProcessor(stage);
-
-        TiledMapTileLayer collisionLayer = mapLoader.buildCollisionLayerFromProperties(map, propertiesPath);
-        generateFBO(collisionLayer);
-        player = new Player(collisionLayer, 16, 8);
         stage.addActor(player);
 
-        mapLoader.spawnCollectiblesFromProperties(stage, pointManager, collisionLayer, propertiesPath);
+        enemies.clear();
+        collectibles.clear();
+        mapLoader.spawnEntitiesFromProperties(stage, pointManager, collisionLayer, propertiesPath, enemies, collectibles);
+
+        if (initialGameState != null) {
+            if (initialGameState.enemies != null) {
+                for (int i = 0; i < Math.min(enemies.size(), initialGameState.enemies.size()); i++) {
+                    EnemyData data = initialGameState.enemies.get(i);
+                    enemies.get(i).setPosition(data.x, data.y);
+                }
+            }
+
+            if (initialGameState.collectibles != null) {
+                for (CollectibleData data : initialGameState.collectibles) {
+                    if (data.pickedUp) {
+                        for (de.tum.cit.fop.maze.entity.collectible.Collectible collectible : collectibles) {
+                            if (Math.abs(collectible.getSpawnX() - data.x) < 0.01f && Math.abs(collectible.getSpawnY() - data.y) < 0.01f) {
+                                collectible.markPickedUp();
+                                collectible.remove();
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
         stage.setKeyboardFocus(player);
         player.toFront();
@@ -176,6 +247,10 @@ public class GameScreen implements Screen {
         combinationShader.dispose();
         map.dispose();
         mapRenderer.dispose();
+    }
+
+    public void setGameState(GameState gameState) {
+
     }
 
     private void renderWorld(Batch batch, OrthographicCamera camera, float viewX, float viewY, float viewW, float viewH) {
@@ -275,7 +350,7 @@ public class GameScreen implements Screen {
         interFbo.dispose();
     }
 
-    private void generateFBO(TiledMapTileLayer collisionLayer) {
+    private void generateFBO() {
         int height = collisionLayer.getHeight();
         int width = collisionLayer.getWidth();
         collisionFbo = new FrameBuffer(Pixmap.Format.RGBA8888, WORLD_WIDTH, WORLD_HEIGHT, false);

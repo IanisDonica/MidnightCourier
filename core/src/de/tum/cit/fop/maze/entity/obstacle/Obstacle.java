@@ -22,7 +22,7 @@ public class Obstacle extends MapObject {
     }
 
     private void initAnimation() {
-        //This is kinda duplicate, but it will later be usefull
+        //This is kinda duplicate, but it will later be useful
         Texture textureSheet = new Texture(Gdx.files.internal("objects.png"));
         Array<TextureRegion> frames = new Array<>(TextureRegion.class);
 

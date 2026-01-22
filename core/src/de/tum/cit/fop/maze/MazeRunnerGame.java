@@ -5,6 +5,8 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import de.tum.cit.fop.maze.screen.*;
+import de.tum.cit.fop.maze.system.GameState;
+import de.tum.cit.fop.maze.system.SaveManager;
 import games.spooky.gdx.nativefilechooser.NativeFileChooser;
 
 /**
@@ -66,6 +68,15 @@ public class MazeRunnerGame extends Game {
             menuScreen = null;
         }
     }
+
+    public void goToGame(GameState gameState){
+        this.setScreen(new GameScreen(this, gameState)); // Set the current screen to GameScreen
+        if (menuScreen != null) {
+            menuScreen.dispose(); // Dispose the menu screen if it exists
+            menuScreen = null;
+        }
+    }
+
 
     /**
      * Switches to the new game screen.
