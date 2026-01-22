@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class SettingsControlsScreen implements Screen {
+    private final MazeRunnerGame game;
     private final Stage stage;
     private final ConfigManager configManager;
     private String rebindingAction = null;
@@ -26,6 +27,7 @@ public class SettingsControlsScreen implements Screen {
     private final Map<String, TextButton> actionButtons = new HashMap<>();
 
     public SettingsControlsScreen(MazeRunnerGame game) {
+        this.game = game;
         this.configManager = game.getConfigManager();
 
         var camera = new OrthographicCamera();
@@ -153,6 +155,7 @@ public class SettingsControlsScreen implements Screen {
     public void show() {
         // Set the input processor so the stage can receive input events
         Gdx.input.setInputProcessor(stage);
+        stage.addListener(game.getKeyHandler());
     }
 
     //The following methods are part of the Screen interface but are not used in this screen.

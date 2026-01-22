@@ -1,21 +1,18 @@
 package de.tum.cit.fop.maze.system;
 
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import de.tum.cit.fop.maze.MazeRunnerGame;
 import de.tum.cit.fop.maze.entity.Player;
-import de.tum.cit.fop.maze.screen.GameScreen;
+import de.tum.cit.fop.maze.screen.*;
 
 public class KeyHandler extends InputListener {
-    private final Player player;
-    private final GameScreen gameScreen;
     private final MazeRunnerGame game;
     private final ConfigManager configManager;
+    private Player player;
+    private GameScreen gameScreen;
 
-    public KeyHandler(Player player, GameScreen gameScreen, MazeRunnerGame game) {
-        this.player = player;
-        this.gameScreen = gameScreen;
+    public KeyHandler(MazeRunnerGame game) {
         this.game = game;
         configManager = game.getConfigManager();
     }
@@ -32,12 +29,18 @@ public class KeyHandler extends InputListener {
 
     private boolean handleKey(int keycode, boolean isDown) {
         // Player movement and sprint
-        if (checkMovementKeys(keycode, isDown)) return true;
+        if (player != null && checkMovementKeys(keycode, isDown)) return true;
 
         // GameScreen debug and menu (only on keyDown)
         if (isDown) {
             if (keycode == configManager.getKeyBinding("pause")) {
-                game.goToMenu();
+                if (game.getScreen() instanceof GameScreen) {
+                    game.goToMenu();
+                } else if (game.getScreen() instanceof MenuScreen ||
+                        game.getScreen() instanceof SettingsScreen ||
+                        game.getScreen() instanceof SettingsControlsScreen) {
+                    game.goToGame();
+                }
                 return true;
             }
             if (keycode == configManager.getKeyBinding("zoomIn")) {
@@ -66,30 +69,38 @@ public class KeyHandler extends InputListener {
     }
 
     private boolean checkMovementKeys(int keycode, boolean isDown) {
-            if (keycode == configManager.getKeyBinding("up")) {
-                player.setMoveUp(isDown);
-                return true;
-            }
-            if (keycode == configManager.getKeyBinding("down")) {
-                player.setMoveDown(isDown);
-                return true;
-            }
-            if (keycode == configManager.getKeyBinding("left")) {
-                player.setMoveLeft(isDown);
-                return true;
-            }
-            if (keycode == configManager.getKeyBinding("right")) {
-                player.setMoveRight(isDown);
-                return true;
-            }
-            if (keycode == configManager.getKeyBinding("sprint")) {
-                player.setSprinting(isDown);
-                return true;
-            }
+        if (keycode == configManager.getKeyBinding("up")) {
+            player.setMoveUp(isDown);
+            return true;
+        }
+        if (keycode == configManager.getKeyBinding("down")) {
+            player.setMoveDown(isDown);
+            return true;
+        }
+        if (keycode == configManager.getKeyBinding("left")) {
+            player.setMoveLeft(isDown);
+            return true;
+        }
+        if (keycode == configManager.getKeyBinding("right")) {
+            player.setMoveRight(isDown);
+            return true;
+        }
+        if (keycode == configManager.getKeyBinding("sprint")) {
+            player.setSprinting(isDown);
+            return true;
+        }
         return false;
     }
 
     public ConfigManager getConfigManager() {
         return configManager;
+    }
+
+    public void setPlayer(Player player) {
+        this.player = player;
+    }
+
+    public void setGameScreen(GameScreen gameScreen) {
+        this.gameScreen = gameScreen;
     }
 }

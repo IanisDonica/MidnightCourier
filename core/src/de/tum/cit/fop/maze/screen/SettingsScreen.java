@@ -16,9 +16,11 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import de.tum.cit.fop.maze.MazeRunnerGame;
 
 public class SettingsScreen implements Screen {
+    private final MazeRunnerGame game;
     private final Stage stage;
 
     public SettingsScreen(MazeRunnerGame game){
+        this.game = game;
         var camera = new OrthographicCamera();
         camera.zoom = 1.5f; // Set camera zoom for a closer view
 
@@ -87,6 +89,7 @@ public class SettingsScreen implements Screen {
     public void show() {
         // Set the input processor so the stage can receive input events
         Gdx.input.setInputProcessor(stage);
+        stage.addListener(game.getKeyHandler());
     }
 
     //The following methods are part of the Screen interface but are not used in this screen.
