@@ -5,7 +5,7 @@
 },
 "left": {
 	"class": "java.lang.Integer",
-	"value": 21
+	"value": 29
 },
 "sprint": {
 	"class": "java.lang.Integer",
@@ -25,19 +25,19 @@
 },
 "up": {
 	"class": "java.lang.Integer",
-	"value": 19
+	"value": 51
 },
 "right": {
 	"class": "java.lang.Integer",
-	"value": 22
+	"value": 32
 },
 "down": {
 	"class": "java.lang.Integer",
-	"value": 20
+	"value": 47
 },
 "pause": {
 	"class": "java.lang.Integer",
-	"value": 29
+	"value": 111
 },
 "moreFog": {
 	"class": "java.lang.Integer",

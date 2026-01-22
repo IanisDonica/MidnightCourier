@@ -33,7 +33,7 @@ public class GameScreen implements Screen {
     public static final int WORLD_WIDTH = 32;
     public static final int WORLD_HEIGHT = 16;
     private final MazeRunnerGame game;
-    private TiledMap map;
+    private final TiledMap map;
     private final TiledMapTileLayer  collisionLayer;
     private final OrthogonalTiledMapRenderer mapRenderer;
     private final Stage stage;
@@ -44,7 +44,7 @@ public class GameScreen implements Screen {
     private boolean noireMode = false;
     private FrameBuffer fbo;
     private TextureRegion fboRegion;
-    private Player player;
+    private final Player player;
     public PointManager pointManager;
     private final MapLoader mapLoader = new MapLoader();
     private final String mapPath = "untitled.tmx";
@@ -52,7 +52,7 @@ public class GameScreen implements Screen {
     private final HUD hud;
     private final List<de.tum.cit.fop.maze.entity.obstacle.Enemy> enemies = new ArrayList<>();
     private final List<de.tum.cit.fop.maze.entity.collectible.Collectible> collectibles = new ArrayList<>();
-    private GameState initialGameState;
+    private GameState gameState;
 
     /**
      * Constructor for GameScreen. Sets up the camera and font.
@@ -81,9 +81,9 @@ public class GameScreen implements Screen {
 
     public GameScreen(MazeRunnerGame game, GameState gameState) {
         this.game = game;
-        this.initialGameState = gameState;
+        this.gameState = gameState;
         this.hud = new HUD(game);
-        this.map = new TmxMapLoader().load(gameState.mapPath);
+        this.map = new TmxMapLoader().load(gameState.getMapPath());
 
         Viewport viewport = new ExtendViewport(WORLD_WIDTH, WORLD_HEIGHT);
         stage = new Stage(viewport, game.getSpriteBatch());
@@ -98,13 +98,11 @@ public class GameScreen implements Screen {
         collisionLayer = mapLoader.buildCollisionLayerFromProperties(map, propertiesPath);
         player = new Player(collisionLayer, 16, 8);
 
-        this.player.setX(gameState.playerX);
-        this.player.setY(gameState.playerY);
-        if (gameState.hasKey) player.pickupKey();
-        this. pointManager = gameState.pointManager;
-//        this.pointManager.setPoints(gameState.score);
-//        this.pointManager.setTimePoints(gameState.timePoints);
-        this.player.setHp(gameState.playerLives);
+        this.player.setX(gameState.getPlayerX());
+        this.player.setY(gameState.getPlayerY());
+        if (gameState.hasKey()) player.pickupKey();
+        this. pointManager = gameState.getPointManager();
+        this.player.setHp(gameState.getPlayerLives());
     }
 
     public void adjustZoom(float amount) {
@@ -176,7 +174,10 @@ public class GameScreen implements Screen {
             collectibleDataList.add(new CollectibleData(collectible.getSpawnX(), collectible.getSpawnY(), collectible.getPickedUp()));
         }
 
-        GameState gameState = new GameState(mapPath, player.getX(), player.getY(), player.getHp(), pointManager, player.hasKey(), enemyDataList, collectibleDataList);
+        if (gameState != null) {
+            gameState.save(mapPath, player.getX(), player.getY(), player.getHp(), pointManager, player.hasKey(), enemyDataList, collectibleDataList);
+        }
+        else gameState = new GameState(mapPath, player.getX(), player.getY(), player.getHp(), pointManager, player.hasKey(), enemyDataList, collectibleDataList);
         SaveManager.saveGame(gameState);
     }
 
@@ -209,20 +210,20 @@ public class GameScreen implements Screen {
         Gdx.input.setInputProcessor(stage);
         stage.addActor(player);
 
-        enemies.clear();
-        collectibles.clear();
-        mapLoader.spawnEntitiesFromProperties(stage, pointManager, collisionLayer, propertiesPath, enemies, collectibles);
+        if (enemies.isEmpty() && collectibles.isEmpty()) {
+            mapLoader.spawnEntitiesFromProperties(stage, pointManager, collisionLayer, propertiesPath, enemies, collectibles);
+        }
 
-        if (initialGameState != null) {
-            if (initialGameState.enemies != null) {
-                for (int i = 0; i < Math.min(enemies.size(), initialGameState.enemies.size()); i++) {
-                    EnemyData data = initialGameState.enemies.get(i);
+        if (gameState != null) {
+            if (gameState.getEnemies() != null) {
+                for (int i = 0; i < Math.min(enemies.size(), gameState.getEnemies().size()); i++) {
+                    EnemyData data = gameState.getEnemies().get(i);
                     enemies.get(i).setPosition(data.x, data.y);
                 }
             }
 
-            if (initialGameState.collectibles != null) {
-                for (CollectibleData data : initialGameState.collectibles) {
+            if (gameState.getCollectibles() != null) {
+                for (CollectibleData data : gameState.getCollectibles()) {
                     if (data.pickedUp) {
                         for (de.tum.cit.fop.maze.entity.collectible.Collectible collectible : collectibles) {
                             if (Math.abs(collectible.getSpawnX() - data.x) < 0.01f && Math.abs(collectible.getSpawnY() - data.y) < 0.01f) {
@@ -237,9 +238,11 @@ public class GameScreen implements Screen {
 
         stage.setKeyboardFocus(player);
         player.toFront();
-        stage.addListener(new KeyHandler(player, this, game));
+        stage.addListener(game.getKeyHandler());
+        game.getKeyHandler().setPlayer(player);
+        game.getKeyHandler().setGameScreen(this);
 
-        stage.getCamera().position.set(16 + player.getWidth() / 2, 8 + player.getHeight() / 2, 0);
+        stage.getCamera().position.set(player.getX() + player.getWidth() / 2, player.getY() + player.getHeight() / 2, 0);
         stage.getCamera().update();
     }
 
@@ -259,6 +262,14 @@ public class GameScreen implements Screen {
     }
 
     public void setGameState(GameState gameState) {
-
+        this.gameState = gameState;
+        if (player != null) {
+            player.setPosition(gameState.getPlayerX(), gameState.getPlayerY());
+            // Since there's no dropKey, we just set the state if it's true.
+            // If it's false, we'd need a way to unset it if we want to support full state restoration.
+            if (gameState.hasKey()) player.pickupKey();
+            player.setHp(gameState.getPlayerLives());
+        }
+        this.pointManager = gameState.getPointManager();
     }
 }

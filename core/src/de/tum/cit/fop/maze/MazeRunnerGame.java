@@ -7,6 +7,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import de.tum.cit.fop.maze.screen.*;
 import de.tum.cit.fop.maze.system.ConfigManager;
 import de.tum.cit.fop.maze.system.GameState;
+import de.tum.cit.fop.maze.system.KeyHandler;
 import de.tum.cit.fop.maze.system.SaveManager;
 import games.spooky.gdx.nativefilechooser.NativeFileChooser;
 
@@ -24,6 +25,7 @@ public class MazeRunnerGame extends Game {
     private SpriteBatch spriteBatch;
     private Skin skin;
     private final ConfigManager configManager;
+    private final KeyHandler keyHandler;
 
     /**
      * Constructor for MazeRunnerGame.
@@ -33,6 +35,7 @@ public class MazeRunnerGame extends Game {
     public MazeRunnerGame(NativeFileChooser fileChooser) {
         super();
         configManager = new ConfigManager();
+        keyHandler = new KeyHandler(this);
     }
 
     /**
@@ -57,30 +60,29 @@ public class MazeRunnerGame extends Game {
      * Switches to the menu screen.
      */
     public void goToMenu() {
-        this.setScreen(new MenuScreen(this)); // Set the current screen to MenuScreen
-        if (gameScreen != null) {
-            gameScreen.dispose(); // Dispose the game screen if it exists
-            gameScreen = null;
+        if (menuScreen == null) {
+            menuScreen = new MenuScreen(this);
         }
+        this.setScreen(menuScreen);
     }
 
     /**
      * Switches to the game screen.
      */
     public void goToGame() {
-        this.setScreen(new GameScreen(this)); // Set the current screen to GameScreen
-        if (menuScreen != null) {
-            menuScreen.dispose(); // Dispose the menu screen if it exists
-            menuScreen = null;
+        if (gameScreen == null) {
+            gameScreen = new GameScreen(this);
         }
+        this.setScreen(gameScreen);
     }
 
     public void goToGame(GameState gameState){
-        this.setScreen(new GameScreen(this, gameState)); // Set the current screen to GameScreen
-        if (menuScreen != null) {
-            menuScreen.dispose(); // Dispose the menu screen if it exists
-            menuScreen = null;
+        if (gameScreen == null) {
+            gameScreen = new GameScreen(this, gameState);
+        } else {
+            gameScreen.setGameState(gameState);
         }
+        this.setScreen(gameScreen);
     }
 
 
@@ -106,15 +108,11 @@ public class MazeRunnerGame extends Game {
         }
     }
 
-    /**
-     * Switches to the settings screen.
-     */
     public void goToSettingsScreen() {
-        this.setScreen(new SettingsScreen(this)); // Set the current screen to GameScreen
-        if (menuScreen != null) {
-            menuScreen.dispose(); // Dispose the menu screen if it exists
-            menuScreen = null;
+        if (settingsScreen == null) {
+            settingsScreen = new SettingsScreen(this);
         }
+        this.setScreen(settingsScreen);
     }
 
     public void goToSettingsControlsScreen() {
@@ -184,6 +182,10 @@ public class MazeRunnerGame extends Game {
 
     public ConfigManager getConfigManager() {
         return configManager;
+    }
+
+    public KeyHandler getKeyHandler() {
+        return keyHandler;
     }
 
 }
