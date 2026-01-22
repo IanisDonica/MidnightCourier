@@ -68,6 +68,7 @@ public class SettingsControlsScreen implements Screen {
             keybindsTable.add(keyButton).width(300).padBottom(10).row();
         }
 
+
         stage.addListener(new InputListener() {
             @Override
             public boolean keyDown(InputEvent event, int keycode) {
@@ -108,7 +109,18 @@ public class SettingsControlsScreen implements Screen {
             }
         });
 
-        table.add(backButton).colspan(2).padTop(20);
+        TextButton saveButton = new TextButton("Save", game.getSkin());
+        saveButton.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                configManager.saveKeyBindings();
+            }
+        });
+
+        HorizontalGroup horizontalGroup = new HorizontalGroup();
+        horizontalGroup.addActor(backButton);
+        horizontalGroup.addActor(saveButton);
+        table.add(horizontalGroup).colspan(2).padTop(20);
     }
 
     private void unbindButton(String action) {

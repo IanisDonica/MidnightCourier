@@ -33,7 +33,6 @@ public class MazeRunnerGame extends Game {
     public MazeRunnerGame(NativeFileChooser fileChooser) {
         super();
         configManager = new ConfigManager();
-        configManager.loadKeyBindings();
     }
 
     /**
@@ -41,6 +40,7 @@ public class MazeRunnerGame extends Game {
      */
     @Override
     public void create() {
+        configManager.loadKeyBindings();
         spriteBatch = new SpriteBatch(); // Create SpriteBatch
         skin = new Skin(Gdx.files.internal("craft/craftacular-ui.json")); // Load UI skin
 

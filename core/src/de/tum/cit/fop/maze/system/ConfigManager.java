@@ -5,6 +5,7 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonValue;
+import com.badlogic.gdx.utils.JsonWriter;
 import de.tum.cit.fop.maze.entity.collectible.Key;
 
 import javax.swing.text.JTextComponent;
@@ -21,7 +22,6 @@ public class ConfigManager {
 
     public ConfigManager() {
         keyBindings = new HashMap<>();
-        initializeDefaults();
     }
 
     private void initializeDefaults() {
@@ -58,10 +58,10 @@ public class ConfigManager {
     public void saveKeyBindings() {
         try {
             Json json = new Json();
-            String jsonString = json.toJson(keyBindings);
+            json.setOutputType(JsonWriter.OutputType.json);
 
             FileHandle file = Gdx.files.local(CONFIG_FILE);
-            file.writeString(jsonString, false);
+            file.writeString(json.prettyPrint(keyBindings), false);
         } catch (Exception e) {
             System.err.println("Could not save keybindings: " + e.getMessage());
         }
