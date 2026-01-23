@@ -32,6 +32,7 @@ public class KeyHandler extends InputListener {
         if (player != null && checkMovementKeys(keycode, isDown)) return true;
 
         // GameScreen debug and menu (only on keyDown)
+        // TODO fix
         if (isDown) {
             if (keycode == configManager.getKeyBinding("pause")) {
                 if (game.getScreen() instanceof GameScreen) {

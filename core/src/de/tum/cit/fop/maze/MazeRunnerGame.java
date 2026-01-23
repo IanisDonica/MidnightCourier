@@ -23,6 +23,7 @@ public class MazeRunnerGame extends Game {
     private GameScreen gameScreen;
     private SettingsScreen settingsScreen;
     private LevelSelectScreen levelSelectScreen;
+    private HighscoreScreen highscoreScreen;
     private int currentLevelNumber = 1;
     private SpriteBatch spriteBatch;
     private Skin skin;
@@ -145,6 +146,13 @@ public class MazeRunnerGame extends Game {
             settingsScreen = new SettingsScreen(this);
         }
         this.setScreen(settingsScreen);
+    }
+
+    public void goToHighscoreScreen() {
+        if (highscoreScreen == null) {
+            highscoreScreen = new HighscoreScreen(this);
+        }
+        this.setScreen(highscoreScreen);
     }
 
     public void goToSettingsControlsScreen() {

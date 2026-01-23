@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 public class PointManager implements Serializable {
     private static final String FILE_PATH = "assets/data/highscore.json";
     private static final String ENDPOINT = "https://webservertransprut-production.up.railway.app/api/scores/";
-    private int points = 0;
+    private int points = 100;
     private int timePoints = 100000;
     private float offset = 0;
     private float safetyTime = 5f; // the amount of time for which points won't go down
@@ -127,6 +127,8 @@ public class PointManager implements Serializable {
             this.time = time;
             this.playerHp = playerHp;
             this.level = level;
+            this.dateTime = LocalDateTime.now().toString();
+            System.out.println(dateTime);
         }
     }
 }
