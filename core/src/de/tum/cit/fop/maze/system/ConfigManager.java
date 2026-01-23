@@ -30,6 +30,7 @@ public class ConfigManager {
         keyBindings.put("left", Input.Keys.LEFT);
         keyBindings.put("right", Input.Keys.RIGHT);
         keyBindings.put("sprint", Input.Keys.SHIFT_LEFT);
+        keyBindings.put("openShop", Input.Keys.E);
         keyBindings.put("pause", Input.Keys.ESCAPE);
         keyBindings.put("zoomIn", Input.Keys.NUMPAD_ADD);
         keyBindings.put("zoomOut", Input.Keys.NUMPAD_SUBTRACT);

@@ -8,6 +8,7 @@ import de.tum.cit.fop.maze.screen.*;
 import de.tum.cit.fop.maze.system.ConfigManager;
 import de.tum.cit.fop.maze.system.GameState;
 import de.tum.cit.fop.maze.system.KeyHandler;
+import de.tum.cit.fop.maze.system.ProgressionManager;
 import de.tum.cit.fop.maze.system.SaveManager;
 import games.spooky.gdx.nativefilechooser.NativeFileChooser;
 
@@ -24,11 +25,13 @@ public class MazeRunnerGame extends Game {
     private SettingsScreen settingsScreen;
     private LevelSelectScreen levelSelectScreen;
     private HighscoreScreen highscoreScreen;
+    private ProgressionTreeScreen progressionTreeScreen;
     private int currentLevelNumber = 1;
     private SpriteBatch spriteBatch;
     private Skin skin;
     private final ConfigManager configManager;
     private final KeyHandler keyHandler;
+    private ProgressionManager progressionManager;
 
     /**
      * Constructor for MazeRunnerGame.
@@ -49,6 +52,7 @@ public class MazeRunnerGame extends Game {
         configManager.loadKeyBindings();
         spriteBatch = new SpriteBatch(); // Create SpriteBatch
         skin = new Skin(Gdx.files.internal("craft/craftacular-ui.json")); // Load UI skin
+        progressionManager = new ProgressionManager(2000);
 
         // Play some background music
         // Background sound
@@ -155,6 +159,21 @@ public class MazeRunnerGame extends Game {
         this.setScreen(highscoreScreen);
     }
 
+    public void goToProgressionTreeScreenFromGame() {
+        if (progressionTreeScreen == null) {
+            progressionTreeScreen = new ProgressionTreeScreen(this);
+        }
+        this.setScreen(progressionTreeScreen);
+    }
+
+    public void goBackFromProgressionTree() {
+        if (gameScreen != null) {
+            this.setScreen(gameScreen);
+        } else {
+            goToMenu();
+        }
+    }
+
     public void goToSettingsControlsScreen() {
         this.setScreen(new SettingsControlsScreen(this)); // Set the current screen to GameScreen
         if (settingsScreen != null) {
@@ -230,6 +249,10 @@ public class MazeRunnerGame extends Game {
 
     public int getCurrentLevelNumber() {
         return currentLevelNumber;
+    }
+
+    public ProgressionManager getProgressionManager() {
+        return progressionManager;
     }
 
 }

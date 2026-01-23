@@ -34,6 +34,12 @@ public class KeyHandler extends InputListener {
         // GameScreen debug and menu (only on keyDown)
         // TODO fix
         if (isDown) {
+            if (keycode == configManager.getKeyBinding("openShop")) {
+                if (game.getScreen() instanceof GameScreen && gameScreen != null && gameScreen.getHud().isShopButtonVisible()) {
+                    game.goToProgressionTreeScreenFromGame();
+                    return true;
+                }
+            }
             if (keycode == configManager.getKeyBinding("pause")) {
                 if (game.getScreen() instanceof GameScreen) {
                     game.goToMenu();

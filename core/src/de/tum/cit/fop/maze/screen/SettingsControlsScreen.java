@@ -46,7 +46,7 @@ public class SettingsControlsScreen implements Screen {
         Table keybindsTable = new Table();
         keybindsTable.pad(20);
 
-        String[] actions = {"up", "down", "left", "right", "sprint", "pause", "zoomIn", "zoomOut", "moreFog", "lessFog", "noire"};
+        String[] actions = {"up", "down", "left", "right", "sprint", "openShop", "pause", "zoomIn", "zoomOut", "moreFog", "lessFog", "noire"};
 
         for (String action : actions) {
             Label actionLabel = new Label(action.toUpperCase(), game.getSkin());

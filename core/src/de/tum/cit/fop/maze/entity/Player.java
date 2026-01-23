@@ -131,7 +131,7 @@ public class Player extends Entity {
     @Override
     public void act(float delta) {
         super.act(delta);
-        speed = 2.5f * delta;
+        speed = 20.5f * delta;
         if (sprinting) {speed *= 2f;}
         float deltaX = 0, deltaY = 0;
 

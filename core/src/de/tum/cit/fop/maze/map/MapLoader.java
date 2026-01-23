@@ -9,8 +9,9 @@ import de.tum.cit.fop.maze.entity.collectible.EnergyDrink;
 import de.tum.cit.fop.maze.entity.collectible.ExitDoor;
 import de.tum.cit.fop.maze.entity.collectible.HealthPickup;
 import de.tum.cit.fop.maze.entity.collectible.Key;
+import de.tum.cit.fop.maze.HUD;
 import de.tum.cit.fop.maze.entity.obstacle.Enemy;
-import de.tum.cit.fop.maze.entity.obstacle.Obstacle;
+import de.tum.cit.fop.maze.entity.obstacle.Shop;
 import de.tum.cit.fop.maze.entity.obstacle.Trap;
 import de.tum.cit.fop.maze.system.PointManager;
 import java.io.InputStream;
@@ -46,6 +47,16 @@ public class MapLoader {
                 int value = Integer.parseInt(String.valueOf(entry.getValue()));
                 if (value == 7 || value == 2) {
                     layer.setCell(x, y, new TiledMapTileLayer.Cell());
+                } else if (value == 10) {
+                    for (int dx = 0; dx < 4; dx++) {
+                        for (int dy = 0; dy < 2; dy++) {
+                            int cellX = x + dx;
+                            int cellY = y + dy;
+                            if (cellX >= 0 && cellY >= 0 && cellX < width && cellY < height) {
+                                layer.setCell(cellX, cellY, new TiledMapTileLayer.Cell());
+                            }
+                        }
+                    }
                 }
             } catch (NumberFormatException ignored) {
                 // Skip bad coordinates or values.
@@ -54,7 +65,7 @@ public class MapLoader {
         return layer;
     }
 
-    public void spawnEntitiesFromProperties(Stage stage, PointManager pointManager, TiledMapTileLayer collisionLayer, String propertiesPath, List<Enemy> enemies, List<Collectible> collectibles, ExitDoor.VictoryListener victoryListener) {
+    public void spawnEntitiesFromProperties(Stage stage, PointManager pointManager, TiledMapTileLayer collisionLayer, String propertiesPath, HUD hud, List<Enemy> enemies, List<Collectible> collectibles, ExitDoor.VictoryListener victoryListener) {
         Properties props = new Properties();
 
         // CHeck if the map actually exists, if it doesn't crash the game, cause
@@ -96,6 +107,9 @@ public class MapLoader {
                     Enemy enemy = new Enemy(collisionLayer, x, y);
                     stage.addActor(enemy);
                     enemies.add(enemy);
+                } else if (value == 10) {
+                    Shop shop = new Shop(x, y, hud);
+                    stage.addActor(shop);
                 }
             } catch (NumberFormatException ignored) {
                 // Bad coords.
