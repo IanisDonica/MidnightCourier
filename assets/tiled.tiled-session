@@ -5,10 +5,10 @@
     },
     "activeFile": "Assets_Map/THE_MAP.tmx",
     "expandedProjectPaths": [
-        "data",
         ".",
         "Assets_Map/Intersection",
         "Assets_Map",
+        "data",
         "craft"
     ],
     "file.lastUsedOpenFilter": "All Files (*)",
@@ -134,11 +134,11 @@
             "scaleInDock": 1
         },
         "Assets_Map/THE_MAP.tmx": {
-            "scale": 1.5,
+            "scale": 0.75,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 2453.6666666666665,
-                "y": 2185
+                "x": 1231.3333333333333,
+                "y": 2259.333333333333
             }
         },
         "Assets_Map/TrainStation.tsx": {

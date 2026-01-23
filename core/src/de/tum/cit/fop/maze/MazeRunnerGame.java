@@ -23,7 +23,7 @@ public class MazeRunnerGame extends Game {
     private GameScreen gameScreen;
     private SettingsScreen settingsScreen;
     private LevelSelectScreen levelSelectScreen;
-    private String currentPropertiesPath = "maps/level-1.properties";
+    private int currentLevelNumber = 1;
     private SpriteBatch spriteBatch;
     private Skin skin;
     private final ConfigManager configManager;
@@ -73,28 +73,26 @@ public class MazeRunnerGame extends Game {
      */
 
 
-    // TODO, merge the methods
+    // TODO, merge the methods (maybe check if even necesary)
     public void goToGame() {
         if (gameScreen != null) {
             gameScreen.dispose();
             gameScreen = null;
         }
-        currentPropertiesPath = "maps/level-1.properties";
-        gameScreen = new GameScreen(this);
+        currentLevelNumber = 1;
+        gameScreen = new GameScreen(this, currentLevelNumber);
         this.setScreen(gameScreen);
     }
 
-    public void goToGame(String propertiesPath) {
+    public void goToGame(int levelNumber) {
         // This will be the case after Try again/Next level
         // If this is not done there will be a memory leak
         if (gameScreen != null) {
             gameScreen.dispose();
             gameScreen = null;
         }
-        if (propertiesPath != null) {
-            currentPropertiesPath = propertiesPath;
-        }
-        gameScreen = new GameScreen(this, propertiesPath);
+        currentLevelNumber = levelNumber;
+        gameScreen = new GameScreen(this, currentLevelNumber);
         this.setScreen(gameScreen);
     }
 
@@ -107,9 +105,7 @@ public class MazeRunnerGame extends Game {
             gameScreen.dispose();
             gameScreen = null;
         }
-        if (gameState.getPropertiesPath() != null) {
-            currentPropertiesPath = gameState.getPropertiesPath();
-        }
+        currentLevelNumber = gameState.getLevel();
         gameScreen = new GameScreen(this, gameState);
         this.setScreen(gameScreen);
     }
@@ -224,8 +220,8 @@ public class MazeRunnerGame extends Game {
         return keyHandler;
     }
 
-    public String getCurrentPropertiesPath() {
-        return currentPropertiesPath;
+    public int getCurrentLevelNumber() {
+        return currentLevelNumber;
     }
 
 }

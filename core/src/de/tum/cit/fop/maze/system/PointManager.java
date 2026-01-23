@@ -20,6 +20,7 @@ public class PointManager implements Serializable {
     private float safetyTime = 5f; // the amount of time for which points won't go down
     private float elapsedTime = 0f;
     private boolean requestSent = false;
+    private final int level;
 
     public int getPoints() {
         return points + timePoints;
@@ -40,6 +41,10 @@ public class PointManager implements Serializable {
     public void add(int amount) {
         if (amount < 0) throw new IllegalArgumentException("points need to be non-negative");
         points += amount;
+    }
+
+    public PointManager(int level) {
+        this.level = level;
     }
 
     /*
@@ -69,7 +74,7 @@ public class PointManager implements Serializable {
 
     public void saveScore(int playerHp) {
         //THis is just to make the JSON handaling easier
-        ScoreRecord record = new ScoreRecord(getPoints(), elapsedTime, playerHp);
+        ScoreRecord record = new ScoreRecord(getPoints(), elapsedTime, playerHp, level);
 
         Json json = new Json();
         json.setOutputType(JsonWriter.OutputType.json);
@@ -115,13 +120,13 @@ public class PointManager implements Serializable {
         public float time;
         public int playerHp;
         public String dateTime;
+        public int level;
 
-        public ScoreRecord(double score, float time, int playerHp) {
+        public ScoreRecord(double score, float time, int playerHp, int level) {
             this.score = score;
             this.time = time;
             this.playerHp = playerHp;
-            // This is only for the local leaderboard; I'll make the just take the request time
-            this.dateTime = LocalDateTime.now().toString();
+            this.level = level;
         }
     }
 }
