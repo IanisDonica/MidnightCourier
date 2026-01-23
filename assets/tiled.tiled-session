@@ -3,14 +3,158 @@
         "height": 4300,
         "width": 2
     },
-    "activeFile": "untitled.tmx",
+    "activeFile": "Assets_Map/THE_MAP.tmx",
     "expandedProjectPaths": [
-        "."
+        "data",
+        ".",
+        "Assets_Map/Intersection",
+        "Assets_Map",
+        "craft"
     ],
     "file.lastUsedOpenFilter": "All Files (*)",
     "fileStates": {
-        "basictiles.tsx": {
+        "Assets_Map/128x128Fountain.tsx": {
+            "scaleInDock": 1
+        },
+        "Assets_Map/128x128_Block.tsx": {
+            "scaleInDock": 1
+        },
+        "Assets_Map/1ParkRoad.tsx": {
+            "scaleInDock": 1
+        },
+        "Assets_Map/1WaterPark.tsx": {
+            "scaleInDock": 1
+        },
+        "Assets_Map/2ParkRoad.tsx": {
+            "scaleInDock": 1
+        },
+        "Assets_Map/2WaterPark.tsx": {
+            "scaleInDock": 1
+        },
+        "Assets_Map/32Concrete+grass.tsx": {
+            "scaleInDock": 1
+        },
+        "Assets_Map/3ParkRoad.tsx": {
+            "scaleInDock": 1
+        },
+        "Assets_Map/3Water.tsx": {
             "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "Assets_Map/4ParkRoad.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "Assets_Map/96x160Block.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "Assets_Map/APARTAMENT_RED.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "Assets_Map/BIBLIOTECA_NATIONALA.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "Assets_Map/BIBLIOTECA_NATIONALA_2.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "Assets_Map/BIBLIOTECA_NATIONALA_IMPARTITA.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "Assets_Map/BIG_ROAD.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "Assets_Map/BOTTOM_BIBLIO.tsx": {
+            "scaleInDock": 1
+        },
+        "Assets_Map/Block.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "Assets_Map/BridgeSide.tsx": {
+            "scaleInDock": 1
+        },
+        "Assets_Map/CORNER_64.tsx": {
+            "scaleInDock": 1
+        },
+        "Assets_Map/CORNER_64_DOUBLE.tsx": {
+            "scaleInDock": 1
+        },
+        "Assets_Map/CROSS_64_LATERAL.tsx": {
+            "scaleInDock": 1
+        },
+        "Assets_Map/Cafe.tsx": {
+            "scaleInDock": 1
+        },
+        "Assets_Map/Character.tsx": {
+            "scaleInDock": 1
+        },
+        "Assets_Map/Concrete+grass.tsx": {
+            "scaleInDock": 1
+        },
+        "Assets_Map/Crossing_64.tsx": {
+            "scaleInDock": 1
+        },
+        "Assets_Map/Crossing_64_LATERAL.tsx": {
+            "scaleInDock": 1
+        },
+        "Assets_Map/Intersection.tsx": {
+            "scaleInDock": 1
+        },
+        "Assets_Map/ItalianRestaurant.tsx": {
+            "scaleInDock": 1
+        },
+        "Assets_Map/PAVEMENT.tsx": {
+            "scaleInDock": 1
+        },
+        "Assets_Map/ParkGrass.tsx": {
+            "scaleInDock": 1
+        },
+        "Assets_Map/ParkRoad.tsx": {
+            "scaleInDock": 1
+        },
+        "Assets_Map/ROAD_64.tsx": {
+            "scaleInDock": 1
+        },
+        "Assets_Map/RailTrack.tsx": {
+            "scaleInDock": 1
+        },
+        "Assets_Map/SEPARATED_64_LATERAL.tsx": {
+            "scaleInDock": 1
+        },
+        "Assets_Map/SEPARATED_ONCE_64_LATERAL.tsx": {
+            "scaleInDock": 1
+        },
+        "Assets_Map/SIDEWALK_32.tsx": {
+            "scaleInDock": 1
+        },
+        "Assets_Map/THE_MAP.tmx": {
+            "scale": 1.5,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 2453.6666666666665,
+                "y": 2185
+            }
+        },
+        "Assets_Map/TrainStation.tsx": {
+            "scaleInDock": 1
+        },
+        "Assets_Map/WATER_32.tsx": {
+            "scaleInDock": 1
+        },
+        "Assets_Map/WaterDark.tsx": {
+            "scaleInDock": 1
+        },
+        "Assets_Map/grass.tsx": {
+            "scaleInDock": 1
+        },
+        "basictiles.tsx": {
+            "scaleInDock": 1.5,
             "scaleInEditor": 1
         },
         "testmap.tmx": {
@@ -29,8 +173,8 @@
             "scale": 3,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 239.16666666666666,
-                "y": 97.83333333333333
+                "x": 256,
+                "y": 127.83333333333333
             }
         }
     },
@@ -45,14 +189,32 @@
         "basictiles.tsx",
         "things.tsx",
         "testmap.tmx",
-        "untitled.tmx"
+        "untitled.tmx",
+        "Assets_Map/THE_MAP.tmx",
+        "Assets_Map/3Water.tsx",
+        "Assets_Map/96x160Block.tsx",
+        "Assets_Map/4ParkRoad.tsx",
+        "Assets_Map/APARTAMENT_RED.tsx",
+        "Assets_Map/BIBLIOTECA_NATIONALA_2.tsx",
+        "Assets_Map/BIBLIOTECA_NATIONALA_IMPARTITA.tsx",
+        "Assets_Map/BIBLIOTECA_NATIONALA.tsx",
+        "Assets_Map/BIG_ROAD.tsx",
+        "Assets_Map/Block.tsx"
     ],
     "project": "tiled.tiled-project",
     "recentFiles": [
         "basictiles.tsx",
         "things.tsx",
         "testmap.tmx",
-        "untitled.tmx"
+        "untitled.tmx",
+        "Assets_Map/Block.tsx",
+        "Assets_Map/BIG_ROAD.tsx",
+        "Assets_Map/BIBLIOTECA_NATIONALA.tsx",
+        "Assets_Map/BIBLIOTECA_NATIONALA_IMPARTITA.tsx",
+        "Assets_Map/BIBLIOTECA_NATIONALA_2.tsx",
+        "Assets_Map/APARTAMENT_RED.tsx",
+        "Assets_Map/4ParkRoad.tsx",
+        "Assets_Map/96x160Block.tsx"
     ],
     "tileset.lastUsedFormat": "tsx",
     "tileset.tileSize": {

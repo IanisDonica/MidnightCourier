@@ -3,7 +3,7 @@
  <image source="128x128Fountain.png" width="128" height="128"/>
  <tile id="0">
   <properties>
-   <property name="colide" type="bool" value="false"/>
+   <property name="colide" type="bool" value="true"/>
   </properties>
  </tile>
  <tile id="1">

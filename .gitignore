@@ -36,7 +36,19 @@ local.properties
 .settings/
 .loadpath
 .recommenders
+
+#Build file
 .idea/runConfigurations/Run_Game.xml
+
+#Save files
+*.sav
+
+#Keybinds/Highscore
+config/keybindings.json
+assets/data/highscore.json
+
+#tiled editor file
+assets/tiled.tiled-session
 
 # External tool builders
 .externalToolBuilders/

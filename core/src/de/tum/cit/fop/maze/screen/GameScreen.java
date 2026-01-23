@@ -35,8 +35,8 @@ import java.util.List;
  */
 public class GameScreen implements Screen {
 
-    public static final int WORLD_WIDTH = 32;
-    public static final int WORLD_HEIGHT = 16;
+    public static final int WORLD_WIDTH = 225;
+    public static final int WORLD_HEIGHT = 250;
     private final MazeRunnerGame game;
     private final TiledMap map;
     private final TiledMapTileLayer  collisionLayer;
@@ -60,8 +60,8 @@ public class GameScreen implements Screen {
     private final Player player;
     public PointManager pointManager;
     private final MapLoader mapLoader = new MapLoader();
-    private final String mapPath = "untitled.tmx";
-    private final String propertiesPath = "maps/level-1.properties";
+    private String mapPath = "Assets_Map/THE_MAP.tmx";
+    private String propertiesPath = "maps/level-1.properties";
     private final HUD hud;
     private final List<de.tum.cit.fop.maze.entity.obstacle.Enemy> enemies = new ArrayList<>();
     private final List<de.tum.cit.fop.maze.entity.collectible.Collectible> collectibles = new ArrayList<>();
@@ -73,23 +73,28 @@ public class GameScreen implements Screen {
      * @param game The main game class, used to access global resources and methods.
      */
     public GameScreen(MazeRunnerGame game) {
+        this(game, "maps/level-1.properties");
+    }
+
+    public GameScreen(MazeRunnerGame game, String propertiesPath) {
         this.game = game;
         this.hud = new HUD(game);
+        this.propertiesPath = propertiesPath;
         Viewport viewport = new ExtendViewport(WORLD_WIDTH, WORLD_HEIGHT);
         stage = new Stage(viewport, game.getSpriteBatch());
         map = new TmxMapLoader().load(mapPath);
-        mapRenderer = new OrthogonalTiledMapRenderer(map, 1 / 16f, game.getSpriteBatch());
+        mapRenderer = new OrthogonalTiledMapRenderer(map, 1 / 32f, game.getSpriteBatch());
         createFrameBuffers(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         grayScaleShader = new ShaderProgram(Gdx.files.internal("shaders/vertex.glsl"), Gdx.files.internal("shaders/grayscale.frag"));
         fogShader = new ShaderProgram(Gdx.files.internal("shaders/vertex.glsl"), Gdx.files.internal("shaders/fog.frag"));
         collisionShader = new ShaderProgram(Gdx.files.internal("shaders/vertex.glsl"), Gdx.files.internal("shaders/collision.frag"));
         combinationShader = new ShaderProgram(Gdx.files.internal("shaders/vertex.glsl"), Gdx.files.internal("shaders/combination.frag"));
-        ((OrthographicCamera) stage.getCamera()).zoom = 1f;
+        ((OrthographicCamera) stage.getCamera()).zoom = 0.1f;
         uiCamera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         pointManager = new PointManager();
-        collisionLayer = mapLoader.buildCollisionLayerFromProperties(map, propertiesPath);
+        collisionLayer = mapLoader.buildCollisionLayerFromProperties(map, this.propertiesPath);
         generateFBO();
-        player = new Player(collisionLayer, 16, 8);
+        player = new Player(collisionLayer, 16, 10, game::goToGameOverScreen);
 
     }
 
@@ -97,11 +102,17 @@ public class GameScreen implements Screen {
         this.game = game;
         this.gameState = gameState;
         this.hud = new HUD(game);
-        this.map = new TmxMapLoader().load(gameState.getMapPath());
+        if (gameState.getMapPath() != null) {
+            this.mapPath = gameState.getMapPath();
+        }
+        if (gameState.getPropertiesPath() != null) {
+            this.propertiesPath = gameState.getPropertiesPath();
+        }
+        this.map = new TmxMapLoader().load(this.mapPath);
 
         Viewport viewport = new ExtendViewport(WORLD_WIDTH, WORLD_HEIGHT);
         stage = new Stage(viewport, game.getSpriteBatch());
-        mapRenderer = new OrthogonalTiledMapRenderer(map, 1 / 16f, game.getSpriteBatch());
+        mapRenderer = new OrthogonalTiledMapRenderer(map, 1 / 32f, game.getSpriteBatch());
         createFrameBuffers(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         grayScaleShader = new ShaderProgram(Gdx.files.internal("shaders/vertex.glsl"), Gdx.files.internal("shaders/grayscale.frag"));
         fogShader = new ShaderProgram(Gdx.files.internal("shaders/vertex.glsl"), Gdx.files.internal("shaders/fog.frag"));
@@ -109,9 +120,9 @@ public class GameScreen implements Screen {
         combinationShader = new ShaderProgram(Gdx.files.internal("shaders/vertex.glsl"), Gdx.files.internal("shaders/combination.frag"));
         ((OrthographicCamera) stage.getCamera()).zoom = 1f;
         uiCamera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        collisionLayer = mapLoader.buildCollisionLayerFromProperties(map, propertiesPath);
+        collisionLayer = mapLoader.buildCollisionLayerFromProperties(map, this.propertiesPath);
         generateFBO();
-        player = new Player(collisionLayer, 16, 8);
+        player = new Player(collisionLayer, 16, 10, game::goToGameOverScreen);
 
         this.player.setX(gameState.getPlayerX());
         this.player.setY(gameState.getPlayerY());
@@ -136,7 +147,6 @@ public class GameScreen implements Screen {
     public void render(float delta) {
         stage.act(delta);
         pointManager.act(delta);
-        //System.out.println(pointManager.getPoints());
 
         Batch batch = stage.getBatch();
         OrthographicCamera camera = (OrthographicCamera) stage.getCamera();
@@ -165,9 +175,9 @@ public class GameScreen implements Screen {
         }
 
         if (gameState != null) {
-            gameState.save(mapPath, player.getX(), player.getY(), player.getHp(), pointManager, player.hasKey(), enemyDataList, collectibleDataList);
+            gameState.save(mapPath, propertiesPath, player.getX(), player.getY(), player.getHp(), pointManager, player.hasKey(), enemyDataList, collectibleDataList);
         }
-        else gameState = new GameState(mapPath, player.getX(), player.getY(), player.getHp(), pointManager, player.hasKey(), enemyDataList, collectibleDataList);
+        else gameState = new GameState(mapPath, propertiesPath, player.getX(), player.getY(), player.getHp(), pointManager, player.hasKey(), enemyDataList, collectibleDataList);
         SaveManager.saveGame(gameState);
     }
 
@@ -199,7 +209,7 @@ public class GameScreen implements Screen {
         stage.addActor(player);
 
         if (enemies.isEmpty() && collectibles.isEmpty()) {
-            mapLoader.spawnEntitiesFromProperties(stage, pointManager, collisionLayer, propertiesPath, enemies, collectibles);
+            mapLoader.spawnEntitiesFromProperties(stage, pointManager, collisionLayer, propertiesPath, enemies, collectibles, game::goToVictoryScreen);
         }
 
         if (gameState != null) {
