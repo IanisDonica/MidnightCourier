@@ -50,8 +50,8 @@ public class MenuScreen implements Screen {
         TextButton continueGame = new TextButton("Load Game", game.getSkin());
         table.add(continueGame).width(300).row();
 
-        TextButton selectMap = new TextButton("Maps", game.getSkin());
-        table.add(selectMap).width(300).row();
+        TextButton highscores = new TextButton("Highscores", game.getSkin());
+        table.add(highscores).width(300).row();
 
         TextButton settings = new TextButton("Settings", game.getSkin());
         table.add(settings).width(300).row();
@@ -73,10 +73,10 @@ public class MenuScreen implements Screen {
             }
         });
 
-        selectMap.addListener(new ChangeListener() {
+        highscores.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                game.goToLevelSelectScreen();
+                game.goToHighscoreScreen();
             }
         });
 
