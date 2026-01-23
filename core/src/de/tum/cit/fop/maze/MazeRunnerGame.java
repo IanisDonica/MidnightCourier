@@ -22,6 +22,8 @@ public class MazeRunnerGame extends Game {
     private MenuScreen menuScreen;
     private GameScreen gameScreen;
     private SettingsScreen settingsScreen;
+    private LevelSelectScreen levelSelectScreen;
+    private String currentPropertiesPath = "maps/level-1.properties";
     private SpriteBatch spriteBatch;
     private Skin skin;
     private final ConfigManager configManager;
@@ -69,19 +71,46 @@ public class MazeRunnerGame extends Game {
     /**
      * Switches to the game screen.
      */
+
+
+    // TODO, merge the methods
     public void goToGame() {
-        if (gameScreen == null) {
-            gameScreen = new GameScreen(this);
+        if (gameScreen != null) {
+            gameScreen.dispose();
+            gameScreen = null;
         }
+        currentPropertiesPath = "maps/level-1.properties";
+        gameScreen = new GameScreen(this);
+        this.setScreen(gameScreen);
+    }
+
+    public void goToGame(String propertiesPath) {
+        // This will be the case after Try again/Next level
+        // If this is not done there will be a memory leak
+        if (gameScreen != null) {
+            gameScreen.dispose();
+            gameScreen = null;
+        }
+        if (propertiesPath != null) {
+            currentPropertiesPath = propertiesPath;
+        }
+        gameScreen = new GameScreen(this, propertiesPath);
         this.setScreen(gameScreen);
     }
 
     public void goToGame(GameState gameState){
-        if (gameScreen == null) {
-            gameScreen = new GameScreen(this, gameState);
-        } else {
-            gameScreen.setGameState(gameState);
+        if (gameState == null) {
+            goToMenu();
+            return;
         }
+        if (gameScreen != null) {
+            gameScreen.dispose();
+            gameScreen = null;
+        }
+        if (gameState.getPropertiesPath() != null) {
+            currentPropertiesPath = gameState.getPropertiesPath();
+        }
+        gameScreen = new GameScreen(this, gameState);
         this.setScreen(gameScreen);
     }
 
@@ -106,6 +135,13 @@ public class MazeRunnerGame extends Game {
             menuScreen.dispose(); // Dispose the menu screen if it exists
             menuScreen = null;
         }
+    }
+
+    public void goToLevelSelectScreen() {
+        if (levelSelectScreen == null) {
+            levelSelectScreen = new LevelSelectScreen(this);
+        }
+        this.setScreen(levelSelectScreen);
     }
 
     public void goToSettingsScreen() {
@@ -186,6 +222,10 @@ public class MazeRunnerGame extends Game {
 
     public KeyHandler getKeyHandler() {
         return keyHandler;
+    }
+
+    public String getCurrentPropertiesPath() {
+        return currentPropertiesPath;
     }
 
 }

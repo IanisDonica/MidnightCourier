@@ -5,6 +5,7 @@ import java.util.List;
 
 public class GameState implements Serializable {
     private String mapPath;
+    private String propertiesPath;
     private float playerX, playerY;
     private int playerLives;
     private PointManager pointManager;
@@ -13,8 +14,9 @@ public class GameState implements Serializable {
     private List<CollectibleData> collectibles;
 
 
-    public GameState(String mapPath, float playerX, float playerY, int playerLives, PointManager pointManager, boolean hasKey, List<EnemyData> enemies, List<CollectibleData> collectibles) {
+    public GameState(String mapPath, String propertiesPath, float playerX, float playerY, int playerLives, PointManager pointManager, boolean hasKey, List<EnemyData> enemies, List<CollectibleData> collectibles) {
         this.mapPath = mapPath;
+        this.propertiesPath = propertiesPath;
         this.playerLives = playerLives;
         this.playerX = playerX;
         this.playerY = playerY;
@@ -24,8 +26,9 @@ public class GameState implements Serializable {
         this.collectibles = collectibles;
     }
 
-    public void save(String mapPath, float playerX, float playerY, int playerLives, PointManager pointManager, boolean hasKey, List<EnemyData> enemies, List<CollectibleData> collectibles) {
+    public void save(String mapPath, String propertiesPath, float playerX, float playerY, int playerLives, PointManager pointManager, boolean hasKey, List<EnemyData> enemies, List<CollectibleData> collectibles) {
         this.mapPath = mapPath;
+        this.propertiesPath = propertiesPath;
         this.playerX = playerX;
         this.playerY = playerY;
         this.playerLives = playerLives;
@@ -37,6 +40,10 @@ public class GameState implements Serializable {
 
     public String getMapPath() {
         return mapPath;
+    }
+
+    public String getPropertiesPath() {
+        return propertiesPath;
     }
 
     public float getPlayerX() {
@@ -67,5 +74,4 @@ public class GameState implements Serializable {
         return collectibles;
     }
 }
-
 

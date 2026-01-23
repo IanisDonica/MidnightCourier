@@ -12,23 +12,30 @@ import de.tum.cit.fop.maze.system.CollisionHandler;
 import java.awt.*;
 
 public class Player extends Entity {
+    public interface GameOverListener {
+        void onGameOver();
+    }
+
     private final CollisionHandler collisionHandler;
+    private final GameOverListener gameOverListener;
     protected Animation<TextureRegion> stunnedAnimation;
     private boolean moveUp, moveDown, moveLeft, moveRight;
     private boolean sprinting;
-    private int hp = 10;
+    private int hp = 3;
     private float speedUpTimer = 0;
     private boolean hasKey = false;
     private boolean stunned = false;
     private float stunDuration;
     private char lastInputDirection = 'd';
+    private boolean gameOverTriggered = false;
 
     //Initialize the player on a specific coordinate point
-    public Player(TiledMapTileLayer collisionLayer, float x, float y) {
+    public Player(TiledMapTileLayer collisionLayer, float x, float y, GameOverListener gameOverListener) {
         super(x, y);
         initialiseAnimations();
         setSize(1, 2);
         this.collisionHandler = new CollisionHandler(collisionLayer);
+        this.gameOverListener = gameOverListener;
     }
 
     public void setMoveUp(boolean moveUp) {
@@ -93,9 +100,12 @@ public class Player extends Entity {
 
     public void damage(int damage) {
         hp -= damage;
-        if (hp < 1) {
-            //TODO make it nice
-            throw new RuntimeException("You died");
+        if (hp <= 0 && !gameOverTriggered) {
+            gameOverTriggered = true;
+            if (gameOverListener != null) {
+                gameOverListener.onGameOver();
+            }
+            return;
         }
         stunned = true;
         stunDuration = 0.5f;
@@ -194,7 +204,7 @@ public class Player extends Entity {
     }
 
     public void setHp(int hp) {
-        this.hp = hp;
+        this.hp = Math.min(hp, 3);
     }
     public int getHp() {
         return this.hp;

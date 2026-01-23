@@ -44,7 +44,7 @@ public class NewGameScreen implements Screen {
         yesButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                game.goToGame(); // Change to the game screen when the button is pressed
+                game.goToLevelSelectScreen();
             }
         });
         noButton.addListener(new ChangeListener() {

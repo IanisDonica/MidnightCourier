@@ -40,7 +40,7 @@ public class GameOverScreen implements Screen {
         retryButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent changeEvent, Actor actor) {
-                // TODO retry button functionality
+                game.goToGame(game.getCurrentPropertiesPath());
             }
         });
 

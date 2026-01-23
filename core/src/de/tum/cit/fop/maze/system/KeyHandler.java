@@ -44,11 +44,11 @@ public class KeyHandler extends InputListener {
                 return true;
             }
             if (keycode == configManager.getKeyBinding("zoomIn")) {
-                gameScreen.adjustZoom(0.1f);
+                gameScreen.adjustZoom(0.02f);
                 return true;
             }
             if (keycode == configManager.getKeyBinding("zoomOut")) {
-                gameScreen.adjustZoom(-0.1f);
+                gameScreen.adjustZoom(-0.02f);
                 return true;
             }
             if (keycode == configManager.getKeyBinding("moreFog")) {

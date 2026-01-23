@@ -54,7 +54,7 @@ public class MapLoader {
         return layer;
     }
 
-    public void spawnEntitiesFromProperties(Stage stage, PointManager pointManager, TiledMapTileLayer collisionLayer, String propertiesPath, List<Enemy> enemies, List<Collectible> collectibles) {
+    public void spawnEntitiesFromProperties(Stage stage, PointManager pointManager, TiledMapTileLayer collisionLayer, String propertiesPath, List<Enemy> enemies, List<Collectible> collectibles, ExitDoor.VictoryListener victoryListener) {
         Properties props = new Properties();
 
         // CHeck if the map actually exists, if it doesn't crash the game, cause
@@ -84,7 +84,7 @@ public class MapLoader {
                     stage.addActor(keyGame);
                     collectibles.add(keyGame);
                 } else if (value == 2) {
-                    ExitDoor exitDoor = new ExitDoor(x, y, pointManager);
+                    ExitDoor exitDoor = new ExitDoor(x, y, pointManager, victoryListener);
                     stage.addActor(exitDoor);
                     collectibles.add(exitDoor);
                 } else if (value == 8) {
