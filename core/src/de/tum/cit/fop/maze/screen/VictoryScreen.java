@@ -42,14 +42,12 @@ public class VictoryScreen implements Screen {
                 // This is dumb, if I have more time ill make it so there is a hirearchy of levels
                 // mapped to certain proeprty files or something and you dont have to do it this way
                 // for now its important that the proertyfile namesfollow the structure level-#.properties
-                String currentPath = game.getCurrentPropertiesPath();
-                int dash = currentPath.lastIndexOf('-');
-                int nextLevel = Integer.parseInt(currentPath.substring(dash + 1, dash + 2)) + 1;
-                if (nextLevel <= 5) {
-                    game.goToGame(String.format("maps/level-%d.properties", nextLevel));
+                int currentLevel = game.getCurrentLevelNumber();
+                if (currentLevel + 1 <= 5) {
+                    game.goToGame(currentLevel + 1);
                     return;
                 }
-                game.goToGame(currentPath);
+                game.goToGame(currentLevel);
             }
         });
 

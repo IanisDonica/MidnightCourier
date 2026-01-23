@@ -15,6 +15,7 @@ public class HUD {
     private Label scoreLabel;
     private Label healthLabel;
     private Label keyLabel;
+    private Label levelLabel;
 
     public HUD(MazeRunnerGame game){
         //this.game = game;
@@ -27,10 +28,13 @@ public class HUD {
         healthLabel.setFontScale(2.0f);
         keyLabel = new Label("Key: no", game.getSkin());
         keyLabel.setFontScale(2.0f);
+        levelLabel = new Label("Level: 1", game.getSkin());
+        levelLabel.setFontScale(2.0f);
 
         Table table = new Table();
         table.setFillParent(true);
         table.top();
+        table.add(levelLabel).left().expandX().pad(10);
         table.add(healthLabel).left().expandX().pad(10);
         table.add(scoreLabel).center().expandX().pad(10);
         table.add(keyLabel).right().expandX().pad(10);
@@ -38,7 +42,8 @@ public class HUD {
         stage.addActor(table);
     }
 
-    public void update(int hp, double score, boolean hasKey){
+    public void update(int levelNumber, int hp, int score, boolean hasKey){
+        levelLabel.setText("Level: " + levelNumber);
         scoreLabel.setText("Score: " + score);
         healthLabel.setText("Health: " + hp);
         if(hasKey){

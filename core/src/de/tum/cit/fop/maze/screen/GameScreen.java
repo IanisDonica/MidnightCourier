@@ -48,7 +48,8 @@ public class GameScreen implements Screen {
     public PointManager pointManager;
     private final MapLoader mapLoader = new MapLoader();
     private String mapPath = "Assets_Map/THE_MAP.tmx";
-    private String propertiesPath = "maps/level-1.properties";
+    private int level;
+    private String propertiesPath;
     private final HUD hud;
     private final List<de.tum.cit.fop.maze.entity.obstacle.Enemy> enemies = new ArrayList<>();
     private final List<de.tum.cit.fop.maze.entity.collectible.Collectible> collectibles = new ArrayList<>();
@@ -60,13 +61,14 @@ public class GameScreen implements Screen {
      * @param game The main game class, used to access global resources and methods.
      */
     public GameScreen(MazeRunnerGame game) {
-        this(game, "maps/level-1.properties");
+        this(game, 1);
     }
 
-    public GameScreen(MazeRunnerGame game, String propertiesPath) {
+    public GameScreen(MazeRunnerGame game, int level) {
         this.game = game;
         this.hud = new HUD(game);
-        this.propertiesPath = propertiesPath;
+        this.level = level;
+        this.propertiesPath = toPropertiesPath(level);
         Viewport viewport = new ExtendViewport(WORLD_WIDTH, WORLD_HEIGHT);
         stage = new Stage(viewport, game.getSpriteBatch());
         map = new TmxMapLoader().load(mapPath);
@@ -78,7 +80,7 @@ public class GameScreen implements Screen {
         combinedShader = new ShaderProgram(Gdx.files.internal("shaders/vertex.glsl"), Gdx.files.internal("shaders/combined.frag"));
         ((OrthographicCamera) stage.getCamera()).zoom = 0.1f;
         uiCamera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        pointManager = new PointManager();
+        pointManager = new PointManager(level);
         collisionLayer = mapLoader.buildCollisionLayerFromProperties(map, this.propertiesPath);
         player = new Player(collisionLayer, 16, 10, game::goToGameOverScreen);
 
@@ -91,9 +93,8 @@ public class GameScreen implements Screen {
         if (gameState.getMapPath() != null) {
             this.mapPath = gameState.getMapPath();
         }
-        if (gameState.getPropertiesPath() != null) {
-            this.propertiesPath = gameState.getPropertiesPath();
-        }
+        this.level = gameState.getLevel();
+        this.propertiesPath = toPropertiesPath(this.level);
         this.map = new TmxMapLoader().load(this.mapPath);
 
         Viewport viewport = new ExtendViewport(WORLD_WIDTH, WORLD_HEIGHT);
@@ -112,8 +113,13 @@ public class GameScreen implements Screen {
         this.player.setX(gameState.getPlayerX());
         this.player.setY(gameState.getPlayerY());
         if (gameState.hasKey()) player.pickupKey();
-        this. pointManager = gameState.getPointManager();
+        if (gameState.getPointManager() != null) {
+            pointManager = gameState.getPointManager();
+        } else {
+            pointManager = new PointManager(this.level);
+        }
         this.player.setHp(gameState.getPlayerLives());
+        ((OrthographicCamera) stage.getCamera()).zoom = gameState.getCameraZoom();
     }
 
     public void adjustZoom(float amount) {
@@ -132,6 +138,8 @@ public class GameScreen implements Screen {
     public void render(float delta) {
         stage.act(delta);
         pointManager.act(delta);
+        // Doing it through a listener is better, as this happens every frame, but this is easier
+        noireMode = player.getHp() <= 1;
 
         Batch batch = stage.getBatch();
         OrthographicCamera camera = (OrthographicCamera) stage.getCamera();
@@ -169,7 +177,7 @@ public class GameScreen implements Screen {
         batch.setShader(null);
 
         // render hud
-        hud.update(player.getHp(), pointManager.getPoints(), player.hasKey());
+        hud.update(level, player.getHp(), pointManager.getPoints(), player.hasKey());
         hud.getStage().act(delta);
         hud.getStage().draw();
 
@@ -185,9 +193,9 @@ public class GameScreen implements Screen {
         }
 
         if (gameState != null) {
-            gameState.save(mapPath, propertiesPath, player.getX(), player.getY(), player.getHp(), pointManager, player.hasKey(), enemyDataList, collectibleDataList);
+            gameState.save(mapPath, level, ((OrthographicCamera) stage.getCamera()).zoom, player.getX(), player.getY(), player.getHp(), pointManager, player.hasKey(), enemyDataList, collectibleDataList);
         }
-        else gameState = new GameState(mapPath, propertiesPath, player.getX(), player.getY(), player.getHp(), pointManager, player.hasKey(), enemyDataList, collectibleDataList);
+        else gameState = new GameState(mapPath, level, ((OrthographicCamera) stage.getCamera()).zoom, player.getX(), player.getY(), player.getHp(), pointManager, player.hasKey(), enemyDataList, collectibleDataList);
         SaveManager.saveGame(gameState);
     }
 
@@ -274,12 +282,19 @@ public class GameScreen implements Screen {
     public void setGameState(GameState gameState) {
         this.gameState = gameState;
         if (player != null) {
+            this.level = gameState.getLevel();
+            this.propertiesPath = toPropertiesPath(this.level);
             player.setPosition(gameState.getPlayerX(), gameState.getPlayerY());
             // Since there's no dropKey, we just set the state if it's true.
             // If it's false, we'd need a way to unset it if we want to support full state restoration.
             if (gameState.hasKey()) player.pickupKey();
             player.setHp(gameState.getPlayerLives());
+            ((OrthographicCamera) stage.getCamera()).zoom = gameState.getCameraZoom();
         }
         this.pointManager = gameState.getPointManager();
+    }
+
+    private static String toPropertiesPath(int levelNumber) {
+        return String.format("maps/level-%d.properties", levelNumber);
     }
 }

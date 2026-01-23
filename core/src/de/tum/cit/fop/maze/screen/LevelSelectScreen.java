@@ -31,13 +31,13 @@ public class LevelSelectScreen implements Screen {
         table.add(new Label("Select level", game.getSkin(), "title")).padBottom(80).row();
 
         for (int i = 1; i <= 5; i++) {
-            final String propertiesPath = String.format("maps/level-%d.properties", i);
+            final int levelNumber = i;
             TextButton levelButton = new TextButton("Level " + i, game.getSkin());
             table.add(levelButton).width(300).row();
             levelButton.addListener(new ChangeListener() {
                 @Override
                 public void changed(ChangeEvent event, Actor actor) {
-                    game.goToGame(propertiesPath);
+                    game.goToGame(levelNumber);
                 }
             });
         }
