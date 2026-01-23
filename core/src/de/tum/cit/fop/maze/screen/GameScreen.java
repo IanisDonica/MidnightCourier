@@ -1,6 +1,7 @@
 package de.tum.cit.fop.maze.screen;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
@@ -96,7 +97,7 @@ public class GameScreen implements Screen {
         pointManager = new PointManager(level);
         collisionLayer = mapLoader.buildCollisionLayerFromProperties(map, this.propertiesPath);
         generateFBO();
-        player = new Player(collisionLayer, 16, 10, game::goToGameOverScreen);
+        player = new Player(collisionLayer, 38, 149, game::goToGameOverScreen);
 
     }
 
@@ -123,7 +124,7 @@ public class GameScreen implements Screen {
         uiCamera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         collisionLayer = mapLoader.buildCollisionLayerFromProperties(map, this.propertiesPath);
         generateFBO();
-        player = new Player(collisionLayer, 16, 10, game::goToGameOverScreen);
+        player = new Player(collisionLayer, 38, 149, game::goToGameOverScreen);
 
         this.player.setX(gameState.getPlayerX());
         this.player.setY(gameState.getPlayerY());
@@ -151,6 +152,7 @@ public class GameScreen implements Screen {
 
     @Override
     public void render(float delta) {
+        hud.setShopButtonVisible(false);
         stage.act(delta);
         pointManager.act(delta);
         // Doing it through a listener is better, as this happens every frame, but this is easier
@@ -213,11 +215,11 @@ public class GameScreen implements Screen {
 
     @Override
     public void show() {
-        Gdx.input.setInputProcessor(stage);
+        Gdx.input.setInputProcessor(new InputMultiplexer(hud.getStage(), stage));
         stage.addActor(player);
 
         if (enemies.isEmpty() && collectibles.isEmpty()) {
-            mapLoader.spawnEntitiesFromProperties(stage, pointManager, collisionLayer, propertiesPath, enemies, collectibles, game::goToVictoryScreen);
+            mapLoader.spawnEntitiesFromProperties(stage, pointManager, collisionLayer, propertiesPath, hud, enemies, collectibles, game::goToVictoryScreen);
         }
 
         if (gameState != null) {
@@ -283,6 +285,10 @@ public class GameScreen implements Screen {
             ((OrthographicCamera) stage.getCamera()).zoom = gameState.getCameraZoom();
         }
         this.pointManager = gameState.getPointManager();
+    }
+
+    public HUD getHud() {
+        return hud;
     }
 
     private static String toPropertiesPath(int levelNumber) {

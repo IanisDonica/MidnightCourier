@@ -1,6 +1,7 @@
 package de.tum.cit.fop.maze.screen;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.scenes.scene2d.Actor;
@@ -69,6 +70,16 @@ public class HighscoreScreen implements Screen {
     @Override
     public void show() {
         Gdx.input.setInputProcessor(stage);
+        stage.addListener(new com.badlogic.gdx.scenes.scene2d.InputListener() {
+            @Override
+            public boolean keyDown(com.badlogic.gdx.scenes.scene2d.InputEvent event, int keycode) {
+                if (keycode == Input.Keys.ESCAPE) {
+                    game.goToMenu();
+                    return true;
+                }
+                return false;
+            }
+        });
         rebuildTable();
     }
 
@@ -84,6 +95,8 @@ public class HighscoreScreen implements Screen {
     public void hide() {
     }
 
+
+    // Build only once, as opposed to doing it every frame.
     private void rebuildTable() {
         table.clear();
 
