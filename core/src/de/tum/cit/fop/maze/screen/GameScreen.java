@@ -19,6 +19,7 @@ import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.*;
 import de.tum.cit.fop.maze.HUD;
@@ -73,6 +74,8 @@ public class GameScreen implements Screen {
     private static final float REGEN_INTERVAL_SECONDS = 10f;
     private static final int REGEN_POINTS_ON_FULL = 100;
     private float regenTimer = 0f;
+    private static final float MIN_ZOOM = 0.02f;
+    private static final float MAX_ZOOM = 0.3f;
 
     /**
      * Constructor for GameScreen. Sets up the camera and font.
@@ -97,12 +100,13 @@ public class GameScreen implements Screen {
         fogShader = new ShaderProgram(Gdx.files.internal("shaders/vertex.glsl"), Gdx.files.internal("shaders/fog.frag"));
         collisionShader = new ShaderProgram(Gdx.files.internal("shaders/vertex.glsl"), Gdx.files.internal("shaders/collision.frag"));
         combinationShader = new ShaderProgram(Gdx.files.internal("shaders/vertex.glsl"), Gdx.files.internal("shaders/combination.frag"));
-        ((OrthographicCamera) stage.getCamera()).zoom = 0.1f;
+        ((OrthographicCamera) stage.getCamera()).zoom = MIN_ZOOM;
         uiCamera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         pointManager = new PointManager(level);
         collisionLayer = mapLoader.buildCollisionLayerFromProperties(map, this.propertiesPath);
         generateFBO();
-        player = new Player(collisionLayer, 38, 149, game::goToGameOverScreen);
+        player = new Player(collisionLayer, 78,46, game::goToGameOverScreen);
+        player.setWorldBounds(WORLD_WIDTH, WORLD_HEIGHT);
         applyUpgrades();
 
     }
@@ -126,11 +130,12 @@ public class GameScreen implements Screen {
         fogShader = new ShaderProgram(Gdx.files.internal("shaders/vertex.glsl"), Gdx.files.internal("shaders/fog.frag"));
         collisionShader = new ShaderProgram(Gdx.files.internal("shaders/vertex.glsl"), Gdx.files.internal("shaders/collision.frag"));
         combinationShader = new ShaderProgram(Gdx.files.internal("shaders/vertex.glsl"), Gdx.files.internal("shaders/combination.frag"));
-        ((OrthographicCamera) stage.getCamera()).zoom = 1f;
+        ((OrthographicCamera) stage.getCamera()).zoom = MAX_ZOOM;
         uiCamera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         collisionLayer = mapLoader.buildCollisionLayerFromProperties(map, this.propertiesPath);
         generateFBO();
-        player = new Player(collisionLayer, 38, 149, game::goToGameOverScreen);
+        player = new Player(collisionLayer, 78,46, game::goToGameOverScreen);
+        player.setWorldBounds(WORLD_WIDTH, WORLD_HEIGHT);
         applyUpgrades();
 
         this.player.setX(gameState.getPlayerX());
@@ -142,11 +147,13 @@ public class GameScreen implements Screen {
             pointManager = new PointManager(this.level);
         }
         this.player.setHp(gameState.getPlayerLives());
-        ((OrthographicCamera) stage.getCamera()).zoom = gameState.getCameraZoom();
+        ((OrthographicCamera) stage.getCamera()).zoom = MathUtils.clamp(gameState.getCameraZoom(), MIN_ZOOM, MAX_ZOOM);
     }
 
     public void adjustZoom(float amount) {
-        ((OrthographicCamera) stage.getCamera()).zoom += amount;
+        OrthographicCamera camera = (OrthographicCamera) stage.getCamera();
+        camera.zoom = MathUtils.clamp(camera.zoom + amount, MIN_ZOOM, MAX_ZOOM);
+        camera.update();
     }
 
     public void adjustFog(float amount) {
@@ -198,6 +205,18 @@ public class GameScreen implements Screen {
 
         Batch batch = stage.getBatch();
         OrthographicCamera camera = (OrthographicCamera) stage.getCamera();
+
+        float halfViewW = (camera.viewportWidth * camera.zoom) / 2f;
+        float halfViewH = (camera.viewportHeight * camera.zoom) / 2f;
+        float maxX = WORLD_WIDTH - halfViewW;
+        float maxY = WORLD_HEIGHT - halfViewH;
+        float minX = Math.min(halfViewW, maxX);
+        float maxClampX = Math.max(halfViewW, maxX);
+        float minY = Math.min(halfViewH, maxY);
+        float maxClampY = Math.max(halfViewH, maxY);
+        camera.position.x = MathUtils.clamp(camera.position.x, minX, maxClampX);
+        camera.position.y = MathUtils.clamp(camera.position.y, minY, maxClampY);
+        camera.update();
 
         float viewW = camera.viewportWidth * camera.zoom;
         float viewH = camera.viewportHeight * camera.zoom;
@@ -362,7 +381,7 @@ public class GameScreen implements Screen {
             // If it's false, we'd need a way to unset it if we want to support full state restoration.
             if (gameState.hasKey()) player.pickupKey();
             player.setHp(gameState.getPlayerLives());
-            ((OrthographicCamera) stage.getCamera()).zoom = gameState.getCameraZoom();
+            ((OrthographicCamera) stage.getCamera()).zoom = MathUtils.clamp(gameState.getCameraZoom(), MIN_ZOOM, MAX_ZOOM);
         }
         this.pointManager = gameState.getPointManager();
     }
