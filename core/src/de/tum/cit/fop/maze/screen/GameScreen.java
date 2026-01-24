@@ -50,7 +50,7 @@ public class GameScreen implements Screen {
     private final ShaderProgram collisionShader;
     private final ShaderProgram combinationShader;
     private final OrthographicCamera uiCamera;
-    private float fogIntensity = 20f;
+    private float fogIntensity = 7f;
     private boolean noireMode = false;
     private FrameBuffer fbo;
     private TextureRegion fboRegion;
@@ -74,7 +74,7 @@ public class GameScreen implements Screen {
     private static final float REGEN_INTERVAL_SECONDS = 10f;
     private static final int REGEN_POINTS_ON_FULL = 100;
     private float regenTimer = 0f;
-    private static final float MIN_ZOOM = 0.02f;
+    private static final float MIN_ZOOM = 0.03f;
     private static final float MAX_ZOOM = 0.3f;
 
     /**
@@ -164,7 +164,7 @@ public class GameScreen implements Screen {
         noireMode = !noireMode;
     }
 
-    // If I have more time ill make it so this isnt polled every frame (the original idea was to make it fired in the upgrade classes)
+    // If I have more time ill make it, so this isn't polled every frame (the original idea was to make it fired in the upgrade classes),
     // But for now this also works
     private void applyUpgrades() {
         ProgressionManager progressionManager = game.getProgressionManager();
