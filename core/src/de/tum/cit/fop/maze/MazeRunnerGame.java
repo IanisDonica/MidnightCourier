@@ -212,6 +212,7 @@ public class MazeRunnerGame extends Game {
     }
 
     public void goToVictoryScreen() {
+        progressionManager.addPoints(500);
         this.setScreen(new VictoryScreen(this)); // Set the current screen to GameScreen
         if(settingsScreen != null){
             settingsScreen.dispose(); // Dispose the menu screen if it exists
