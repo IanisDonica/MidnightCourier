@@ -39,6 +39,7 @@ local.properties
 
 #Build file
 .idea/runConfigurations/Run_Game.xml
+desktop/build.grade
 
 #Save files
 *.sav
