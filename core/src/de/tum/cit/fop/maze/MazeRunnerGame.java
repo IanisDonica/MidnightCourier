@@ -102,6 +102,7 @@ public class MazeRunnerGame extends Game {
             goToMenu();
             return;
         }
+        loadProgressionFromGameState(gameState);
         if (gameScreen != null) {
             gameScreen.dispose();
             gameScreen = null;
@@ -249,6 +250,20 @@ public class MazeRunnerGame extends Game {
 
     public ProgressionManager getProgressionManager() {
         return progressionManager;
+    }
+
+    public void startNewGameProgression() {
+        progressionManager = new ProgressionManager(2000);
+    }
+
+    private void loadProgressionFromGameState(GameState gameState) {
+        int points = gameState.getProgressionPoints();
+        if (gameState.getOwnedUpgrades() == null) {
+            points = 2000;
+        }
+        ProgressionManager loaded = new ProgressionManager(points);
+        loaded.setOwnedUpgrades(gameState.getOwnedUpgrades());
+        progressionManager = loaded;
     }
 
 }
