@@ -21,6 +21,7 @@ import de.tum.cit.fop.maze.MazeRunnerGame;
 import de.tum.cit.fop.maze.entity.Player;
 import de.tum.cit.fop.maze.map.MapLoader;
 import de.tum.cit.fop.maze.system.*;
+import de.tum.cit.fop.maze.system.ProgressionManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,6 +56,10 @@ public class GameScreen implements Screen {
     private final List<de.tum.cit.fop.maze.entity.obstacle.Enemy> enemies = new ArrayList<>();
     private final List<de.tum.cit.fop.maze.entity.collectible.Collectible> collectibles = new ArrayList<>();
     private GameState gameState;
+    private boolean paused = false;
+    private static final float REGEN_INTERVAL_SECONDS = 10f;
+    private static final int REGEN_POINTS_ON_FULL = 100;
+    private float regenTimer = 0f;
 
     /**
      * Constructor for GameScreen. Sets up the camera and font.
@@ -84,6 +89,7 @@ public class GameScreen implements Screen {
         pointManager = new PointManager(level);
         collisionLayer = mapLoader.buildCollisionLayerFromProperties(map, this.propertiesPath);
         player = new Player(collisionLayer, 38, 149, game::goToGameOverScreen);
+        applyUpgrades();
 
     }
 
@@ -110,6 +116,7 @@ public class GameScreen implements Screen {
         uiCamera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         collisionLayer = mapLoader.buildCollisionLayerFromProperties(map, this.propertiesPath);
         player = new Player(collisionLayer, 38, 149, game::goToGameOverScreen);
+        applyUpgrades();
 
         this.player.setX(gameState.getPlayerX());
         this.player.setY(gameState.getPlayerY());
@@ -135,11 +142,42 @@ public class GameScreen implements Screen {
         noireMode = !noireMode;
     }
 
+    // If I have more time ill make it so this isnt polled every frame (the original idea was to make it fired in the upgrade classes)
+    // But for now this also works
+    private void applyUpgrades() {
+        ProgressionManager progressionManager = game.getProgressionManager();
+        int speedUpgrades = 0;
+        if (progressionManager.hasUpgrade("speed")) speedUpgrades++;
+        if (progressionManager.hasUpgrade("speed_2")) speedUpgrades++;
+        if (progressionManager.hasUpgrade("speed_3")) speedUpgrades++;
+        float multiplier = 1f + (0.2f * speedUpgrades);
+        player.setSpeedMultiplier(multiplier);
+
+        int healthUpgrades = 0;
+        if (progressionManager.hasUpgrade("health")) healthUpgrades++;
+        if (progressionManager.hasUpgrade("health_2")) healthUpgrades++;
+        if (progressionManager.hasUpgrade("health_3")) healthUpgrades++;
+        player.setMaxHp(3 + healthUpgrades);
+
+        int drinkSpeedUpgrades = 0;
+        if (progressionManager.hasUpgrade("drink_speed_1")) drinkSpeedUpgrades++;
+        if (progressionManager.hasUpgrade("drink_speed_2")) drinkSpeedUpgrades++;
+        float drinkMultiplier = 1f + (0.5f * drinkSpeedUpgrades);
+        player.setDrinkDurationMultiplier(drinkMultiplier);
+
+        player.setPotholeImmune(progressionManager.hasUpgrade("pothol_imunity"));
+    }
+
     @Override
     public void render(float delta) {
         hud.setShopButtonVisible(false);
-        stage.act(delta);
-        pointManager.act(delta);
+
+        if (!paused) {
+            applyUpgrades();
+            handleRegen(delta);
+            stage.act(delta);
+            pointManager.act(delta);
+        }
         // Doing it through a listener is better, as this happens every frame, but this is easier
         noireMode = player.getHp() <= 1;
 
@@ -179,7 +217,15 @@ public class GameScreen implements Screen {
         batch.setShader(null);
 
         // render hud
-        hud.update(level, player.getHp(), pointManager.getPoints(), player.hasKey());
+        hud.update(
+                level,
+                player.getHp(),
+                pointManager.getPoints(),
+                player.hasKey(),
+                game.getProgressionManager().hasUpgrade("regen"),
+                regenTimer,
+                REGEN_INTERVAL_SECONDS
+        );
         hud.getStage().act(delta);
         hud.getStage().draw();
 
@@ -195,9 +241,37 @@ public class GameScreen implements Screen {
         }
 
         if (gameState != null) {
-            gameState.save(mapPath, level, ((OrthographicCamera) stage.getCamera()).zoom, player.getX(), player.getY(), player.getHp(), pointManager, player.hasKey(), enemyDataList, collectibleDataList);
+            gameState.save(
+                    mapPath,
+                    level,
+                    ((OrthographicCamera) stage.getCamera()).zoom,
+                    player.getX(),
+                    player.getY(),
+                    player.getHp(),
+                    pointManager,
+                    player.hasKey(),
+                    enemyDataList,
+                    collectibleDataList,
+                    game.getProgressionManager().getPoints(),
+                    new java.util.HashSet<>(game.getProgressionManager().getOwnedUpgrades())
+            );
         }
-        else gameState = new GameState(mapPath, level, ((OrthographicCamera) stage.getCamera()).zoom, player.getX(), player.getY(), player.getHp(), pointManager, player.hasKey(), enemyDataList, collectibleDataList);
+        else {
+            gameState = new GameState(
+                    mapPath,
+                    level,
+                    ((OrthographicCamera) stage.getCamera()).zoom,
+                    player.getX(),
+                    player.getY(),
+                    player.getHp(),
+                    pointManager,
+                    player.hasKey(),
+                    enemyDataList,
+                    collectibleDataList,
+                    game.getProgressionManager().getPoints(),
+                    new java.util.HashSet<>(game.getProgressionManager().getOwnedUpgrades())
+            );
+        }
         SaveManager.saveGame(gameState);
     }
 
@@ -217,12 +291,18 @@ public class GameScreen implements Screen {
 
     @Override
     public void pause() {
-
+        if (paused) {
+            resume();
+        } else {
+            paused = true;
+            hud.setPauseMenuVisible(true);
+        }
     }
 
     @Override
     public void resume() {
-        // implement resumeAS
+        paused = false;
+        hud.setPauseMenuVisible(false);
     }
 
     @Override
@@ -302,5 +382,24 @@ public class GameScreen implements Screen {
 
     private static String toPropertiesPath(int levelNumber) {
         return String.format("maps/level-%d.properties", levelNumber);
+    }
+
+    private void handleRegen(float delta) {
+        if (!game.getProgressionManager().hasUpgrade("regen")) {
+            regenTimer = 0f;
+            return;
+        }
+        regenTimer += delta;
+
+        System.out.println(regenTimer);
+        if (regenTimer >= REGEN_INTERVAL_SECONDS) {
+            regenTimer = 0;
+            if (player.getHp() < player.getMaxHp()) {
+                player.setHp(player.getHp() + 1);
+                System.out.println("Here");
+            } else {
+                pointManager.add(REGEN_POINTS_ON_FULL);
+            }
+        }
     }
 }

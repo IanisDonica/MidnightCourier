@@ -89,8 +89,23 @@ public class ProgressionManager {
         points += amount;
     }
 
+    public void setPoints(int points) {
+        this.points = points;
+    }
+
     public Map<String, Upgrade> getUpgrades() {
         return Collections.unmodifiableMap(upgradesByName);
+    }
+
+    public Set<String> getOwnedUpgrades() {
+        return Collections.unmodifiableSet(ownedUpgrades);
+    }
+
+    public void setOwnedUpgrades(Collection<String> upgrades) {
+        ownedUpgrades.clear();
+        if (upgrades != null) {
+            ownedUpgrades.addAll(upgrades);
+        }
     }
 
     public Upgrade getUpgrade(String upgradeName) {

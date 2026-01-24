@@ -42,10 +42,8 @@ public class KeyHandler extends InputListener {
             }
             if (keycode == configManager.getKeyBinding("pause")) {
                 if (game.getScreen() instanceof GameScreen) {
-                    game.goToMenu();
-                } else if (game.getScreen() instanceof MenuScreen ||
-                        game.getScreen() instanceof SettingsScreen ||
-                        game.getScreen() instanceof SettingsControlsScreen) {
+                    game.pause();
+                } else if (game.getScreen() instanceof SettingsScreen || game.getScreen() instanceof SettingsControlsScreen) {
                     game.goToGame();
                 }
                 return true;
