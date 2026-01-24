@@ -50,7 +50,7 @@ public class GameScreen implements Screen {
     private final ShaderProgram collisionShader;
     private final ShaderProgram combinationShader;
     private final OrthographicCamera uiCamera;
-    private float fogIntensity = 20f;
+    private float fogIntensity = 7f;
     private boolean noireMode = false;
     private FrameBuffer fbo;
     private TextureRegion fboRegion;

@@ -1,8 +1,13 @@
 package de.tum.cit.fop.maze.screen;
 
 import com.badlogic.gdx.Screen;
+import de.tum.cit.fop.maze.MazeRunnerGame;
 
 public class SettingsGameScreen implements Screen {
+    private final MazeRunnerGame game;
+    public SettingsGameScreen(MazeRunnerGame game) {
+        this.game = game;
+    }
     @Override
     public void show() {
 
