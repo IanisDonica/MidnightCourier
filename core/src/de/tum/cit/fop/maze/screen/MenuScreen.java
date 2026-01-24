@@ -53,6 +53,9 @@ public class MenuScreen implements Screen {
         TextButton highscores = new TextButton("Highscores", game.getSkin());
         table.add(highscores).width(300).row();
 
+        TextButton achievements = new TextButton("Achievements", game.getSkin());
+        table.add(achievements).width(300).row();
+
         TextButton settings = new TextButton("Settings", game.getSkin());
         table.add(settings).width(300).row();
 
@@ -77,6 +80,13 @@ public class MenuScreen implements Screen {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 game.goToHighscoreScreen();
+            }
+        });
+
+        achievements.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                game.goToAchievementsScreen();
             }
         });
 
