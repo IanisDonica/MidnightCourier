@@ -22,20 +22,10 @@ public class Shop extends MapObject {
 
     @Override
     protected void updateBounds() {
+        // Since we want the game to actually show the open shop button even when the player isnt hugging it
         bounds.set(getX() - 1f, getY() - 1f, getWidth() + 2f, getHeight() + 2f);
     }
 
-    @Override
-    protected void checkCollisionsWithPlayer() {
-        if (player == null) {
-            return;
-        }
-        boolean overlap = bounds.overlaps(new Rectangle(player.getX(), player.getY(), player.getWidth(), player.getHeight()));
-        if (overlap && hud != null) {
-            hud.setShopButtonVisible(true);
-            collision();
-        }
-    }
 
     @Override
     protected void collision() {
