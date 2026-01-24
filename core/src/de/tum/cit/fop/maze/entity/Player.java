@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;
 import de.tum.cit.fop.maze.system.CollisionHandler;
 
@@ -32,6 +33,8 @@ public class Player extends Entity {
     private boolean gameOverTriggered = false;
     private float speedMultiplier = 1f;
     private boolean potholeImmune = false;
+    private float worldWidth = 0f;
+    private float worldHeight = 0f;
 
     //Initialize the player on a specific coordinate point
     public Player(TiledMapTileLayer collisionLayer, float x, float y, GameOverListener gameOverListener) {
@@ -76,6 +79,11 @@ public class Player extends Entity {
 
     public void setSpeedMultiplier(float speedMultiplier) {
         this.speedMultiplier = speedMultiplier;
+    }
+
+    public void setWorldBounds(float worldWidth, float worldHeight) {
+        this.worldWidth = worldWidth;
+        this.worldHeight = worldHeight;
     }
 
     public void setPotholeImmune(boolean potholeImmune) {
@@ -206,6 +214,12 @@ public class Player extends Entity {
         if (deltaX < 0 && collisionHandler.checkCollision(this, 'l')) {
             setPosition(nextX, getY());
             facingDirection = 'l';
+        }
+
+        if (worldWidth > 0f && worldHeight > 0f) {
+            float clampedX = MathUtils.clamp(getX(), 0f, worldWidth - getWidth());
+            float clampedY = MathUtils.clamp(getY(), 0f, worldHeight - getHeight());
+            setPosition(clampedX, clampedY);
         }
 
         animationTime += delta;

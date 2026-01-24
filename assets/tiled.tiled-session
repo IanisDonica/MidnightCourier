@@ -13,6 +13,9 @@
     ],
     "file.lastUsedOpenFilter": "All Files (*)",
     "fileStates": {
+        "Assets_Map/!!128x128.tsx": {
+            "scaleInDock": 1
+        },
         "Assets_Map/128x128Fountain.tsx": {
             "scaleInDock": 1
         },
@@ -44,6 +47,9 @@
         "Assets_Map/4ParkRoad.tsx": {
             "scaleInDock": 1,
             "scaleInEditor": 1
+        },
+        "Assets_Map/96x160.tsx": {
+            "scaleInDock": 1
         },
         "Assets_Map/96x160Block.tsx": {
             "scaleInDock": 1,
@@ -173,11 +179,12 @@
             "scale": 3,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 256,
+                "x": 256.16666666666663,
                 "y": 127.83333333333333
             }
         }
     },
+    "last.externalTilesetPath": "/home/pc/Desktop/Grundlagen_Programmierung/fopws2526projectfop-transprutsolution/assets/Assets_Map",
     "last.imagePath": "/home/pc/Desktop/Grundlagen_Programmierung/fopws2526projectfop-transprutsolution/assets",
     "map.fixedSize": true,
     "map.height": 16,
