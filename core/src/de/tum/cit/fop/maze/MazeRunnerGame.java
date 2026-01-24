@@ -78,14 +78,10 @@ public class MazeRunnerGame extends Game {
      */
 
 
-    // TODO, merge the methods (maybe check if even necesary)
     public void goToGame() {
-        if (gameScreen != null) {
-            gameScreen.dispose();
-            gameScreen = null;
+        if (gameScreen == null) {
+            gameScreen = new GameScreen(this);
         }
-        currentLevelNumber = 1;
-        gameScreen = new GameScreen(this, currentLevelNumber);
         this.setScreen(gameScreen);
     }
 
