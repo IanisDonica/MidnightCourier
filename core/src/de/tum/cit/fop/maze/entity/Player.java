@@ -40,7 +40,7 @@ public class Player extends Entity {
     public Player(TiledMapTileLayer collisionLayer, float x, float y, GameOverListener gameOverListener) {
         super(x, y);
         initialiseAnimations();
-        setSize(1, 2);
+        setSize(0.5f, 1);
         this.collisionHandler = new CollisionHandler(collisionLayer);
         this.gameOverListener = gameOverListener;
     }
@@ -163,7 +163,7 @@ public class Player extends Entity {
     @Override
     public void act(float delta) {
         super.act(delta);
-        speed = 20.5f * delta * speedMultiplier;
+        speed = 2.5f * delta * speedMultiplier;
         if (sprinting) {speed *= 2f;}
         float deltaX = 0, deltaY = 0;
 

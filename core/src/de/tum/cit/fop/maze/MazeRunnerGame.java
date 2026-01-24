@@ -5,14 +5,9 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import de.tum.cit.fop.maze.screen.*;
-import de.tum.cit.fop.maze.system.ConfigManager;
-import de.tum.cit.fop.maze.system.GameState;
-import de.tum.cit.fop.maze.system.KeyHandler;
-import de.tum.cit.fop.maze.system.ProgressionManager;
-import de.tum.cit.fop.maze.system.SaveManager;
+import de.tum.cit.fop.maze.system.*;
 import games.spooky.gdx.nativefilechooser.NativeFileChooser;
 
-import java.io.ObjectInputFilter;
 
 /**
  * The MazeRunnerGame class represents the core of the Maze Runner game.
@@ -20,6 +15,9 @@ import java.io.ObjectInputFilter;
  */
 
 public class MazeRunnerGame extends Game {
+    private final NativeFileChooser fileChooser;
+    private final ConfigManager configManager;
+    private final KeyHandler keyHandler;
     private MenuScreen menuScreen;
     private GameScreen gameScreen;
     private SettingsScreen settingsScreen;
@@ -29,19 +27,15 @@ public class MazeRunnerGame extends Game {
     private int currentLevelNumber = 1;
     private SpriteBatch spriteBatch;
     private Skin skin;
-    private final ConfigManager configManager;
-    private final KeyHandler keyHandler;
     private ProgressionManager progressionManager;
+    private final AchievementManager achievementManager;
 
-    /**
-     * Constructor for MazeRunnerGame.
-     *
-     * @param fileChooser The file chooser for the game, typically used in a desktop environment.
-     */
     public MazeRunnerGame(NativeFileChooser fileChooser) {
         super();
+        this.fileChooser = fileChooser;
         configManager = new ConfigManager();
         keyHandler = new KeyHandler(this);
+        achievementManager = new AchievementManager();
     }
 
     /**
@@ -87,7 +81,7 @@ public class MazeRunnerGame extends Game {
 
     public void goToGame(int levelNumber) {
         // This will be the case after Try again/Next level
-        // If this is not done there will be a memory leak
+        // If this is not done, there will be a memory leak
         if (gameScreen != null) {
             gameScreen.dispose();
             gameScreen = null;
@@ -97,7 +91,7 @@ public class MazeRunnerGame extends Game {
         this.setScreen(gameScreen);
     }
 
-    public void goToGame(GameState gameState){
+    public void goToGame(GameState gameState) {
         if (gameState == null) {
             goToMenu();
             return;
@@ -179,8 +173,16 @@ public class MazeRunnerGame extends Game {
         }
     }
 
+    public void goToAchievementsScreen() {
+        this.setScreen(new AchievementsScreen(this, achievementManager)); // Set the current screen to GameScreen
+        if (menuScreen != null) {
+            menuScreen.dispose(); // Dispose the menu screen if it exists
+            menuScreen = null;
+        }
+    }
+
     public void goToSettingsVideoScreen() {
-        this.setScreen(new SettingsScreen(this)); // Set the current screen to GameScreen
+        this.setScreen(new SettingsVideoScreen(this)); // Set the current screen to GameScreen
         if (settingsScreen != null) {
             settingsScreen.dispose(); // Dispose the menu screen if it exists
             settingsScreen = null;
@@ -188,7 +190,7 @@ public class MazeRunnerGame extends Game {
     }
 
     public void goToSettingsAudioScreen() {
-        this.setScreen(new SettingsScreen(this)); // Set the current screen to GameScreen
+        this.setScreen(new SettingsAudioScreen(this)); // Set the current screen to GameScreen
         if (settingsScreen != null) {
             settingsScreen.dispose(); // Dispose the menu screen if it exists
             settingsScreen = null;
@@ -196,8 +198,8 @@ public class MazeRunnerGame extends Game {
     }
 
     public void goToSettingsGameScreen() {
-        this.setScreen(new SettingsControlsScreen(this)); // Set the current screen to GameScreen
-        if(settingsScreen != null){
+        this.setScreen(new SettingsGameScreen(this)); // Set the current screen to GameScreen
+        if (settingsScreen != null) {
             settingsScreen.dispose(); // Dispose the menu screen if it exists
             settingsScreen = null;
         }
@@ -205,7 +207,7 @@ public class MazeRunnerGame extends Game {
 
     public void goToGameOverScreen() {
         this.setScreen(new GameOverScreen(this)); // Set the current screen to GameScreen
-        if(settingsScreen != null){
+        if (settingsScreen != null) {
             settingsScreen.dispose(); // Dispose the menu screen if it exists
             settingsScreen = null;
         }
@@ -214,7 +216,7 @@ public class MazeRunnerGame extends Game {
     public void goToVictoryScreen() {
         progressionManager.addPoints(500);
         this.setScreen(new VictoryScreen(this)); // Set the current screen to GameScreen
-        if(settingsScreen != null){
+        if (settingsScreen != null) {
             settingsScreen.dispose(); // Dispose the menu screen if it exists
             settingsScreen = null;
         }
