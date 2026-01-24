@@ -5,11 +5,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import de.tum.cit.fop.maze.screen.*;
-import de.tum.cit.fop.maze.system.ConfigManager;
-import de.tum.cit.fop.maze.system.GameState;
-import de.tum.cit.fop.maze.system.KeyHandler;
-import de.tum.cit.fop.maze.system.ProgressionManager;
-import de.tum.cit.fop.maze.system.SaveManager;
+import de.tum.cit.fop.maze.system.*;
 import games.spooky.gdx.nativefilechooser.NativeFileChooser;
 
 import java.io.ObjectInputFilter;
@@ -26,12 +22,14 @@ public class MazeRunnerGame extends Game {
     private LevelSelectScreen levelSelectScreen;
     private HighscoreScreen highscoreScreen;
     private ProgressionTreeScreen progressionTreeScreen;
+    private AchievementsScreen achievementsScreen;
     private int currentLevelNumber = 1;
     private SpriteBatch spriteBatch;
     private Skin skin;
     private final ConfigManager configManager;
     private final KeyHandler keyHandler;
     private ProgressionManager progressionManager;
+    private AchievementManager achievementManager;
 
     /**
      * Constructor for MazeRunnerGame.
@@ -42,6 +40,7 @@ public class MazeRunnerGame extends Game {
         super();
         configManager = new ConfigManager();
         keyHandler = new KeyHandler(this);
+        achievementManager = new AchievementManager();
     }
 
     /**
@@ -176,6 +175,14 @@ public class MazeRunnerGame extends Game {
         if (settingsScreen != null) {
             settingsScreen.dispose(); // Dispose the menu screen if it exists
             settingsScreen = null;
+        }
+    }
+
+    public void goToAchievementsScreen(){
+        this.setScreen(new AchievementsScreen(this, achievementManager)); // Set the current screen to GameScreen
+        if (menuScreen != null) {
+            menuScreen.dispose(); // Dispose the menu screen if it exists
+            menuScreen = null;
         }
     }
 
