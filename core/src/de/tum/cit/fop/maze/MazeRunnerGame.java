@@ -8,7 +8,6 @@ import de.tum.cit.fop.maze.screen.*;
 import de.tum.cit.fop.maze.system.*;
 import games.spooky.gdx.nativefilechooser.NativeFileChooser;
 
-import java.io.ObjectInputFilter;
 
 /**
  * The MazeRunnerGame class represents the core of the Maze Runner game.
@@ -25,12 +24,11 @@ public class MazeRunnerGame extends Game {
     private LevelSelectScreen levelSelectScreen;
     private HighscoreScreen highscoreScreen;
     private ProgressionTreeScreen progressionTreeScreen;
-    private AchievementsScreen achievementsScreen;
     private int currentLevelNumber = 1;
     private SpriteBatch spriteBatch;
     private Skin skin;
     private ProgressionManager progressionManager;
-    private AchievementManager achievementManager;
+    private final AchievementManager achievementManager;
 
     public MazeRunnerGame(NativeFileChooser fileChooser) {
         super();
@@ -175,7 +173,7 @@ public class MazeRunnerGame extends Game {
         }
     }
 
-    public void goToAchievementsScreen(){
+    public void goToAchievementsScreen() {
         this.setScreen(new AchievementsScreen(this, achievementManager)); // Set the current screen to GameScreen
         if (menuScreen != null) {
             menuScreen.dispose(); // Dispose the menu screen if it exists
