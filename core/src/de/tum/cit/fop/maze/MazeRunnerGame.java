@@ -8,6 +8,7 @@ import de.tum.cit.fop.maze.screen.*;
 import de.tum.cit.fop.maze.system.*;
 import games.spooky.gdx.nativefilechooser.NativeFileChooser;
 
+import java.io.ObjectInputFilter;
 
 /**
  * The MazeRunnerGame class represents the core of the Maze Runner game.
@@ -15,9 +16,6 @@ import games.spooky.gdx.nativefilechooser.NativeFileChooser;
  */
 
 public class MazeRunnerGame extends Game {
-    private final NativeFileChooser fileChooser;
-    private final ConfigManager configManager;
-    private final KeyHandler keyHandler;
     private MenuScreen menuScreen;
     private GameScreen gameScreen;
     private SettingsScreen settingsScreen;
@@ -27,12 +25,18 @@ public class MazeRunnerGame extends Game {
     private int currentLevelNumber = 1;
     private SpriteBatch spriteBatch;
     private Skin skin;
+    private final ConfigManager configManager;
+    private final KeyHandler keyHandler;
     private ProgressionManager progressionManager;
     private final AchievementManager achievementManager;
 
+    /**
+     * Constructor for MazeRunnerGame.
+     *
+     * @param fileChooser The file chooser for the game, typically used in a desktop environment.
+     */
     public MazeRunnerGame(NativeFileChooser fileChooser) {
         super();
-        this.fileChooser = fileChooser;
         configManager = new ConfigManager();
         keyHandler = new KeyHandler(this);
         achievementManager = new AchievementManager();

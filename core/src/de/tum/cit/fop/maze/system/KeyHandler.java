@@ -1,5 +1,6 @@
 package de.tum.cit.fop.maze.system;
 
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import de.tum.cit.fop.maze.MazeRunnerGame;
@@ -28,12 +29,24 @@ public class KeyHandler extends InputListener {
     }
 
     private boolean handleKey(int keycode, boolean isDown) {
+        if (gameScreen != null && gameScreen.isDevConsoleVisible()) {
+            if (isDown && (keycode == Input.Keys.GRAVE || keycode == Input.Keys.ESCAPE)) {
+                gameScreen.toggleDevConsole();
+            }
+            return true;
+        }
+
         // Player movement and sprint
         if (player != null && checkMovementKeys(keycode, isDown)) return true;
 
         // GameScreen debug and menu (only on keyDown)
-        // TODO fix
         if (isDown) {
+            if (keycode == Input.Keys.GRAVE) {
+                if (game.getScreen() instanceof GameScreen && gameScreen != null) {
+                    gameScreen.toggleDevConsole();
+                    return true;
+                }
+            }
             if (keycode == configManager.getKeyBinding("openShop")) {
                 if (game.getScreen() instanceof GameScreen && gameScreen != null && gameScreen.getHud().isShopButtonVisible()) {
                     game.goToProgressionTreeScreenFromGame();

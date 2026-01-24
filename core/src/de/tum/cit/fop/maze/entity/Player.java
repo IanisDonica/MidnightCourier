@@ -35,6 +35,7 @@ public class Player extends Entity {
     private boolean potholeImmune = false;
     private float worldWidth = 0f;
     private float worldHeight = 0f;
+    private float debugSpeedMultiplier = 1f;
 
     //Initialize the player on a specific coordinate point
     public Player(TiledMapTileLayer collisionLayer, float x, float y, GameOverListener gameOverListener) {
@@ -79,6 +80,10 @@ public class Player extends Entity {
 
     public void setSpeedMultiplier(float speedMultiplier) {
         this.speedMultiplier = speedMultiplier;
+    }
+
+    public void setDebugSpeedMultiplier(float debugSpeedMultiplier) {
+        this.debugSpeedMultiplier = debugSpeedMultiplier;
     }
 
     public void setWorldBounds(float worldWidth, float worldHeight) {
@@ -163,7 +168,7 @@ public class Player extends Entity {
     @Override
     public void act(float delta) {
         super.act(delta);
-        speed = 2.5f * delta * speedMultiplier;
+        speed = 2.5f * delta * speedMultiplier * debugSpeedMultiplier;
         if (sprinting) {speed *= 2f;}
         float deltaX = 0, deltaY = 0;
 

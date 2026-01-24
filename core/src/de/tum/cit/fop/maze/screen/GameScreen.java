@@ -54,6 +54,7 @@ public class GameScreen implements Screen {
     private int level;
     private String propertiesPath;
     private final HUD hud;
+    private final DevConsole devConsole;
     private final List<de.tum.cit.fop.maze.entity.obstacle.Enemy> enemies = new ArrayList<>();
     private final List<de.tum.cit.fop.maze.entity.collectible.Collectible> collectibles = new ArrayList<>();
     private GameState gameState;
@@ -76,6 +77,7 @@ public class GameScreen implements Screen {
     public GameScreen(MazeRunnerGame game, int level) {
         this.game = game;
         this.hud = new HUD(game);
+        this.devConsole = new DevConsole(game);
         this.level = level;
         this.propertiesPath = toPropertiesPath(level);
         Viewport viewport = new ExtendViewport(WORLD_WIDTH, WORLD_HEIGHT);
@@ -94,6 +96,8 @@ public class GameScreen implements Screen {
         player = new Player(collisionLayer, 78,46, game::goToGameOverScreen);
         player.setWorldBounds(WORLD_WIDTH, WORLD_HEIGHT);
         applyUpgrades();
+        devConsole.setPlayer(player);
+        devConsole.addToStage(hud.getStage());
 
     }
 
@@ -101,6 +105,7 @@ public class GameScreen implements Screen {
         this.game = game;
         this.gameState = gameState;
         this.hud = new HUD(game);
+        this.devConsole = new DevConsole(game);
         if (gameState.getMapPath() != null) {
             this.mapPath = gameState.getMapPath();
         }
@@ -122,6 +127,8 @@ public class GameScreen implements Screen {
         player = new Player(collisionLayer, 78,46, game::goToGameOverScreen);
         player.setWorldBounds(WORLD_WIDTH, WORLD_HEIGHT);
         applyUpgrades();
+        devConsole.setPlayer(player);
+        devConsole.addToStage(hud.getStage());
 
         this.player.setX(gameState.getPlayerX());
         this.player.setY(gameState.getPlayerY());
@@ -297,6 +304,7 @@ public class GameScreen implements Screen {
     @Override
     public void resize(int width, int height) {
         stage.getViewport().update(width, height, false);
+        hud.resize(width, height);
 
         uiCamera.setToOrtho(false, width, height);
         uiCamera.update();
@@ -397,6 +405,14 @@ public class GameScreen implements Screen {
 
     public HUD getHud() {
         return hud;
+    }
+
+    public void toggleDevConsole() {
+        devConsole.toggle(hud.getStage());
+    }
+
+    public boolean isDevConsoleVisible() {
+        return devConsole.isVisible();
     }
 
     private static String toPropertiesPath(int levelNumber) {
