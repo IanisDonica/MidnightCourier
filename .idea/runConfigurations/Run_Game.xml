@@ -1,9 +1,9 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Run Game" type="Application" factoryName="Application">
-    <option name="ALTERNATIVE_JRE_PATH" value="temurin-17" />
+    <option name="ALTERNATIVE_JRE_PATH" value="$USER_HOME$/.jdks/corretto-17.0.17" />
     <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
     <option name="MAIN_CLASS_NAME" value="de.tum.cit.fop.maze.DesktopLauncher" />
-    <module name="glovobranch.desktop.main" />
+    <module name="fopws2526projectfop-transprutsolution.desktop.main" />
     <extension name="coverage">
       <pattern>
         <option name="PATTERN" value="de.tum.cit.ase.maze.*" />

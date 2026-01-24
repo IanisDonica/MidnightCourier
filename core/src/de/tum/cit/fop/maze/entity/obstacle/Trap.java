@@ -9,6 +9,9 @@ public class Trap extends Obstacle {
 
     @Override
     public void collision() {
+        if (player.isPotholeImmune()) {
+            return;
+        }
         if (!player.isStunned()) {
             player.damage(1);
         }

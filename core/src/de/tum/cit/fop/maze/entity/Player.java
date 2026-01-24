@@ -21,13 +21,17 @@ public class Player extends Entity {
     protected Animation<TextureRegion> stunnedAnimation;
     private boolean moveUp, moveDown, moveLeft, moveRight;
     private boolean sprinting;
-    private int hp = 3;
+    private int maxHp = 3;
+    private int hp = maxHp;
     private float speedUpTimer = 0;
+    private float drinkDurationMultiplier = 1f;
     private boolean hasKey = false;
     private boolean stunned = false;
     private float stunDuration;
     private char lastInputDirection = 'd';
     private boolean gameOverTriggered = false;
+    private float speedMultiplier = 1f;
+    private boolean potholeImmune = false;
 
     //Initialize the player on a specific coordinate point
     public Player(TiledMapTileLayer collisionLayer, float x, float y, GameOverListener gameOverListener) {
@@ -68,6 +72,26 @@ public class Player extends Entity {
 
     public void setSprinting(boolean sprinting) {
         this.sprinting = sprinting;
+    }
+
+    public void setSpeedMultiplier(float speedMultiplier) {
+        this.speedMultiplier = speedMultiplier;
+    }
+
+    public void setPotholeImmune(boolean potholeImmune) {
+        this.potholeImmune = potholeImmune;
+    }
+
+    public void setMaxHp(int maxHp) {
+        this.maxHp = maxHp;
+    }
+
+    public int getMaxHp() {
+        return maxHp;
+    }
+
+    public void setDrinkDurationMultiplier(float drinkDurationMultiplier) {
+        this.drinkDurationMultiplier = drinkDurationMultiplier;
     }
 
     private void initialiseAnimations() {
@@ -131,7 +155,7 @@ public class Player extends Entity {
     @Override
     public void act(float delta) {
         super.act(delta);
-        speed = 20.5f * delta;
+        speed = 20.5f * delta * speedMultiplier;
         if (sprinting) {speed *= 2f;}
         float deltaX = 0, deltaY = 0;
 
@@ -191,7 +215,7 @@ public class Player extends Entity {
 
     public void drinkEnergyDrink() {
         //This method seems useless, but it its mostly for later in order to handle sounds / screen effects etc.
-        speedUpTimer = 5f;
+        speedUpTimer = 5f * drinkDurationMultiplier;
     }
 
     public void pickupKey() {
@@ -204,7 +228,7 @@ public class Player extends Entity {
     }
 
     public void setHp(int hp) {
-        this.hp = Math.min(hp, 3);
+        this.hp = Math.min(hp, maxHp);
     }
     public int getHp() {
         return this.hp;
@@ -212,5 +236,9 @@ public class Player extends Entity {
 
     public boolean isStunned() {
         return stunned;
+    }
+
+    public boolean isPotholeImmune() {
+        return potholeImmune;
     }
 }

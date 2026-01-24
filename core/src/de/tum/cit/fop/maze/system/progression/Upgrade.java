@@ -12,4 +12,6 @@ public interface Upgrade {
     int getCost();
 
     String[] getPrerequisites();
+
+    // TODO make a method here that will fire up a call in the Achievment manager for a achivment based on buying certain amount of ugrade
 }
