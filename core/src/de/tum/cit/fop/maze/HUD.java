@@ -15,7 +15,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.viewport.StretchViewport;
+import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import de.tum.cit.fop.maze.system.ConfigManager;
 
@@ -41,7 +41,7 @@ public class HUD {
     public HUD(MazeRunnerGame game){
         //this.game = game;
         this.configManager = game.getConfigManager();
-        viewport = new StretchViewport(1920, 1080);
+        viewport = new ExtendViewport(1920, 1080);
         stage = new Stage(viewport);
         TextureAtlas textureAtlas = new TextureAtlas("assets/craft/craftacular-ui.atlas");
         heart_texture = textureAtlas.findRegion("heart");
@@ -178,6 +178,10 @@ public class HUD {
 
     public Viewport getViewport(){
         return viewport;
+    }
+
+    public void resize(int width, int height) {
+        viewport.update(width, height, true);
     }
 
     public void setShopButtonVisible(boolean visible) {
