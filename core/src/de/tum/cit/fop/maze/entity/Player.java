@@ -110,10 +110,20 @@ public class Player extends Entity {
 
     private void initialiseAnimations() {
         Texture walkSheet = new Texture(Gdx.files.internal("character.png"));
+        Texture walkSheetDownUp = new Texture(Gdx.files.internal("CharacterUpDown.png"));
+        Texture walkSheetRight =  new Texture(Gdx.files.internal("Character_Right.png"));
+        Texture walkSheetLeft = new Texture(Gdx.files.internal("Character_Left.png"));
 
         int frameWidth = 16;
         int frameHeight = 32;
         int animationFrames = 4;
+
+        int frameWidthDownUp = 11;
+        int frameHeightDownUp = 20;
+        ///int animationFramesDownUp = 2;
+
+        int frameWidthRightLeft = 16;
+        int frameHeightRightLeft = 20;
 
         Array<TextureRegion> walkDownFrames = new Array<>(TextureRegion.class);
         Array<TextureRegion> walkRightFrames = new Array<>(TextureRegion.class);
@@ -122,10 +132,10 @@ public class Player extends Entity {
         Array<TextureRegion> stunnedFrames = new Array<>(TextureRegion.class);
 
         for (int col = 0; col < animationFrames; col++) {
-            walkDownFrames.add(new TextureRegion(walkSheet, col * frameWidth, 0, frameWidth, frameHeight));
-            walkRightFrames.add(new TextureRegion(walkSheet, col * frameWidth, 32, frameWidth, frameHeight));
-            walkUpFrames.add(new TextureRegion(walkSheet, col * frameWidth, 64, frameWidth, frameHeight));
-            walkLeftFrames.add(new TextureRegion(walkSheet, col * frameWidth, 96, frameWidth, frameHeight));
+            walkUpFrames.add(new TextureRegion(walkSheetDownUp, col * frameWidthDownUp, 0, frameWidthDownUp, frameHeightDownUp));
+            walkRightFrames.add(new TextureRegion(walkSheetRight, col * frameWidthRightLeft, 0, frameWidthRightLeft, frameHeightRightLeft));
+            walkDownFrames.add(new TextureRegion(walkSheetDownUp, col * frameWidthDownUp, 20, frameWidthDownUp, frameHeightDownUp));
+            walkLeftFrames.add(new TextureRegion(walkSheetLeft, col * frameWidthRightLeft, 0, frameWidthRightLeft, frameHeightRightLeft));
             stunnedFrames.add(new TextureRegion(walkSheet, 80 + col * frameWidth, 96, frameWidth, frameHeight));
         }
 
