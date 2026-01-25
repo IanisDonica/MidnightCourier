@@ -19,6 +19,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import de.tum.cit.fop.maze.MazeRunnerGame;
+import de.tum.cit.fop.maze.system.AudioManager;
 import de.tum.cit.fop.maze.system.ProgressionManager;
 import de.tum.cit.fop.maze.system.progression.Upgrade;
 
@@ -53,9 +54,11 @@ public class ProgressionTreeScreen implements Screen {
     private final Texture megaTexture;
     private final Image megaImage;
     private final Map<String, TextButton> buttonsByName = new HashMap<>();
+    private final AudioManager audioManager;
 
     public ProgressionTreeScreen(MazeRunnerGame game) {
         this.game = game;
+        audioManager = game.getAudioManager();
         Viewport viewport = new FitViewport(1920, 1080);
         stage = new Stage(viewport, game.getSpriteBatch());
         shapeRenderer = new ShapeRenderer();
@@ -76,6 +79,7 @@ public class ProgressionTreeScreen implements Screen {
         backButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
+                audioManager.playSound("Click.wav", 1);
                 game.goBackFromProgressionTree();
             }
         });
@@ -84,16 +88,7 @@ public class ProgressionTreeScreen implements Screen {
     @Override
     public void show() {
         Gdx.input.setInputProcessor(stage);
-        stage.addListener(new com.badlogic.gdx.scenes.scene2d.InputListener() {
-            @Override
-            public boolean keyDown(com.badlogic.gdx.scenes.scene2d.InputEvent event, int keycode) {
-                if (keycode == Input.Keys.ESCAPE) {
-                    game.goBackFromProgressionTree();
-                    return true;
-                }
-                return false;
-            }
-        });
+        stage.addListener(game.getKeyHandler());
         rebuildTable();
     }
 
@@ -219,6 +214,7 @@ public class ProgressionTreeScreen implements Screen {
                 @Override
                 public void changed(ChangeEvent event, Actor actor) {
                     if (progressionManager.buyUpgrade(upgradeName)) {
+                        audioManager.playSound("Click.wav", 1);
                         rebuildTable();
                     }
                 }

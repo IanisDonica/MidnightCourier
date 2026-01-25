@@ -16,6 +16,7 @@ import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import de.tum.cit.fop.maze.MazeRunnerGame;
+import de.tum.cit.fop.maze.system.AudioManager;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
@@ -29,11 +30,13 @@ public class HighscoreScreen implements Screen {
     private final MazeRunnerGame game;
     private final Table table;
     private final TextButton backButton;
+    private final AudioManager audioManager;
 
     public HighscoreScreen(MazeRunnerGame game) {
         this.game = game;
         Viewport viewport = new FitViewport(1920, 1080);
         stage = new Stage(viewport, game.getSpriteBatch());
+        audioManager = game.getAudioManager();
 
         table = new Table();
         table.setFillParent(true);
@@ -45,6 +48,7 @@ public class HighscoreScreen implements Screen {
         backButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
+                audioManager.playSound("Click.wav", 1);
                 game.goToMenu();
             }
         });
@@ -70,16 +74,7 @@ public class HighscoreScreen implements Screen {
     @Override
     public void show() {
         Gdx.input.setInputProcessor(stage);
-        stage.addListener(new com.badlogic.gdx.scenes.scene2d.InputListener() {
-            @Override
-            public boolean keyDown(com.badlogic.gdx.scenes.scene2d.InputEvent event, int keycode) {
-                if (keycode == Input.Keys.ESCAPE) {
-                    game.goToMenu();
-                    return true;
-                }
-                return false;
-            }
-        });
+        stage.addListener(game.getKeyHandler());
         rebuildTable();
     }
 

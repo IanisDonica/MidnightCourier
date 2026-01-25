@@ -1,6 +1,7 @@
 package de.tum.cit.fop.maze.system;
 
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import de.tum.cit.fop.maze.MazeRunnerGame;
@@ -10,12 +11,13 @@ import de.tum.cit.fop.maze.screen.*;
 public class KeyHandler extends InputListener {
     private final MazeRunnerGame game;
     private final ConfigManager configManager;
+    private final AudioManager audioManager;
     private Player player;
-    private GameScreen gameScreen;
 
     public KeyHandler(MazeRunnerGame game) {
         this.game = game;
         configManager = game.getConfigManager();
+        audioManager = game.getAudioManager();
     }
 
     @Override
@@ -29,58 +31,12 @@ public class KeyHandler extends InputListener {
     }
 
     private boolean handleKey(int keycode, boolean isDown) {
-        if (gameScreen != null && gameScreen.isDevConsoleVisible()) {
-            if (isDown && (keycode == Input.Keys.GRAVE || keycode == Input.Keys.ESCAPE)) {
-                gameScreen.toggleDevConsole();
-            }
-            return true;
-        }
-
         // Player movement and sprint
         if (player != null && checkMovementKeys(keycode, isDown)) return true;
 
-        // GameScreen debug and menu (only on keyDown)
+        // GameScreen debug, menu and effects (only on keyDown)
         if (isDown) {
-            if (keycode == Input.Keys.GRAVE) {
-                if (game.getScreen() instanceof GameScreen && gameScreen != null) {
-                    gameScreen.toggleDevConsole();
-                    return true;
-                }
-            }
-            if (keycode == configManager.getKeyBinding("openShop")) {
-                if (game.getScreen() instanceof GameScreen && gameScreen != null && gameScreen.getHud().isShopButtonVisible()) {
-                    game.goToProgressionTreeScreenFromGame();
-                    return true;
-                }
-            }
-            if (keycode == configManager.getKeyBinding("pause")) {
-                if (game.getScreen() instanceof GameScreen) {
-                    game.pause();
-                } else if (game.getScreen() instanceof SettingsScreen || game.getScreen() instanceof SettingsControlsScreen) {
-                    game.goToGame();
-                }
-                return true;
-            }
-            if (keycode == configManager.getKeyBinding("zoomIn")) {
-                gameScreen.adjustZoom(-0.02f);
-                return true;
-            }
-            if (keycode == configManager.getKeyBinding("zoomOut")) {
-                gameScreen.adjustZoom(0.02f);
-                return true;
-            }
-            if (keycode == configManager.getKeyBinding("moreFog")) {
-                gameScreen.adjustFog(-0.5f);
-                return true;
-            }
-            if (keycode == configManager.getKeyBinding("lessFog")) {
-                gameScreen.adjustFog(0.5f);
-                return true;
-            }
-            if (keycode == configManager.getKeyBinding("noire")) {
-                gameScreen.toggleNoireMode();
-                return true;
-            }
+            return handlePauseKey(keycode) || handleScreenEffects(keycode);
         }
 
         return false;
@@ -110,15 +66,68 @@ public class KeyHandler extends InputListener {
         return false;
     }
 
-    public ConfigManager getConfigManager() {
-        return configManager;
+    private boolean handleScreenEffects(int keycode) {
+        GameScreen gameScreen = game.getGameScreen();
+        Screen s = game.getScreen();
+        if (gameScreen == null) return false;
+        if (keycode == Input.Keys.GRAVE && s instanceof GameScreen) {
+            audioManager.playSound("Click.wav", 1);
+            gameScreen.toggleDevConsole();
+            return true;
+        }
+
+        if (keycode == configManager.getKeyBinding("openShop") && s instanceof GameScreen && gameScreen.getHud().isShopButtonVisible()) {
+            audioManager.playSound("Click.wav", 1);
+            game.goToProgressionTreeScreenFromGame();
+            return true;
+        }
+        if (keycode == configManager.getKeyBinding("zoomIn")) {
+            audioManager.playSound("Click.wav", 1);
+            gameScreen.adjustZoom(-0.02f);
+            return true;
+        }
+        if (keycode == configManager.getKeyBinding("zoomOut")) {
+            audioManager.playSound("Click.wav", 1);
+            gameScreen.adjustZoom(0.02f);
+            return true;
+        }
+        if (keycode == configManager.getKeyBinding("moreFog")) {
+            audioManager.playSound("Click.wav", 1);
+            gameScreen.adjustFog(-0.5f);
+            return true;
+        }
+        if (keycode == configManager.getKeyBinding("lessFog")) {
+            audioManager.playSound("Click.wav", 1);
+            gameScreen.adjustFog(0.5f);
+            return true;
+        }
+        if (keycode == configManager.getKeyBinding("noire")) {
+            audioManager.playSound("Click.wav", 1);
+            gameScreen.toggleNoireMode();
+            return true;
+        }
+        return false;
+    }
+
+    private boolean handlePauseKey(int keycode) {
+        if (keycode == configManager.getKeyBinding("pause")) {
+            audioManager.playSound("Click.wav", 1);
+            Screen s = game.getScreen();
+            if (s instanceof GameScreen && game.getGameScreen() != null) {
+                game.pause();
+            } else if (s instanceof SettingsScreen && game.getGameScreen() != null && game.getGameScreen().isPaused()) {
+                game.goToGame();
+            } else if (s instanceof SettingsGameScreen || s instanceof SettingsVideoScreen || s instanceof SettingsAudioScreen || s instanceof SettingsControlsScreen) {
+                game.goToSettingsScreen();
+            } else {
+                game.goToMenu();
+            }
+            return true;
+        }
+        return false;
     }
 
     public void setPlayer(Player player) {
         this.player = player;
-    }
-
-    public void setGameScreen(GameScreen gameScreen) {
-        this.gameScreen = gameScreen;
     }
 }

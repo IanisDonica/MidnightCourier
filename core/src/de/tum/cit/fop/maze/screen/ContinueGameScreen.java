@@ -14,18 +14,24 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import de.tum.cit.fop.maze.MazeRunnerGame;
+import de.tum.cit.fop.maze.system.AudioManager;
 import de.tum.cit.fop.maze.system.GameState;
 import de.tum.cit.fop.maze.system.SaveManager;
 
 public class ContinueGameScreen implements Screen {
+    private final MazeRunnerGame game;
     private final Stage stage;
+    private final AudioManager audioManager;
 
     public ContinueGameScreen(MazeRunnerGame game){
+        this.game = game;
         var camera = new OrthographicCamera();
         camera.zoom = 1.5f; // Set camera zoom for a closer view
 
         Viewport viewport = new FitViewport(1920, 1080);
         stage = new Stage(viewport, game.getSpriteBatch()); // Create a stage for UI elements
+
+        audioManager = game.getAudioManager();
 
         Table table = new Table(); // Create a table for layout
         table.setFillParent(true); // Make the table fill the stage
@@ -40,6 +46,7 @@ public class ContinueGameScreen implements Screen {
         autosaveButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
+                audioManager.playSound("Click.wav", 1);
                 game.goToGame(SaveManager.loadGame("autosave"));
             }
         });
@@ -60,6 +67,7 @@ public class ContinueGameScreen implements Screen {
         goToMenu.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
+                audioManager.playSound("Click.wav", 1);
                 game.goToMenu();
             }
         });
@@ -87,6 +95,7 @@ public class ContinueGameScreen implements Screen {
     public void show() {
         // Set the input processor so the stage can receive input events
         Gdx.input.setInputProcessor(stage);
+        stage.addListener(game.getKeyHandler());
     }
 
     // The following methods are part of the Screen interface but are not used in this screen.

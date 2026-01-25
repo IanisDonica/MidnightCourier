@@ -12,15 +12,18 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import de.tum.cit.fop.maze.MazeRunnerGame;
 import de.tum.cit.fop.maze.system.AchievementManager;
+import de.tum.cit.fop.maze.system.AudioManager;
 
 public class AchievementsScreen implements Screen {
     private Stage stage;
     private MazeRunnerGame game;
+    private final AudioManager audioManager;
 
     public AchievementsScreen(MazeRunnerGame game, AchievementManager achievementManager){
         this.game = game;
         var camera = new OrthographicCamera();
         camera.zoom = 1.5f; // Set camera zoom for a closer view
+        audioManager = game.getAudioManager();
 
         Viewport viewport = new FitViewport(1920, 1080);
         stage = new Stage(viewport, game.getSpriteBatch()); // Create a stage for UI elements
@@ -32,6 +35,7 @@ public class AchievementsScreen implements Screen {
         mainMenuButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent changeEvent, Actor actor) {
+                audioManager.playSound("Click.wav", 1);
                 game.goToMenu();
             }
         });

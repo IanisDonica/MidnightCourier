@@ -14,15 +14,18 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import de.tum.cit.fop.maze.MazeRunnerGame;
+import de.tum.cit.fop.maze.system.AudioManager;
 
 public class SettingsScreen implements Screen {
     private final MazeRunnerGame game;
     private final Stage stage;
+    private final AudioManager audioManager;
 
     public SettingsScreen(MazeRunnerGame game){
         this.game = game;
         var camera = new OrthographicCamera();
         camera.zoom = 1.5f; // Set camera zoom for a closer view
+        audioManager = game.getAudioManager();
 
         Viewport viewport = new FitViewport(1920, 1080);
         stage = new Stage(viewport, game.getSpriteBatch()); // Create a stage for UI elements
@@ -54,6 +57,7 @@ public class SettingsScreen implements Screen {
         goBack.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
+                audioManager.playSound("Click.wav", 1);
                 game.goToMenu(); // Change to the game screen when the button is pressed
             }
         });
@@ -61,6 +65,7 @@ public class SettingsScreen implements Screen {
         controlSettings.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
+                audioManager.playSound("Click.wav", 1);
                 game.goToSettingsControlsScreen(); // Change to the settings:controls screen when the button is pressed
             }
         });

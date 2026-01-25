@@ -17,7 +17,7 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.*;
-import de.tum.cit.fop.maze.HUD;
+import de.tum.cit.fop.maze.system.HUD;
 import de.tum.cit.fop.maze.MazeRunnerGame;
 import de.tum.cit.fop.maze.entity.Player;
 import de.tum.cit.fop.maze.map.MapLoader;
@@ -367,7 +367,6 @@ public class GameScreen implements Screen {
         player.toFront();
         stage.addListener(game.getKeyHandler());
         game.getKeyHandler().setPlayer(player);
-        game.getKeyHandler().setGameScreen(this);
 
         stage.getCamera().position.set(player.getX() + player.getWidth() / 2, player.getY() + player.getHeight() / 2, 0);
         stage.getCamera().update();
@@ -401,6 +400,10 @@ public class GameScreen implements Screen {
             ((OrthographicCamera) stage.getCamera()).zoom = MathUtils.clamp(gameState.getCameraZoom(), MIN_ZOOM, MAX_ZOOM);
         }
         this.pointManager = gameState.getPointManager();
+    }
+
+    public boolean isPaused() {
+        return paused;
     }
 
     public HUD getHud() {
