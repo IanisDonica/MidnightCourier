@@ -48,7 +48,14 @@ public class GameOverScreen implements Screen {
             @Override
             public void changed(ChangeEvent changeEvent, Actor actor) {
                 audioManager.playSound("Click.wav", 1);
-                game.goToGame(game.getCurrentLevelNumber());
+                if(game.getCurrentLevelNumber() != 0){
+
+                    game.goToGame(game.getCurrentLevelNumber());
+
+                }
+                else {System.out.print("S"); game.goToEndless();}
+
+
             }
         });
 
