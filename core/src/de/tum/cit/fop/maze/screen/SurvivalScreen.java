@@ -202,17 +202,17 @@ public class SurvivalScreen implements Screen {
 
     @Override
     public void render(float delta) {
-        Adder+=0.04f;
+        Adder*=2.0003;
         Delta+=Adder;
         System.out.println(Adder);
 
 
         Random random = new Random();
 
-        while(Delta >= 500)
+        while(Delta >= 80)
         {
             System.out.println(Adder);
-            Delta = -100;
+            Delta = -80;
             Enemy enemy = new Enemy(collisionLayer, player.getX() + random.nextInt(5, 30), player.getY() + random.nextInt(5, 30));
             stage.addActor(enemy);
             enemies.add(enemy);
