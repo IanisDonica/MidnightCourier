@@ -84,7 +84,8 @@ public class SurvivalScreen implements Screen {
         this.propertiesPath = toPropertiesPath(level);
         Viewport viewport = new ExtendViewport(WORLD_WIDTH, WORLD_HEIGHT);
         stage = new Stage(viewport, game.getSpriteBatch());
-        map = new TmxMapLoader().load(mapPath);
+        String generatedMapPath = buildGeneratedTmx(mapPath, propertiesPath, level);
+        map = new TmxMapLoader().load(String.valueOf(Gdx.files.local(generatedMapPath)));
         mapRenderer = new OrthogonalTiledMapRenderer(map, 1 / 32f, game.getSpriteBatch());
         fbo = new FrameBuffer(Pixmap.Format.RGBA8888, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), false);
         fboRegion = new TextureRegion(fbo.getColorBufferTexture());
@@ -127,7 +128,8 @@ public class SurvivalScreen implements Screen {
         }
         this.level = gameState.getLevel();
         this.propertiesPath = toPropertiesPath(this.level);
-        this.map = new TmxMapLoader().load(this.mapPath);
+        String generatedMapPath = buildGeneratedTmx(this.mapPath, this.propertiesPath, this.level);
+        this.map = new TmxMapLoader().load(String.valueOf(Gdx.files.local(generatedMapPath)));
 
         Viewport viewport = new ExtendViewport(WORLD_WIDTH, WORLD_HEIGHT);
         stage = new Stage(viewport, game.getSpriteBatch());
@@ -165,6 +167,12 @@ public class SurvivalScreen implements Screen {
         OrthographicCamera camera = (OrthographicCamera) stage.getCamera();
         camera.zoom = MathUtils.clamp(camera.zoom + amount, MIN_ZOOM, MAX_ZOOM);
         camera.update();
+    }
+
+    private String buildGeneratedTmx(String templateMapPath, String propertiesPath, int level) {
+        String outputPath = String.format("assets/Assets_Map/generated-survival-level-%d.tmx", level);
+        mapLoader.buildTmxFromProperties(propertiesPath, templateMapPath, outputPath);
+        return outputPath;
     }
 
     public void adjustFog(float amount) {

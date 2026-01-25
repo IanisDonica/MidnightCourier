@@ -15,21 +15,54 @@ import de.tum.cit.fop.maze.entity.obstacle.Enemy;
 import de.tum.cit.fop.maze.entity.obstacle.Shop;
 import de.tum.cit.fop.maze.entity.obstacle.Trap;
 import de.tum.cit.fop.maze.system.PointManager;
+import java.io.BufferedReader;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.Map;
-import java.util.Properties;
 
 public class MapLoader {
+    public String buildTmxFromProperties(String propertiesPath, String templateTmxPath, String outputTmxPath) {
+        List<long[]> entries = readPropertyEntries(propertiesPath);
+        String templateTmx = readTextFile(templateTmxPath);
+        int[] size = readMapSizeFromProperties(entries);
+        int width = size[0];
+        int height = size[1];
+
+        long[][] tiles = new long[height][width];
+        for (long[] entry : entries) {
+            int x = (int) entry[0];
+            int y = (int) entry[1];
+            long value = entry[2];
+            // All tiles will be of value at least 100 and will be exactly 100 over the
+            if (value < 101) {
+                continue;
+            }
+            long gid = value - 100;
+            int row = height - 1 - y; // TMX CSV is top-to-bottom; properties use bottom-left origin
+            if (x < 0 || x >= width || row < 0 || row >= height) {
+                continue;
+            }
+            tiles[row][x] = gid;
+        }
+
+        String csv = buildCsv(tiles, width, height);
+        String updatedTmx = buildTmxDocument(templateTmx, width, height, csv);
+        Gdx.files.local(outputTmxPath).writeString(updatedTmx, false, "UTF-8");
+        return outputTmxPath;
+    }
+
     public TiledMapTileLayer buildCollisionLayerFromProperties(TiledMap map, String propertiesPath) {
         TiledMapTileLayer layer = createLayer(map);
         int width = layer.getWidth();
         int height = layer.getHeight();
-        Properties props = loadProperties(propertiesPath);
-        for (int[] entry : parseProperties(props)) {
-            int x = entry[0];
-            int y = entry[1];
-            int value = entry[2];
+        for (long[] entry : readPropertyEntries(propertiesPath)) {
+            int x = (int) entry[0];
+            int y = (int) entry[1];
+            long value = entry[2];
+            if (value >= 101) {
+                continue;
+            }
             if (value == 7 || value == 2) {
                 layer.setCell(x, y, new TiledMapTileLayer.Cell());
             } else if (value == 10) {
@@ -49,22 +82,26 @@ public class MapLoader {
 
     public TiledMapTileLayer buildRoadLayerFromProperties(TiledMap map, String propertiesPath) {
         TiledMapTileLayer layer = createLayer(map);
-        Properties props = loadProperties(propertiesPath);
-        for (int[] entry : parseProperties(props)) {
-            int value = entry[2];
+        for (long[] entry : readPropertyEntries(propertiesPath)) {
+            long value = entry[2];
+            if (value >= 101) {
+                continue;
+            }
             if (value == 11 || value == 12) {
-                layer.setCell(entry[0], entry[1], new TiledMapTileLayer.Cell());
+                layer.setCell((int) entry[0], (int) entry[1], new TiledMapTileLayer.Cell());
             }
         }
         return layer;
     }
 
     public void spawnEntitiesFromProperties(Stage stage, PointManager pointManager, TiledMapTileLayer collisionLayer, TiledMapTileLayer roadLayer, String propertiesPath, HUD hud, List<Enemy> enemies, List<Collectible> collectibles, ExitDoor.VictoryListener victoryListener) {
-        Properties props = loadProperties(propertiesPath);
-        for (int[] entry : parseProperties(props)) {
-            int x = entry[0];
-            int y = entry[1];
-            int value = entry[2];
+        for (long[] entry : readPropertyEntries(propertiesPath)) {
+            int x = (int) entry[0];
+            int y = (int) entry[1];
+            long value = entry[2];
+            if (value >= 101) {
+                continue;
+            }
             if (value == 3) {
                 HealthPickup pickup = new HealthPickup(x, y, pointManager);
                 stage.addActor(pickup);
@@ -113,40 +150,116 @@ public class MapLoader {
         return new TiledMapTileLayer(width, height, tileWidth, tileHeight);
     }
 
-    private Properties loadProperties(String propertiesPath) {
-        Properties props = new Properties();
-        try (InputStream input = openProperties(propertiesPath)) {
-            props.load(input);
+    private List<long[]> readPropertyEntries(String propertiesPath) {
+        List<long[]> entries = new java.util.ArrayList<>();
+        try (InputStream input = openProperties(propertiesPath);
+             BufferedReader reader = new BufferedReader(new InputStreamReader(input, StandardCharsets.UTF_8))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                line = line.trim();
+                if (line.isEmpty() || line.startsWith("#") || line.startsWith("!")) {
+                    continue;
+                }
+                int eqIndex = line.indexOf('=');
+                if (eqIndex <= 0) {
+                    continue;
+                }
+                String key = line.substring(0, eqIndex).trim();
+                String valueText = line.substring(eqIndex + 1).trim();
+                String[] parts = key.split(",");
+                if (parts.length != 2) {
+                    continue;
+                }
+                try {
+                    int x = Integer.parseInt(parts[0].trim());
+                    int y = Integer.parseInt(parts[1].trim());
+                    long value = Long.parseLong(valueText);
+                    entries.add(new long[]{x, y, value});
+                } catch (NumberFormatException ignored) {
+                    // Skip bad coordinates or values.
+                }
+            }
         } catch (Exception ex) {
-            throw new RuntimeException("Property file doesn't exist");
-        }
-        return props;
-    }
-
-    private List<int[]> parseProperties(Properties props) {
-        List<int[]> entries = new java.util.ArrayList<>();
-        for (Map.Entry<Object, Object> entry : props.entrySet()) {
-            String key = String.valueOf(entry.getKey());
-            String[] parts = key.split(",");
-            if (parts.length != 2) {
-                continue;
-            }
-            try {
-                int x = Integer.parseInt(parts[0]);
-                int y = Integer.parseInt(parts[1]);
-                int value = Integer.parseInt(String.valueOf(entry.getValue()));
-                entries.add(new int[]{x, y, value});
-            } catch (NumberFormatException ignored) {
-                // Skip bad coordinates or values.
-            }
+            throw new RuntimeException("no such propoerty file");
         }
         return entries;
     }
 
     private InputStream openProperties(String propertiesPath) {
-        if (Gdx.files.local(propertiesPath).exists()) {
-            return Gdx.files.local(propertiesPath).read();
-        }
-        return Gdx.files.internal(propertiesPath).read();
+        return Gdx.files.local(propertiesPath).read();
     }
+
+    private String readTextFile(String path) {
+        return Gdx.files.local(path).readString("UTF-8");
+    }
+
+    private int[] readMapSizeFromProperties(List<long[]> entries) {
+        int maxX = -1;
+        int maxY = -1;
+        for (long[] entry : entries) {
+            int x = (int) entry[0];
+            int y = (int) entry[1];
+            if (x > maxX) maxX = x;
+            if (y > maxY) maxY = y;
+        }
+        int width = Math.max(1, maxX + 1);
+        int height = Math.max(1, maxY + 1);
+        return new int[]{width, height};
+    }
+
+    private String buildCsv(long[][] tiles, int width, int height) {
+        StringBuilder csv = new StringBuilder();
+        for (int row = 0; row < height; row++) {
+            for (int col = 0; col < width; col++) {
+                csv.append(tiles[row][col]).append(',');
+            }
+            if (row + 1 < height) {
+                csv.append('\n');
+            }
+        }
+        return csv.toString();
+    }
+
+    private String buildTmxDocument(String templateTmx, int width, int height, String csv) {
+        String propertiesBlock = findFirstMatch(templateTmx, "<properties>.*?</properties>");
+        if (propertiesBlock == null) {
+            propertiesBlock = "";
+        }
+
+        java.util.regex.Pattern tilesetPattern = java.util.regex.Pattern.compile("<tileset[^>]*(?:/>|>.*?</tileset>)", java.util.regex.Pattern.DOTALL);
+        java.util.regex.Matcher matcher = tilesetPattern.matcher(templateTmx);
+        StringBuilder tilesets = new StringBuilder();
+        while (matcher.find()) {
+            tilesets.append(matcher.group()).append('\n');
+        }
+        String tilesetBlock = tilesets.toString();
+
+        StringBuilder tmx = new StringBuilder();
+        tmx.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+        tmx.append(String.format(
+                "<map version=\"1.10\" tiledversion=\"1.11.2\" orientation=\"orthogonal\" renderorder=\"right-down\" width=\"%d\" height=\"%d\" tilewidth=\"32\" tileheight=\"32\" infinite=\"0\" nextlayerid=\"2\" nextobjectid=\"1\">\n",
+                width,
+                height
+        ));
+        if (!propertiesBlock.isEmpty()) {
+            tmx.append(' ').append(propertiesBlock).append('\n');
+        }
+        if (!tilesetBlock.isEmpty()) {
+            tmx.append(' ').append(tilesetBlock);
+        }
+        tmx.append(" <layer id=\"1\" name=\"Tile Layer 1\" width=\"").append(width).append("\" height=\"").append(height).append("\">\n");
+        tmx.append("  <data encoding=\"csv\">\n");
+        tmx.append(csv).append('\n');
+        tmx.append("  </data>\n");
+        tmx.append(" </layer>\n");
+        tmx.append("</map>\n");
+        return tmx.toString();
+    }
+
+    private String findFirstMatch(String text, String pattern) {
+        java.util.regex.Pattern regex = java.util.regex.Pattern.compile(pattern, java.util.regex.Pattern.DOTALL);
+        java.util.regex.Matcher matcher = regex.matcher(text);
+        return matcher.find() ? matcher.group() : null;
+    }
+
 }
