@@ -263,6 +263,7 @@ public class SurvivalScreen implements Screen {
 
         renderWorld(batch, camera, viewX, viewY, viewW, viewH);
 
+
         // render hud
         hud.update(
                 level,
