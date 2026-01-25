@@ -3,13 +3,17 @@ package de.tum.cit.fop.maze.entity.obstacle;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import de.tum.cit.fop.maze.ai.ChaseBehavior;
 import de.tum.cit.fop.maze.ai.Pathfinder;
 import de.tum.cit.fop.maze.ai.PatrolBehaviour;
 import de.tum.cit.fop.maze.ai.RetreatBehavior;
 import de.tum.cit.fop.maze.entity.collectible.Collectible;
+import de.tum.cit.fop.maze.entity.Player;
 import java.util.ArrayList;
+import java.util.List;
 
 public class Enemy extends Obstacle {
     private enum EnemyState {
@@ -179,6 +183,82 @@ public class Enemy extends Obstacle {
         }
         float step = Math.min(speed * delta, dist);
         setPosition(getX() + (dx / dist) * step, getY() + (dy / dist) * step);
+    }
+
+    public static void spawnRandomEnemies(Player player, Stage stage, TiledMapTileLayer collisionLayer, int amount) {
+        if (player == null || stage == null || collisionLayer == null) {
+            return;
+        }
+        List<GridPoint2> walkableTiles = collectWalkableTiles(collisionLayer);
+        if (walkableTiles.isEmpty()) {
+            return;
+        }
+        List<GridPoint2> candidates = getSpawnCandidates(walkableTiles, player, 2, collisionLayer);
+        int spawned = 0;
+        while (spawned < amount && !candidates.isEmpty()) {
+            int index = MathUtils.random(candidates.size() - 1);
+            GridPoint2 target = candidates.remove(index);
+            float spawnX = target.x;
+            float spawnY = target.y;
+            if (wouldCollideAt(stage, spawnX, spawnY)) {
+                continue;
+            }
+            stage.addActor(new Enemy(collisionLayer, spawnX, spawnY));
+            spawned++;
+        }
+    }
+
+    private static List<GridPoint2> collectWalkableTiles(TiledMapTileLayer collisionLayer) {
+        List<GridPoint2> tiles = new ArrayList<>();
+        int width = collisionLayer.getWidth();
+        int height = collisionLayer.getHeight();
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                if (collisionLayer.getCell(x, y) == null) {
+                    tiles.add(new GridPoint2(x, y));
+                }
+            }
+        }
+        return tiles;
+    }
+
+    private static List<GridPoint2> getSpawnCandidates(List<GridPoint2> tiles, Player player, int distance, TiledMapTileLayer collisionLayer) {
+        int playerTileX = clampTileCoord(player.getX() + player.getWidth() / 2f, collisionLayer.getWidth());
+        int playerTileY = clampTileCoord(player.getY() + player.getHeight() / 2f, collisionLayer.getHeight());
+        List<GridPoint2> candidates = new ArrayList<>(tiles.size());
+        for (GridPoint2 tile : tiles) {
+            if (Math.abs(tile.x - playerTileX) <= distance && Math.abs(tile.y - playerTileY) <= distance) {
+                continue;
+            }
+            candidates.add(tile);
+        }
+        return candidates;
+    }
+
+    private static int clampTileCoord(float center, int max) {
+        int tile = MathUtils.floor(center);
+        if (tile < 0) {
+            return 0;
+        }
+        if (tile >= max) {
+            return max - 1;
+        }
+        return tile;
+    }
+
+    private static boolean wouldCollideAt(Stage stage, float x, float y) {
+        // It probably will never be null, but why not check
+        if (stage == null) {
+            return true;
+        }
+        Rectangle spawnBounds = new Rectangle(x, y, 1f, 1f);
+        for (Actor actor : stage.getActors()) {
+            Rectangle actorBounds = new Rectangle(actor.getX(), actor.getY(), actor.getWidth(), actor.getHeight());
+            if (spawnBounds.overlaps(actorBounds)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

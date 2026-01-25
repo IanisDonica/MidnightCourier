@@ -134,7 +134,7 @@ public class DevConsole {
         String cmd = parts[0].toLowerCase();
 
         switch (cmd) {
-            case "help" -> appendLine("Commands: help, tp <x> <y>, speed <multiplier>, sethp <hp>, setmaxhp <hp>, setcredits <points>, openshop, godmode [on|off], giveenergydrink, givekey, spawn <enemy|trap|bmwdriver> <x> <y>, spawnbmws <amount>, whereami");
+            case "help" -> appendLine("Commands: help, tp <x> <y>, speed <multiplier>, sethp <hp>, setmaxhp <hp>, setcredits <points>, openshop, godmode [on|off], giveenergydrink, givekey, spawn <enemy|trap|bmwdriver> <x> <y>, spawnbmws <amount>, spawnenemies <amount>, whereami");
             case "tp" -> {
                 if (parts.length < 3) {
                     appendLine("Usage: tp <x> <y>");
@@ -248,6 +248,18 @@ public class DevConsole {
                     }
                 }
             }
+            case "spawnenemies" -> {
+                if (parts.length < 2) {
+                    appendLine("Usage: spawnenemies <amount>");
+                } else {
+                    try {
+                        int amount = Integer.parseInt(parts[1]);
+                        spawnEnemies(amount);
+                    } catch (NumberFormatException ex) {
+                        appendLine("Invalid command.");
+                    }
+                }
+            }
             case "whereami" -> appendLine("player at " + player.getX() + ", " + player.getY());
             default -> appendLine("Unknown command. Try: help");
         }
@@ -315,5 +327,18 @@ public class DevConsole {
         }
         de.tum.cit.fop.maze.entity.obstacle.BmwEnemy.spawnRandomBmws(player, player.getStage(), amount);
         appendLine("spawned " + amount + " bmws");
+    }
+
+    private void spawnEnemies(int amount) {
+        if (player == null || player.getStage() == null) {
+            appendLine("No stage available.");
+            return;
+        }
+        if (collisionLayer == null) {
+            appendLine("Missing collision layer.");
+            return;
+        }
+        de.tum.cit.fop.maze.entity.obstacle.Enemy.spawnRandomEnemies(player, player.getStage(), collisionLayer, amount);
+        appendLine("spawned " + amount + " enemies");
     }
 }
