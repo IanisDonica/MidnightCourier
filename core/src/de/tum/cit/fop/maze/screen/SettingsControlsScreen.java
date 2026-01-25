@@ -3,7 +3,6 @@ package de.tum.cit.fop.maze.screen;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
@@ -23,31 +22,29 @@ public class SettingsControlsScreen implements Screen {
     private final MazeRunnerGame game;
     private final Stage stage;
     private final ConfigManager configManager;
-    private String rebindingAction = null;
-    private TextButton rebindingButton = null;
     private final Map<String, TextButton> actionButtons = new HashMap<>();
     private final AudioManager audioManager;
+    private String rebindingAction = null;
+    private TextButton rebindingButton = null;
 
     public SettingsControlsScreen(MazeRunnerGame game) {
         this.game = game;
         this.configManager = game.getConfigManager();
         audioManager = game.getAudioManager();
 
-        var camera = new OrthographicCamera();
-        camera.zoom = 1.5f; // Set camera zoom for a closer view
-
         Viewport viewport = new FitViewport(1920, 1080);
         stage = new Stage(viewport, game.getSpriteBatch()); // Create a stage for UI elements
 
         Table table = new Table(); // Create a table for layout
+        table.pad(80);
         table.setFillParent(true); // Make the table fill the stage
         stage.addActor(table); // Add the table to the stage
 
         // Add a label as a title
-        table.add(new Label("Settings: Controls", game.getSkin(), "title")).colspan(2).padBottom(80).row();
+        table.add(new Label("Settings: Controls", game.getSkin(), "title")).colspan(2).padBottom(15).row();
 
         Table keybindsTable = new Table();
-        keybindsTable.pad(20);
+        keybindsTable.pad(15);
 
         String[] actions = {"up", "down", "left", "right", "sprint", "openShop", "pause", "zoomIn", "zoomOut", "moreFog", "lessFog", "noire"};
 
@@ -70,7 +67,7 @@ public class SettingsControlsScreen implements Screen {
                 }
             });
 
-            keybindsTable.add(actionLabel).left().padRight(20);
+            keybindsTable.add(actionLabel).left().padRight(15);
             keybindsTable.add(keyButton).width(300).padBottom(10).row();
         }
 
@@ -126,10 +123,12 @@ public class SettingsControlsScreen implements Screen {
             }
         });
 
+
         HorizontalGroup horizontalGroup = new HorizontalGroup();
         horizontalGroup.addActor(backButton);
         horizontalGroup.addActor(saveButton);
-        table.add(horizontalGroup).colspan(2).padTop(20);
+        horizontalGroup.space(15);
+        table.add(horizontalGroup).colspan(2);
     }
 
     private void unbindButton(String action) {

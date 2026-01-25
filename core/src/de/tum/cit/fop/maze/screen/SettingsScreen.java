@@ -3,7 +3,6 @@ package de.tum.cit.fop.maze.screen;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
@@ -11,7 +10,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.viewport.FitViewport;
-import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import de.tum.cit.fop.maze.MazeRunnerGame;
 import de.tum.cit.fop.maze.system.AudioManager;
@@ -21,10 +19,8 @@ public class SettingsScreen implements Screen {
     private final Stage stage;
     private final AudioManager audioManager;
 
-    public SettingsScreen(MazeRunnerGame game){
+    public SettingsScreen(MazeRunnerGame game) {
         this.game = game;
-        var camera = new OrthographicCamera();
-        camera.zoom = 1.5f; // Set camera zoom for a closer view
         audioManager = game.getAudioManager();
 
         Viewport viewport = new FitViewport(1920, 1080);
@@ -40,19 +36,19 @@ public class SettingsScreen implements Screen {
         // Create and add a button to go to the game screen
 
         TextButton controlSettings = new TextButton("Controls", game.getSkin());
-        table.add(controlSettings).width(500).row();
+        table.add(controlSettings).width(500).padBottom(15).row();
 
         TextButton videoSettings = new TextButton("Video", game.getSkin());
-        table.add(videoSettings).width(500).row();
+        table.add(videoSettings).width(500).padBottom(15).row();
 
         TextButton audioSettings = new TextButton("Audio", game.getSkin());
-        table.add(audioSettings).width(500).row();
+        table.add(audioSettings).width(500).padBottom(15).row();
 
         TextButton gameSettings = new TextButton("Game", game.getSkin());
-        table.add(gameSettings).width(500).row();
+        table.add(gameSettings).width(500).padBottom(15).row();
 
         TextButton goBack = new TextButton("Back to the Menu", game.getSkin());
-        table.add(goBack).width(500).row();
+        table.add(goBack).width(500).padBottom(15).row();
 
         goBack.addListener(new ChangeListener() {
             @Override
@@ -67,6 +63,14 @@ public class SettingsScreen implements Screen {
             public void changed(ChangeEvent event, Actor actor) {
                 audioManager.playSound("Click.wav", 1);
                 game.goToSettingsControlsScreen(); // Change to the settings:controls screen when the button is pressed
+            }
+        });
+
+        audioSettings.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                audioManager.playSound("Click.wav", 1);
+                game.goToSettingsAudioScreen();
             }
         });
     }
