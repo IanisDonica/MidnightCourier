@@ -115,7 +115,7 @@ public class KeyHandler extends InputListener {
             Screen s = game.getScreen();
             if (s instanceof GameScreen && game.getGameScreen() != null) {
                 game.pause();
-            } else if (s instanceof SettingsScreen && game.getGameScreen() != null && game.getGameScreen().isPaused()) {
+            } else if (s instanceof SettingsScreen && game.getGameScreen() != null && game.getGameScreen().isPaused() || s instanceof ProgressionTreeScreen) {
                 game.goToGame();
             } else if (s instanceof SettingsGameScreen || s instanceof SettingsVideoScreen || s instanceof SettingsAudioScreen || s instanceof SettingsControlsScreen) {
                 game.goToSettingsScreen();

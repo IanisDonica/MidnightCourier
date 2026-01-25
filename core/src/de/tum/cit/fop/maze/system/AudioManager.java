@@ -18,6 +18,7 @@ public class AudioManager {
     private final Map<String, Sound> soundCache;
     private final Map<String, Music> musicCache;
     private Music currentMusic;
+    private float currentMusicVolume;
     private float masterVolume, soundEffectsVolume, musicVolume;
 
 
@@ -26,6 +27,9 @@ public class AudioManager {
         executor = Executors.newFixedThreadPool(2);
         soundCache = new HashMap<>();
         musicCache = new HashMap<>();
+    }
+
+    public void loadSettings() {
         configManager.loadAudioSettings();
         masterVolume = configManager.getVolume("masterVolume");
         soundEffectsVolume = configManager.getVolume("soundEffectsVolume");
@@ -79,6 +83,7 @@ public class AudioManager {
                 music.setLooping(loop);
                 music.play();
                 currentMusic = music;
+                currentMusicVolume = volume;
             }
         });
     }
@@ -168,12 +173,9 @@ public class AudioManager {
     public void setMasterVolume(float volume) {
         this.masterVolume = Math.max(0f, Math.min(1f, volume));
         configManager.setVolume("masterVolume", masterVolume);
-        executor.submit(() -> {
-            if (currentMusic != null && currentMusic.isPlaying()) {
-                currentMusic.setVolume(currentMusic.getVolume() * masterVolume);
-            }
-        });
+        handleActiveMusic();
     }
+
 
     public float getSoundEffectsVolume() {
         return soundEffectsVolume;
@@ -191,9 +193,13 @@ public class AudioManager {
     public void setMusicVolume(float volume) {
         this.musicVolume = MathUtils.clamp(volume, 0f, 1f);
         configManager.setVolume("musicVolume", musicVolume);
+        handleActiveMusic();
+    }
+
+    public void handleActiveMusic() {
         executor.submit(() -> {
             if (currentMusic != null && currentMusic.isPlaying()) {
-                currentMusic.setVolume(currentMusic.getVolume() * masterVolume);
+                currentMusic.setVolume(currentMusicVolume * musicVolume * masterVolume);
             }
         });
     }

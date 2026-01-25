@@ -48,6 +48,7 @@ public class MazeRunnerGame extends Game {
     @Override
     public void create() {
         configManager.loadKeyBindings();
+        audioManager.loadSettings();
         spriteBatch = new SpriteBatch(); // Create SpriteBatch
         skin = new Skin(Gdx.files.internal("craft/craftacular-ui.json")); // Load UI skin
         progressionManager = new ProgressionManager(2000);
