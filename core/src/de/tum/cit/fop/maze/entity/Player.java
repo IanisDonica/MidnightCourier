@@ -36,6 +36,7 @@ public class Player extends Entity {
     private float worldWidth = 0f;
     private float worldHeight = 0f;
     private float debugSpeedMultiplier = 1f;
+    private boolean godMode = false;
 
     //Initialize the player on a specific coordinate point
     public Player(TiledMapTileLayer collisionLayer, float x, float y, GameOverListener gameOverListener) {
@@ -136,6 +137,9 @@ public class Player extends Entity {
     }
 
     public void damage(int damage) {
+        if (godMode) {
+            return;
+        }
         hp -= damage;
         if (hp <= 0 && !gameOverTriggered) {
             gameOverTriggered = true;
@@ -259,5 +263,13 @@ public class Player extends Entity {
 
     public boolean isPotholeImmune() {
         return potholeImmune;
+    }
+
+    public void setGodMode(boolean godMode) {
+        this.godMode = godMode;
+    }
+
+    public boolean isGodMode() {
+        return godMode;
     }
 }

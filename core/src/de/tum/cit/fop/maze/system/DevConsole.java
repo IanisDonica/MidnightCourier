@@ -19,12 +19,15 @@ public class DevConsole {
     private final Label outputLabel;
     private final ScrollPane scrollPane;
     private final List<String> outputLines = new ArrayList<>();
+    private final MazeRunnerGame game;
     private boolean visible = false;
     private de.tum.cit.fop.maze.entity.Player player;
+    private com.badlogic.gdx.maps.tiled.TiledMapTileLayer collisionLayer;
+    private com.badlogic.gdx.maps.tiled.TiledMapTileLayer roadLayer;
     private boolean ignoreNextTyped = false;
 
     public DevConsole(MazeRunnerGame game) {
-        // TODO add more commands, give items, set health, change level, open shop, spawn, god mode, no clip etc
+        this.game = game;
         root = new Table();
         root.setFillParent(true);
         root.setVisible(false);
@@ -85,6 +88,12 @@ public class DevConsole {
         this.player = player;
     }
 
+    public void setSpawnLayers(com.badlogic.gdx.maps.tiled.TiledMapTileLayer collisionLayer,
+                               com.badlogic.gdx.maps.tiled.TiledMapTileLayer roadLayer) {
+        this.collisionLayer = collisionLayer;
+        this.roadLayer = roadLayer;
+    }
+
     public void addToStage(Stage stage) {
         stage.addActor(root);
     }
@@ -125,7 +134,7 @@ public class DevConsole {
         String cmd = parts[0].toLowerCase();
 
         switch (cmd) {
-            case "help" -> appendLine("Commands: help, tp <x> <y>, speed <multiplier>");
+            case "help" -> appendLine("Commands: help, tp <x> <y>, speed <multiplier>, sethp <hp>, setmaxhp <hp>, setcredits <points>, openshop, godmode [on|off], giveenergydrink, givekey, spawn <enemy|trap|bmwdriver> <x> <y>, whereami");
             case "tp" -> {
                 if (parts.length < 3) {
                     appendLine("Usage: tp <x> <y>");
@@ -133,7 +142,7 @@ public class DevConsole {
                     try {
                         float x = Float.parseFloat(parts[1]), y = Float.parseFloat(parts[2]);
                         player.setPosition(x, y);
-                        appendLine("tped to" + x + ", " + y);
+                        appendLine("tped to " + x + ", " + y);
                     } catch (NumberFormatException ex) {
                         appendLine("Invalid command.");
                     }
@@ -146,12 +155,88 @@ public class DevConsole {
                     try {
                         float multiplier = Float.parseFloat(parts[1]);
                         player.setDebugSpeedMultiplier(multiplier);
-                        appendLine("multiplier set to" + multiplier);
+                        appendLine("multiplier set to " + multiplier);
                     } catch (NumberFormatException ex) {
                         appendLine("Invalid command.");
                     }
                 }
             }
+            case "sethp" -> {
+                if (parts.length < 2) {
+                    appendLine("Usage: sethp <hp>");
+                } else {
+                    try {
+                        int hp = Integer.parseInt(parts[1]);
+                        player.setHp(hp);
+                        appendLine("hp set to " + player.getHp());
+                    } catch (NumberFormatException ex) {
+                        appendLine("Invalid command.");
+                    }
+                }
+            }
+            case "setmaxhp" -> {
+                if (parts.length < 2) {
+                    appendLine("Usage: setmaxhp <hp>");
+                } else {
+                    try {
+                        int hp = Integer.parseInt(parts[1]);
+                        player.setMaxHp(hp);
+                        player.setHp(player.getHp());
+                        appendLine("max hp set to " + player.getMaxHp());
+                    } catch (NumberFormatException ex) {
+                        appendLine("Invalid command.");
+                    }
+                }
+            }
+            case "setcredits" -> {
+                if (parts.length < 2) {
+                    appendLine("Usage: setcredits <points>");
+                } else {
+                    try {
+                        int points = Integer.parseInt(parts[1]);
+                        game.getProgressionManager().setPoints(points);
+                        appendLine("credits set to " + game.getProgressionManager().getPoints());
+                    } catch (NumberFormatException ex) {
+                        appendLine("Invalid command.");
+                    }
+                }
+            }
+            case "openshop" -> {
+                game.goToProgressionTreeScreenFromGame();
+                appendLine("opened shop");
+            }
+            case "godmode" -> {
+                if (parts.length < 2) {
+                    player.setGodMode(!player.isGodMode());
+                } else {
+                    String arg = parts[1].toLowerCase();
+                    player.setGodMode(arg.equals("on") || arg.equals("true") || arg.equals("1"));
+                }
+                appendLine("godmode " + (player.isGodMode() ? "on" : "off"));
+            }
+            case "giveenergydrink" -> {
+                player.drinkEnergyDrink();
+                appendLine("energy drink applied");
+            }
+            case "givekey" -> {
+                player.pickupKey();
+                appendLine("key granted");
+            }
+            case "spawn" -> {
+                if (parts.length < 4) {
+                    appendLine("Usage: spawn <enemy|trap|bmwdriver> <x> <y>");
+                } else {
+                    String type = parts[1].toLowerCase();
+                    try {
+                        float x = Float.parseFloat(parts[2]);
+                        float y = Float.parseFloat(parts[3]);
+                        spawnEntity(type, x, y);
+                    } catch (NumberFormatException ex) {
+                        appendLine("Invalid command.");
+                    }
+                }
+            }
+            case "whereami" -> appendLine("player at " + player.getX() + ", " + player.getY());
             default -> appendLine("Unknown command. Try: help");
         }
         scrollPane.layout();
@@ -169,5 +254,41 @@ public class DevConsole {
             sb.append(outputLines.get(i));
         }
         outputLabel.setText(sb.toString());
+    }
+
+    private void spawnEntity(String type, float x, float y) {
+        if (player == null || player.getStage() == null) {
+            appendLine("No stage available.");
+            return;
+        }
+        switch (type) {
+            case "enemy" -> {
+                if (collisionLayer == null) {
+                    appendLine("Missing collision layer.");
+                    return;
+                }
+                de.tum.cit.fop.maze.entity.obstacle.Enemy enemy =
+                        new de.tum.cit.fop.maze.entity.obstacle.Enemy(collisionLayer, x, y);
+                player.getStage().addActor(enemy);
+                appendLine("spawned enemy at " + x + ", " + y);
+            }
+            case "trap" -> {
+                de.tum.cit.fop.maze.entity.obstacle.Trap trap =
+                        new de.tum.cit.fop.maze.entity.obstacle.Trap(x, y);
+                player.getStage().addActor(trap);
+                appendLine("spawned trap at " + x + ", " + y);
+            }
+            case "bmwdriver", "bmw" -> {
+                if (roadLayer == null) {
+                    appendLine("Missing road layer.");
+                    return;
+                }
+                de.tum.cit.fop.maze.entity.obstacle.BmwEnemy bmw =
+                        new de.tum.cit.fop.maze.entity.obstacle.BmwEnemy(roadLayer, x, y);
+                player.getStage().addActor(bmw);
+                appendLine("spawned bmwdriver at " + x + ", " + y);
+            }
+            default -> appendLine("Unknown spawn type.");
+        }
     }
 }

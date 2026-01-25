@@ -43,6 +43,7 @@ public class GameScreen implements Screen {
     private final MazeRunnerGame game;
     private final TiledMap map;
     private final TiledMapTileLayer  collisionLayer;
+    private final TiledMapTileLayer roadLayer;
     private final OrthogonalTiledMapRenderer mapRenderer;
     private final Stage stage;
     private final ShaderProgram grayScaleShader;
@@ -50,7 +51,7 @@ public class GameScreen implements Screen {
     private final ShaderProgram collisionShader;
     private final ShaderProgram combinationShader;
     private final OrthographicCamera uiCamera;
-    private float fogIntensity = 7f;
+    private float fogIntensity = 1000f;
     private boolean noireMode = false;
     private FrameBuffer fbo;
     private TextureRegion fboRegion;
@@ -107,10 +108,12 @@ public class GameScreen implements Screen {
         pointManager = new PointManager(level);
         collisionLayer = mapLoader.buildCollisionLayerFromProperties(map, this.propertiesPath);
         generateFBO();
+        roadLayer = mapLoader.buildRoadLayerFromProperties(map, this.propertiesPath);
         player = new Player(collisionLayer, 78,46, game::goToGameOverScreen);
         player.setWorldBounds(WORLD_WIDTH, WORLD_HEIGHT);
         applyUpgrades();
         devConsole.setPlayer(player);
+        devConsole.setSpawnLayers(collisionLayer, roadLayer);
         devConsole.addToStage(hud.getStage());
 
     }
@@ -139,10 +142,12 @@ public class GameScreen implements Screen {
         uiCamera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         collisionLayer = mapLoader.buildCollisionLayerFromProperties(map, this.propertiesPath);
         generateFBO();
+        roadLayer = mapLoader.buildRoadLayerFromProperties(map, this.propertiesPath);
         player = new Player(collisionLayer, 78,46, game::goToGameOverScreen);
         player.setWorldBounds(WORLD_WIDTH, WORLD_HEIGHT);
         applyUpgrades();
         devConsole.setPlayer(player);
+        devConsole.setSpawnLayers(collisionLayer, roadLayer);
         devConsole.addToStage(hud.getStage());
 
         this.player.setX(gameState.getPlayerX());
@@ -326,7 +331,7 @@ public class GameScreen implements Screen {
         stage.addActor(player);
 
         if (enemies.isEmpty() && collectibles.isEmpty()) {
-            mapLoader.spawnEntitiesFromProperties(stage, pointManager, collisionLayer, propertiesPath, hud, enemies, collectibles, game::goToVictoryScreen);
+            mapLoader.spawnEntitiesFromProperties(stage, pointManager, collisionLayer, roadLayer, propertiesPath, hud, enemies, collectibles, game::goToVictoryScreen);
         }
 
         if (gameState != null) {
