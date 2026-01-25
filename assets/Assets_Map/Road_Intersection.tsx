@@ -3,6 +3,7 @@
  <image source="output.png" width="32" height="32"/>
  <tile id="0">
   <properties>
+   <property name="colide" type="bool" value="false"/>
    <property name="road" type="bool" value="true"/>
   </properties>
  </tile>
