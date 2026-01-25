@@ -42,7 +42,7 @@ public class Player extends Entity {
     public Player(TiledMapTileLayer collisionLayer, float x, float y, GameOverListener gameOverListener) {
         super(x, y);
         initialiseAnimations();
-        setSize(0.5f, 1);
+        setSize(0.75f, 0.75f);
         this.collisionHandler = new CollisionHandler(collisionLayer);
         this.gameOverListener = gameOverListener;
     }

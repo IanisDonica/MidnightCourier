@@ -76,7 +76,7 @@ public class GameScreen implements Screen {
     private static final float REGEN_INTERVAL_SECONDS = 10f;
     private static final int REGEN_POINTS_ON_FULL = 100;
     private float regenTimer = 0f;
-    private static final float MIN_ZOOM = 0.03f;
+    private static final float MIN_ZOOM = 0.05f;
     private static final float MAX_ZOOM = 0.3f;
 
     /**
@@ -96,7 +96,8 @@ public class GameScreen implements Screen {
         this.propertiesPath = toPropertiesPath(level);
         Viewport viewport = new ExtendViewport(WORLD_WIDTH, WORLD_HEIGHT);
         stage = new Stage(viewport, game.getSpriteBatch());
-        map = new TmxMapLoader().load(mapPath);
+        String generatedMapPath = buildGeneratedTmx(mapPath, propertiesPath, level);
+        map = new TmxMapLoader().load(String.valueOf(Gdx.files.local(generatedMapPath)));
         mapRenderer = new OrthogonalTiledMapRenderer(map, 1 / 32f, game.getSpriteBatch());
         createFrameBuffers(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         grayScaleShader = new ShaderProgram(Gdx.files.internal("shaders/vertex.glsl"), Gdx.files.internal("shaders/grayscale.frag"));
@@ -129,7 +130,8 @@ public class GameScreen implements Screen {
         }
         this.level = gameState.getLevel();
         this.propertiesPath = toPropertiesPath(this.level);
-        this.map = new TmxMapLoader().load(this.mapPath);
+        String generatedMapPath = buildGeneratedTmx(this.mapPath, this.propertiesPath, this.level);
+        this.map = new TmxMapLoader().load(String.valueOf(Gdx.files.local(generatedMapPath)));
 
         Viewport viewport = new ExtendViewport(WORLD_WIDTH, WORLD_HEIGHT);
         stage = new Stage(viewport, game.getSpriteBatch());
@@ -168,6 +170,12 @@ public class GameScreen implements Screen {
         OrthographicCamera camera = (OrthographicCamera) stage.getCamera();
         camera.zoom = MathUtils.clamp(camera.zoom + amount, MIN_ZOOM, MAX_ZOOM);
         camera.update();
+    }
+
+    private String buildGeneratedTmx(String templateMapPath, String propertiesPath, int level) {
+        String outputPath = String.format("assets/Assets_Map/generated-level-%d.tmx", level);
+        mapLoader.buildTmxFromProperties(propertiesPath, templateMapPath, outputPath);
+        return outputPath;
     }
 
     public void adjustFog(float amount) {

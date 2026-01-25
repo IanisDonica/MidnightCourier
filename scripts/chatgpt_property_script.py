@@ -95,24 +95,25 @@ def write_properties(path, width, height, collision):
     with open(path, "w", encoding="utf-8") as f:
         for y in range(height):
             for x in range(width):
-                value = 7 if collision[y][x] else 0
-                f.write(f"{x},{y}={value}\n")
+                if collision[y][x]:
+                    f.write(f"{x},{y}=7\n")
 
 
 def main():
     parser = argparse.ArgumentParser(description="Update level-1.properties from THE_MAP.tmx collisions.")
     parser.add_argument("--tmx", default="assets/Assets_Map/THE_MAP.tmx", help="Path to TMX map")
     parser.add_argument("--tilesets", default="assets/Assets_Map", help="Directory containing TSX tilesets")
-    parser.add_argument("--out", default="maps/level-1.properties", help="Output properties file")
+    parser.add_argument("--levels", default="1,2,3,4,5", help="Comma-separated level numbers to write")
     args = parser.parse_args()
 
     tmx_path = args.tmx
     tileset_dir = args.tilesets
-    out_path = args.out
-
     collidable_gids = build_global_collidable_gids(tmx_path, tileset_dir)
     width, height, collision = build_collision_grid(tmx_path, collidable_gids)
-    write_properties(out_path, width, height, collision)
+    levels = [int(v.strip()) for v in args.levels.split(",") if v.strip()]
+    for level in levels:
+        out_path = f"maps/level-{level}.properties"
+        write_properties(out_path, width, height, collision)
 
     return 0
 

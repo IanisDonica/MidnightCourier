@@ -13,7 +13,7 @@
 },
 "zoomIn": {
 	"class": "java.lang.Integer",
-	"value": 70
+	"value": 156
 },
 "noire": {
 	"class": "java.lang.Integer",
@@ -21,7 +21,7 @@
 },
 "zoomOut": {
 	"class": "java.lang.Integer",
-	"value": 69
+	"value": 157
 },
 "right": {
 	"class": "java.lang.Integer",
