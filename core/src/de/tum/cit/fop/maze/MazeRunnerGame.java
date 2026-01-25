@@ -20,6 +20,7 @@ public class MazeRunnerGame extends Game {
     private final AudioManager audioManager;
     private MenuScreen menuScreen;
     private GameScreen gameScreen;
+    private SurvivalScreen survivalScreen;
     private SettingsScreen settingsScreen;
     private LevelSelectScreen levelSelectScreen;
     private HighscoreScreen highscoreScreen;
@@ -28,6 +29,7 @@ public class MazeRunnerGame extends Game {
     private SpriteBatch spriteBatch;
     private Skin skin;
     private ProgressionManager progressionManager;
+
 
     /**
      * Constructor for MazeRunnerGame.
@@ -72,9 +74,15 @@ public class MazeRunnerGame extends Game {
      */
     public void goToGame() {
         if (gameScreen == null) {
-            gameScreen = new GameScreen(this);
+            survivalScreen = new SurvivalScreen(this);
         }
-        this.setScreen(gameScreen);
+        this.setScreen(survivalScreen);
+    }
+    public void goToEndless() {
+        if (gameScreen == null) {
+            survivalScreen = new SurvivalScreen(this);
+        }
+        this.setScreen(survivalScreen);
     }
 
     public void goToGame(int levelNumber) {

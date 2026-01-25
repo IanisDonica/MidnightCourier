@@ -21,6 +21,7 @@ import java.util.Properties;
 
 public class MapLoader {
     public TiledMapTileLayer buildCollisionLayerFromProperties(TiledMap map, String propertiesPath) {
+        System.out.println("Building collision layer from " + propertiesPath);
         int width = map.getProperties().get("width", Integer.class);
         int height = map.getProperties().get("height", Integer.class);
         int tileWidth = map.getProperties().get("tilewidth", Integer.class);
@@ -28,11 +29,13 @@ public class MapLoader {
 
         TiledMapTileLayer layer = new TiledMapTileLayer(width, height, tileWidth, tileHeight);
         Properties props = new Properties();
+        System.out.println("Loading properties from " + propertiesPath);
         try (InputStream input = Gdx.files.internal(propertiesPath).read()) {
             props.load(input);
         } catch (Exception ex) {
             throw new RuntimeException("Property file doesn't exist");
         }
+        System.out.println("Building collision layer from " + propertiesPath);
 
         for (Map.Entry<Object, Object> entry : props.entrySet()) {
             String key = String.valueOf(entry.getKey());
