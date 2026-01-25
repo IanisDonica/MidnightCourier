@@ -25,7 +25,6 @@ import de.tum.cit.fop.maze.system.*;
 import de.tum.cit.fop.maze.system.ProgressionManager;
 import de.tum.cit.fop.maze.entity.obstacle.Enemy;
 import java.util.Random;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -114,7 +113,6 @@ public class SurvivalScreen implements Screen {
         devConsole.addToStage(hud.getStage());
 
         System.out.println("7");
-
     }
 
     public SurvivalScreen(MazeRunnerGame game, GameState gameState) {
@@ -202,8 +200,8 @@ public class SurvivalScreen implements Screen {
 
     @Override
     public void render(float delta) {
-        Adder*=2.0003;
-        Delta+=Adder;
+        Adder *= 2.0003;
+        Delta += Adder;
         System.out.println(Adder);
 
 
@@ -461,5 +459,4 @@ public class SurvivalScreen implements Screen {
             }
         }
     }
-
 }

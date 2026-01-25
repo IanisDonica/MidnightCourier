@@ -79,14 +79,16 @@ public class MazeRunnerGame extends Game {
         this.setScreen(survivalScreen);
     }
     public void goToEndless() {
-        if (survivalScreen == null) {
-            survivalScreen = new SurvivalScreen(this);
+        if (survivalScreen != null) {
+            survivalScreen.dispose();
+            survivalScreen = null;
         }
+        survivalScreen = new SurvivalScreen(this);
         currentLevelNumber = 0;
         this.setScreen(survivalScreen);
     }
     public void goToEndless(int levelNumber) {
-        if(gameScreen == null) {
+        if (survivalScreen != null) {
             survivalScreen.dispose();
             survivalScreen = null;
         }
@@ -282,6 +284,10 @@ public class MazeRunnerGame extends Game {
 
     public GameScreen getGameScreen() {
         return gameScreen;
+    }
+
+    public SurvivalScreen getSurvivalScreen() {
+        return survivalScreen;
     }
 
     private void loadProgressionFromGameState(GameState gameState) {
