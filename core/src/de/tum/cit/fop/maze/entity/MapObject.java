@@ -27,6 +27,9 @@ public class MapObject extends Actor {
 
     protected void onAddedToStage() {
         Stage stage = getStage();
+        if (stage == null) {
+            return;
+        }
         for (Actor actor : stage.getActors()) {
             if (actor instanceof Player pl) {
                 player = pl;
@@ -41,6 +44,9 @@ public class MapObject extends Actor {
     }
 
     protected void checkCollisionsWithPlayer() {
+        if (player == null) {
+            return;
+        }
         if (bounds.overlaps(new Rectangle(player.getX(), player.getY(), player.getWidth(), player.getHeight()))) {
             collision();
         }

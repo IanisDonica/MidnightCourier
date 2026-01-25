@@ -98,6 +98,11 @@ public class MapLoader {
                 stage.addActor(bmw);
             }
         }
+        refreshBmwRoadTiles();
+    }
+
+    public void refreshBmwRoadTiles() {
+        BmwEnemy.recomputeRoadTiles();
     }
 
     private TiledMapTileLayer createLayer(TiledMap map) {

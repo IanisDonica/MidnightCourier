@@ -27,6 +27,7 @@ import de.tum.cit.fop.maze.entity.obstacle.Enemy;
 import java.util.Random;
 import java.util.ArrayList;
 import java.util.List;
+import de.tum.cit.fop.maze.entity.obstacle.BmwEnemy;
 
 public class SurvivalScreen implements Screen {
     public static final int WORLD_WIDTH = 225;
@@ -99,6 +100,7 @@ public class SurvivalScreen implements Screen {
 
         collisionLayer = mapLoader.buildCollisionLayerFromProperties(map, this.propertiesPath);
         roadLayer = mapLoader.buildRoadLayerFromProperties(map, this.propertiesPath);
+        de.tum.cit.fop.maze.entity.obstacle.BmwEnemy.setRoadLayer(roadLayer);
         System.out.println("3");
 
         player = new Player(collisionLayer, 78,46, game::goToGameOverScreen);
@@ -139,6 +141,7 @@ public class SurvivalScreen implements Screen {
         uiCamera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         collisionLayer = mapLoader.buildCollisionLayerFromProperties(map, this.propertiesPath);
         roadLayer = mapLoader.buildRoadLayerFromProperties(map, this.propertiesPath);
+        BmwEnemy.setRoadLayer(roadLayer);
         player = new Player(collisionLayer, 78,46, game::goToGameOverScreen);
         player.setWorldBounds(WORLD_WIDTH, WORLD_HEIGHT);
         applyUpgrades();
