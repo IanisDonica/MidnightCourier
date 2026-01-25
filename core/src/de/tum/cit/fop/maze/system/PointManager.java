@@ -16,6 +16,7 @@ public class PointManager implements Serializable {
     private static final String ENDPOINT = "https://webservertransprut-production.up.railway.app/api/scores/";
     private int points = 100;
     private int timePoints = 100000;
+    private int timePointsSurvival = 0;
     private float offset = 0;
     private float safetyTime = 5f; // the amount of time for which points won't go down
     private float elapsedTime = 0f;
@@ -23,7 +24,8 @@ public class PointManager implements Serializable {
     private final int level;
 
     public int getPoints() {
-        return points + timePoints;
+        if(level != 0) return points + timePoints;
+        return points + timePointsSurvival;
     }
 
     public int getTimePoints() {
@@ -55,6 +57,13 @@ public class PointManager implements Serializable {
     public void decreasePoints() {
         int deduct = (int) (400 * Math.ceil(Math.log10(timePoints)));
         timePoints = Math.max(timePoints - deduct, 0);
+        int adder = (int) (400 * Math.ceil(Math.log10(timePoints)));
+        timePointsSurvival = Math.max(timePointsSurvival + adder, 0);
+    }
+
+    public void increasePoints() {
+        int adder = (int) (400 * Math.ceil(Math.log10(timePoints)));
+        timePointsSurvival = Math.max(timePoints - adder, 0);
     }
 
     public void act(float delta) {
