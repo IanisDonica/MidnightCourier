@@ -3,20 +3,30 @@ package de.tum.cit.fop.maze.entity.obstacle;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.Stage;
 import de.tum.cit.fop.maze.ai.RoadPathfinder;
+import de.tum.cit.fop.maze.entity.Player;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class BmwEnemy extends Obstacle {
+    // TODO merge common stuff
+    // at the moment BMWEnemy is more or less enemy with some extra stuff, ill merge the code later
     private static final float TARGET_EPS = 0.05f;
     private static final float CENTER_EPS = 0.02f;
-    private final TiledMapTileLayer roadLayer;
-    private final RoadPathfinder pathfinder;
-    private final int mapWidth;
-    private final int mapHeight;
+    private static final int BMW_WIDTH_HORIZONTAL = 2;
+    private static final int BMW_HEIGHT_HORIZONTAL = 1;
+    private static final int BMW_WIDTH_VERTICAL = 1;
+    private static final int BMW_HEIGHT_VERTICAL = 2;
+    private static TiledMapTileLayer roadLayer;
+    private static RoadPathfinder pathfinder;
+    private static int mapWidth;
+    private static int mapHeight;
     private final float speed = 6f;
-    private final List<GridPoint2> roadTiles = new ArrayList<>();
+    protected static final List<GridPoint2> roadTiles = new ArrayList<>();
     private ArrayList<GridPoint2> path = new ArrayList<>();
     private int pathIndex = 0;
     private int goalX = Integer.MIN_VALUE;
@@ -24,12 +34,8 @@ public class BmwEnemy extends Obstacle {
     private boolean pendingRemove = false;
 
     public BmwEnemy(TiledMapTileLayer roadLayer, float x, float y) {
-        super(x, y, 2, 1, 0, 0, 1);
-        this.roadLayer = roadLayer;
-        this.pathfinder = new RoadPathfinder(roadLayer);
-        this.mapWidth = roadLayer.getWidth();
-        this.mapHeight = roadLayer.getHeight();
-        cacheRoadTiles();
+        super(x, y, BMW_WIDTH_HORIZONTAL, BMW_HEIGHT_HORIZONTAL, 0, 0, 1);
+        setRoadLayer(roadLayer);
     }
 
     @Override
@@ -63,11 +69,12 @@ public class BmwEnemy extends Obstacle {
     }
 
     private boolean checkBmwCollisions() {
-        if (pendingRemove || getStage() == null) {
+        Stage stage = getStage();
+        if (pendingRemove || stage == null) {
             return pendingRemove;
         }
-        for (int i = 0; i < getStage().getActors().size; i++) {
-            if (!(getStage().getActors().get(i) instanceof BmwEnemy other)) {
+        for (int i = 0; i < stage.getActors().size; i++) {
+            if (!(stage.getActors().get(i) instanceof BmwEnemy other)) {
                 continue;
             }
             if (other == this || other.pendingRemove) {
@@ -84,43 +91,151 @@ public class BmwEnemy extends Obstacle {
     private void handleBmwCollision(BmwEnemy other) {
         pendingRemove = true;
         other.pendingRemove = true;
-        if (getStage() == null) {
+        Stage stage = getStage();
+        if (stage == null) {
             remove();
             other.remove();
             return;
         }
         float centerX = (getX() + getWidth() / 2f + other.getX() + other.getWidth() / 2f) / 2f;
         float centerY = (getY() + getHeight() / 2f + other.getY() + other.getHeight() / 2f) / 2f;
-        getStage().addActor(new Explosion(centerX, centerY, 5f, player));
-        for (int i = 0; i < 2; i++) {
-            spawnRandomBmw();
-        }
+        stage.addActor(new Explosion(centerX, centerY, 5f, player));
+        spawnRandomBmws(player, stage, 2);
         remove();
         other.remove();
     }
 
-    private void spawnRandomBmw() {
-        if (roadTiles.isEmpty() || getStage() == null) {
+    private Rectangle getBounds() {
+        return new Rectangle(getX(), getY(), getWidth(), getHeight());
+    }
+
+    public static void spawnRandomBmws(Player player, Stage stage, int amount) {
+        if (roadLayer == null || player == null || stage == null) {
             return;
         }
-        GridPoint2 target = roadTiles.get(MathUtils.random(roadTiles.size() - 1));
-        float spawnX = target.x + 0.5f - 1f;
-        float spawnY = target.y + 0.5f - 0.5f;
-        BmwEnemy bmw = new BmwEnemy(roadLayer, spawnX, spawnY);
-        getStage().addActor(bmw);
+        List<GridPoint2> roadTiles = collectRoadTiles(roadLayer);
+        if (roadTiles.isEmpty()) {
+            return;
+        }
+        List<GridPoint2> candidates = getSpawnCandidates(roadTiles, player, 2);
+        int spawned = 0;
+        while (spawned < amount && !candidates.isEmpty()) {
+            int index = MathUtils.random(candidates.size() - 1);
+            GridPoint2 target = candidates.remove(index);
+            float centerX = target.x + 0.5f;
+            float centerY = target.y + 0.5f;
+            if (wouldCollideAt(stage, centerX, centerY)) {
+                continue;
+            }
+            float spawnX = centerX - (BMW_WIDTH_HORIZONTAL / 2f);
+            float spawnY = centerY - (BMW_HEIGHT_HORIZONTAL / 2f);
+            stage.addActor(new BmwEnemy(roadLayer, spawnX, spawnY));
+            spawned++;
+        }
     }
 
-    private com.badlogic.gdx.math.Rectangle getBounds() {
-        return new com.badlogic.gdx.math.Rectangle(getX(), getY(), getWidth(), getHeight());
+    private static List<GridPoint2> getSpawnCandidates(List<GridPoint2> roadTiles, Player player, int distance) {
+        int playerTileX = clampTileCoord(player.getX() + player.getWidth() / 2f, roadLayer.getWidth());
+        int playerTileY = clampTileCoord(player.getY() + player.getHeight() / 2f, roadLayer.getHeight());
+        List<GridPoint2> candidates = new ArrayList<>(roadTiles.size());
+        for (GridPoint2 tile : roadTiles) {
+            if (Math.abs(tile.x - playerTileX) <= distance && Math.abs(tile.y - playerTileY) <= distance) {
+                continue;
+            }
+            candidates.add(tile);
+        }
+        return candidates;
     }
 
-    private void cacheRoadTiles() {
+    private static List<GridPoint2> collectRoadTiles(TiledMapTileLayer roadLayer) {
+        List<GridPoint2> tiles = new ArrayList<>();
+        int width = roadLayer.getWidth();
+        int height = roadLayer.getHeight();
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                if (roadLayer.getCell(x, y) != null) {
+                    tiles.add(new GridPoint2(x, y));
+                }
+            }
+        }
+        return tiles;
+    }
+
+    private static int clampTileCoord(float center, int max) {
+        int tile = MathUtils.floor(center);
+        if (tile < 0) {
+            return 0;
+        }
+        if (tile >= max) {
+            return max - 1;
+        }
+        return tile;
+    }
+
+    private static boolean wouldCollideAt(Stage stage, float centerX, float centerY) {
+        if (stage == null) {
+            return true;
+        }
+        // check if you spawn the BMW when he is moving left/right
+        Rectangle spawnBoundsHorizontal = new Rectangle(
+                centerX - (BMW_WIDTH_HORIZONTAL / 2f),
+                centerY - (BMW_HEIGHT_HORIZONTAL / 2f),
+                BMW_WIDTH_HORIZONTAL,
+                BMW_HEIGHT_HORIZONTAL
+        );
+
+        // check if you spawn the BMW when he is moving up/down
+        Rectangle spawnBoundsVertical = new Rectangle(
+                centerX - (BMW_WIDTH_VERTICAL / 2f),
+                centerY - (BMW_HEIGHT_VERTICAL / 2f),
+                BMW_WIDTH_VERTICAL,
+                BMW_HEIGHT_VERTICAL
+        );
+
+
+        // if at any point a bmw cant spawn in either orientation we dont spawn him there
+        // in theory a bmw could spawn in a borked positions, for example with one tile over the edge
+        // however it would take him at most 1 frame to swich his orientation or move to a valid state
+        // so this will not be fixed
+        for (Actor actor : stage.getActors()) {
+            Rectangle actorBounds = new Rectangle(actor.getX(), actor.getY(), actor.getWidth(), actor.getHeight());
+            if (spawnBoundsHorizontal.overlaps(actorBounds) || spawnBoundsVertical.overlaps(actorBounds)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static void cacheRoadTiles() {
         for (int x = 0; x < mapWidth; x++) {
             for (int y = 0; y < mapHeight; y++) {
                 if (roadLayer.getCell(x, y) != null) {
                     roadTiles.add(new GridPoint2(x, y));
                 }
             }
+        }
+    }
+
+    public static void recomputeRoadTiles() {
+        if (roadLayer == null) {
+            return;
+        }
+        roadTiles.clear();
+        cacheRoadTiles();
+    }
+
+    public static void setRoadLayer(TiledMapTileLayer newRoadLayer) {
+        if (newRoadLayer == null) {
+            return;
+        }
+        if (BmwEnemy.roadLayer != newRoadLayer) {
+            BmwEnemy.roadLayer = newRoadLayer;
+            pathfinder = new RoadPathfinder(newRoadLayer);
+            mapWidth = newRoadLayer.getWidth();
+            mapHeight = newRoadLayer.getHeight();
+            recomputeRoadTiles();
+        } else if (roadTiles.isEmpty()) {
+            recomputeRoadTiles();
         }
     }
 
@@ -196,11 +311,10 @@ public class BmwEnemy extends Obstacle {
         return false;
     }
 
-    private int clampTileX(float centerX) {
+    private static int clampTileX(float centerX) {
         return pathfinder.clampCoord(MathUtils.floor(centerX), mapWidth);
     }
-
-    private int clampTileY(float centerY) {
+    private static int clampTileY(float centerY) {
         return pathfinder.clampCoord(MathUtils.floor(centerY), mapHeight);
     }
 

@@ -109,6 +109,7 @@ public class GameScreen implements Screen {
         collisionLayer = mapLoader.buildCollisionLayerFromProperties(map, this.propertiesPath);
         generateFBO();
         roadLayer = mapLoader.buildRoadLayerFromProperties(map, this.propertiesPath);
+        de.tum.cit.fop.maze.entity.obstacle.BmwEnemy.setRoadLayer(roadLayer);
         player = new Player(collisionLayer, 78,46, game::goToGameOverScreen);
         player.setWorldBounds(WORLD_WIDTH, WORLD_HEIGHT);
         applyUpgrades();
@@ -143,6 +144,7 @@ public class GameScreen implements Screen {
         collisionLayer = mapLoader.buildCollisionLayerFromProperties(map, this.propertiesPath);
         generateFBO();
         roadLayer = mapLoader.buildRoadLayerFromProperties(map, this.propertiesPath);
+        de.tum.cit.fop.maze.entity.obstacle.BmwEnemy.setRoadLayer(roadLayer);
         player = new Player(collisionLayer, 78,46, game::goToGameOverScreen);
         player.setWorldBounds(WORLD_WIDTH, WORLD_HEIGHT);
         applyUpgrades();

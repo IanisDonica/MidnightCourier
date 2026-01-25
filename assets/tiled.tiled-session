@@ -75,6 +75,9 @@
             "scaleInDock": 1,
             "scaleInEditor": 1
         },
+        "Assets_Map/BLOCK copy.tsx": {
+            "scaleInDock": 1
+        },
         "Assets_Map/BOTTOM_BIBLIO.tsx": {
             "scaleInDock": 1
         },
@@ -130,6 +133,9 @@
         "Assets_Map/RailTrack.tsx": {
             "scaleInDock": 1
         },
+        "Assets_Map/Road_Intersection.tsx": {
+            "scaleInDock": 1
+        },
         "Assets_Map/SEPARATED_64_LATERAL.tsx": {
             "scaleInDock": 1
         },
@@ -157,6 +163,9 @@
             "scaleInDock": 1
         },
         "Assets_Map/grass.tsx": {
+            "scaleInDock": 1
+        },
+        "Assets_Map/restaurant_tileswide_96x128.tsx": {
             "scaleInDock": 1
         },
         "basictiles.tsx": {

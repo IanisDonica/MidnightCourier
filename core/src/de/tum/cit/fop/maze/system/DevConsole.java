@@ -134,7 +134,7 @@ public class DevConsole {
         String cmd = parts[0].toLowerCase();
 
         switch (cmd) {
-            case "help" -> appendLine("Commands: help, tp <x> <y>, speed <multiplier>, sethp <hp>, setmaxhp <hp>, setcredits <points>, openshop, godmode [on|off], giveenergydrink, givekey, spawn <enemy|trap|bmwdriver> <x> <y>, whereami");
+            case "help" -> appendLine("Commands: help, tp <x> <y>, speed <multiplier>, sethp <hp>, setmaxhp <hp>, setcredits <points>, openshop, godmode [on|off], giveenergydrink, givekey, spawn <enemy|trap|bmwdriver> <x> <y>, spawnbmws <amount>, whereami");
             case "tp" -> {
                 if (parts.length < 3) {
                     appendLine("Usage: tp <x> <y>");
@@ -236,6 +236,18 @@ public class DevConsole {
                     }
                 }
             }
+            case "spawnbmws" -> {
+                if (parts.length < 2) {
+                    appendLine("Usage: spawnbmws <amount>");
+                } else {
+                    try {
+                        int amount = Integer.parseInt(parts[1]);
+                        spawnBmws(amount);
+                    } catch (NumberFormatException ex) {
+                        appendLine("Invalid command.");
+                    }
+                }
+            }
             case "whereami" -> appendLine("player at " + player.getX() + ", " + player.getY());
             default -> appendLine("Unknown command. Try: help");
         }
@@ -290,5 +302,18 @@ public class DevConsole {
             }
             default -> appendLine("Unknown spawn type.");
         }
+    }
+
+    private void spawnBmws(int amount) {
+        if (player == null || player.getStage() == null) {
+            appendLine("No stage available.");
+            return;
+        }
+        if (roadLayer == null) {
+            appendLine("Missing road layer.");
+            return;
+        }
+        de.tum.cit.fop.maze.entity.obstacle.BmwEnemy.spawnRandomBmws(player, player.getStage(), amount);
+        appendLine("spawned " + amount + " bmws");
     }
 }
