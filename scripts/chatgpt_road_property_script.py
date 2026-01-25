@@ -5,25 +5,24 @@ import sys
 import xml.etree.ElementTree as ET
 
 FLIP_MASK = 0x1FFFFFFF
-ROAD_KEYWORDS = ("road", "cross", "corner", "crossing", "lane")
 
-
-def tileset_is_road(name: str) -> bool:
-    lower = (name or "").lower()
-    return any(k in lower for k in ROAD_KEYWORDS)
-
-
-def read_tileset_ids(tsx_path: str):
+def read_road_tile_ids(tsx_path: str):
     tree = ET.parse(tsx_path)
     root = tree.getroot()
-    tilecount = root.get("tilecount")
-    if tilecount is not None:
-        return set(range(int(tilecount)))
     ids = set()
     for tile in root.findall("tile"):
         tile_id = tile.get("id")
-        if tile_id is not None:
-            ids.add(int(tile_id))
+        if tile_id is None:
+            continue
+        props = tile.find("properties")
+        if props is None:
+            continue
+        for prop in props.findall("property"):
+            name = (prop.get("name") or "").strip().lower()
+            value = (prop.get("value") or "").strip().lower()
+            if name == "road" and value == "true":
+                ids.add(int(tile_id))
+                break
     return ids
 
 
@@ -35,22 +34,15 @@ def build_global_road_gids(tmx_path: str, tileset_dir: str):
     for tileset in root.findall("tileset"):
         firstgid = tileset.get("firstgid")
         source = tileset.get("source")
-        name = tileset.get("name", "")
         if firstgid is None:
             continue
         firstgid = int(firstgid)
-        if source:
-            if not tileset_is_road(source):
-                continue
-            tsx_path = os.path.join(tileset_dir, source)
-            if not os.path.isfile(tsx_path):
-                raise FileNotFoundError(f"Missing tileset: {tsx_path}")
-            local_ids = read_tileset_ids(tsx_path)
-        else:
-            if not tileset_is_road(name):
-                continue
-            tilecount = tileset.get("tilecount")
-            local_ids = set(range(int(tilecount))) if tilecount else set()
+        if not source:
+            continue
+        tsx_path = os.path.join(tileset_dir, source)
+        if not os.path.isfile(tsx_path):
+            raise FileNotFoundError(f"Missing tileset: {tsx_path}")
+        local_ids = read_road_tile_ids(tsx_path)
 
         for local_id in local_ids:
             gids.add(firstgid + local_id)
