@@ -9,7 +9,7 @@ import de.tum.cit.fop.maze.entity.MapObject;
 import com.badlogic.gdx.utils.Array;
 
 public class Obstacle extends MapObject {
-    private Animation<TextureRegion> animation;
+    Animation<TextureRegion> animation;
     int textureOffsetX, textureOffsetY, animationFrames;
 
     public Obstacle(float x, float y, int w, int h, int textureOffsetX, int textureOffsetY, int animationFrames) {
