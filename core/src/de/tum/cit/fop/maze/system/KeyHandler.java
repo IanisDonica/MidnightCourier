@@ -67,43 +67,71 @@ public class KeyHandler extends InputListener {
     }
 
     private boolean handleScreenEffects(int keycode) {
-        GameScreen gameScreen = game.getGameScreen();
         Screen s = game.getScreen();
-        if (gameScreen == null) return false;
+        GameScreen gameScreen = (s instanceof GameScreen) ? game.getGameScreen() : null;
+        SurvivalScreen survivalScreen = (s instanceof SurvivalScreen) ? game.getSurvivalScreen() : null;
+        if (gameScreen == null && survivalScreen == null) return false;
         if (keycode == Input.Keys.GRAVE && (s instanceof GameScreen || s instanceof SurvivalScreen)) {
             audioManager.playSound("Click.wav", 1);
-            gameScreen.toggleDevConsole();
+            if (gameScreen != null) {
+                gameScreen.toggleDevConsole();
+            } else {
+                survivalScreen.toggleDevConsole();
+            }
             return true;
         }
 
-        if (keycode == configManager.getKeyBinding("openShop") && (s instanceof GameScreen || s instanceof SurvivalScreen) && gameScreen.getHud().isShopButtonVisible()) {
+        if (keycode == configManager.getKeyBinding("openShop")
+                && (s instanceof GameScreen || s instanceof SurvivalScreen)
+                && gameScreen != null
+                && gameScreen.getHud().isShopButtonVisible()) {
             audioManager.playSound("Click.wav", 1);
             game.goToProgressionTreeScreenFromGame();
             return true;
         }
         if (keycode == configManager.getKeyBinding("zoomIn")) {
             audioManager.playSound("Click.wav", 1);
-            gameScreen.adjustZoom(-0.02f);
+            if (gameScreen != null) {
+                gameScreen.adjustZoom(-0.02f);
+            } else {
+                survivalScreen.adjustZoom(-0.02f);
+            }
             return true;
         }
         if (keycode == configManager.getKeyBinding("zoomOut")) {
             audioManager.playSound("Click.wav", 1);
-            gameScreen.adjustZoom(0.02f);
+            if (gameScreen != null) {
+                gameScreen.adjustZoom(0.02f);
+            } else {
+                survivalScreen.adjustZoom(0.02f);
+            }
             return true;
         }
         if (keycode == configManager.getKeyBinding("moreFog")) {
             audioManager.playSound("Click.wav", 1);
-            gameScreen.adjustFog(-0.5f);
+            if (gameScreen != null) {
+                gameScreen.adjustFog(-0.5f);
+            } else {
+                survivalScreen.adjustFog(-0.5f);
+            }
             return true;
         }
         if (keycode == configManager.getKeyBinding("lessFog")) {
             audioManager.playSound("Click.wav", 1);
-            gameScreen.adjustFog(0.5f);
+            if (gameScreen != null) {
+                gameScreen.adjustFog(0.5f);
+            } else {
+                survivalScreen.adjustFog(0.5f);
+            }
             return true;
         }
         if (keycode == configManager.getKeyBinding("noire")) {
             audioManager.playSound("Click.wav", 1);
-            gameScreen.toggleNoireMode();
+            if (gameScreen != null) {
+                gameScreen.toggleNoireMode();
+            } else {
+                survivalScreen.toggleNoireMode();
+            }
             return true;
         }
         return false;
@@ -113,7 +141,7 @@ public class KeyHandler extends InputListener {
         if (keycode == configManager.getKeyBinding("pause")) {
             audioManager.playSound("Click.wav", 1);
             Screen s = game.getScreen();
-            if ((s instanceof GameScreen || s instanceof SurvivalScreen) && game.getGameScreen() != null) {
+            if (s instanceof GameScreen || s instanceof SurvivalScreen) {
                 game.pause();
             } else if (s instanceof SettingsScreen && game.getGameScreen() != null && game.getGameScreen().isPaused()) {
                 game.goToGame();
