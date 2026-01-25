@@ -70,13 +70,13 @@ public class KeyHandler extends InputListener {
         GameScreen gameScreen = game.getGameScreen();
         Screen s = game.getScreen();
         if (gameScreen == null) return false;
-        if (keycode == Input.Keys.GRAVE && s instanceof GameScreen) {
+        if (keycode == Input.Keys.GRAVE && (s instanceof GameScreen || s instanceof SurvivalScreen)) {
             audioManager.playSound("Click.wav", 1);
             gameScreen.toggleDevConsole();
             return true;
         }
 
-        if (keycode == configManager.getKeyBinding("openShop") && s instanceof GameScreen && gameScreen.getHud().isShopButtonVisible()) {
+        if (keycode == configManager.getKeyBinding("openShop") && (s instanceof GameScreen || s instanceof SurvivalScreen) && gameScreen.getHud().isShopButtonVisible()) {
             audioManager.playSound("Click.wav", 1);
             game.goToProgressionTreeScreenFromGame();
             return true;
@@ -113,7 +113,7 @@ public class KeyHandler extends InputListener {
         if (keycode == configManager.getKeyBinding("pause")) {
             audioManager.playSound("Click.wav", 1);
             Screen s = game.getScreen();
-            if (s instanceof GameScreen && game.getGameScreen() != null) {
+            if ((s instanceof GameScreen || s instanceof SurvivalScreen) && game.getGameScreen() != null) {
                 game.pause();
             } else if (s instanceof SettingsScreen && game.getGameScreen() != null && game.getGameScreen().isPaused() || s instanceof ProgressionTreeScreen) {
                 game.goToGame();
