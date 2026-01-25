@@ -4,10 +4,13 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.EventListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Slider;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import de.tum.cit.fop.maze.MazeRunnerGame;
@@ -53,6 +56,33 @@ public class SettingsAudioScreen implements Screen {
         table.add(soundEffectsVolumeSlider).width(800).colspan(2).padBottom(15).row();
         table.add(musicVolumeLabel).colspan(2).row();
         table.add(musicVolumeSlider).colspan(2).width(800).row();
+
+        masterVolumeSlider.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                audioManager.playSound("Knife.wav", 1, 0.2f, 0.001f);
+                audioManager.setMasterVolume(masterVolumeSlider.getValue());
+                configManager.saveAudioSettings();
+            }
+        });
+
+        soundEffectsVolumeSlider.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                audioManager.playSound("Knife.wav", 1, 0.2f, 0.001f);
+                audioManager.setSoundEffectsVolume(soundEffectsVolumeSlider.getValue());
+                configManager.saveAudioSettings();
+            }
+        });
+
+        musicVolumeSlider.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                audioManager.playSound("Knife.wav", 1, 0.2f, 0.001f);
+                audioManager.setMusicVolume(musicVolumeSlider.getValue());
+                configManager.saveAudioSettings();
+            }
+        });
 
     }
 
