@@ -30,12 +30,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SurvivalScreen implements Screen {
-
     public static final int WORLD_WIDTH = 225;
     public static final int WORLD_HEIGHT = 250;
     private final MazeRunnerGame game;
     private final TiledMap map;
     private final TiledMapTileLayer  collisionLayer;
+    private final TiledMapTileLayer roadLayer;
     private final OrthogonalTiledMapRenderer mapRenderer;
     private final Stage stage;
     private final ShaderProgram grayScaleShader;
@@ -99,6 +99,7 @@ public class SurvivalScreen implements Screen {
         System.out.println("9");
 
         collisionLayer = mapLoader.buildCollisionLayerFromProperties(map, this.propertiesPath);
+        roadLayer = mapLoader.buildRoadLayerFromProperties(map, this.propertiesPath);
         System.out.println("3");
 
         player = new Player(collisionLayer, 78,46, game::goToGameOverScreen);
@@ -109,6 +110,7 @@ public class SurvivalScreen implements Screen {
         System.out.println("5");
 
         devConsole.setPlayer(player);
+        devConsole.setSpawnLayers(collisionLayer, roadLayer);
         devConsole.addToStage(hud.getStage());
 
         System.out.println("7");
@@ -138,10 +140,12 @@ public class SurvivalScreen implements Screen {
         ((OrthographicCamera) stage.getCamera()).zoom = MAX_ZOOM;
         uiCamera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         collisionLayer = mapLoader.buildCollisionLayerFromProperties(map, this.propertiesPath);
+        roadLayer = mapLoader.buildRoadLayerFromProperties(map, this.propertiesPath);
         player = new Player(collisionLayer, 78,46, game::goToGameOverScreen);
         player.setWorldBounds(WORLD_WIDTH, WORLD_HEIGHT);
         applyUpgrades();
         devConsole.setPlayer(player);
+        devConsole.setSpawnLayers(collisionLayer, roadLayer);
         devConsole.addToStage(hud.getStage());
 
         this.player.setX(gameState.getPlayerX());
@@ -370,7 +374,7 @@ public class SurvivalScreen implements Screen {
         stage.addActor(player);
 
         if (enemies.isEmpty() && collectibles.isEmpty()) {
-            mapLoader.spawnEntitiesFromProperties(stage, pointManager, collisionLayer, propertiesPath, hud, enemies, collectibles, game::goToVictoryScreen);
+            mapLoader.spawnEntitiesFromProperties(stage, pointManager, collisionLayer, roadLayer, propertiesPath, hud, enemies, collectibles, game::goToVictoryScreen);
         }
 
         if (gameState != null) {
