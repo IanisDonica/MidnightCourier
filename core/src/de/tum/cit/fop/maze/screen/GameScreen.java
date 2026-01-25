@@ -387,21 +387,6 @@ public class GameScreen implements Screen {
         mapRenderer.dispose();
     }
 
-    public void setGameState(GameState gameState) {
-        this.gameState = gameState;
-        if (player != null) {
-            this.level = gameState.getLevel();
-            this.propertiesPath = toPropertiesPath(this.level);
-            player.setPosition(gameState.getPlayerX(), gameState.getPlayerY());
-            // Since there's no dropKey, we just set the state if it's true.
-            // If it's false, we'd need a way to unset it if we want to support full state restoration.
-            if (gameState.hasKey()) player.pickupKey();
-            player.setHp(gameState.getPlayerLives());
-            ((OrthographicCamera) stage.getCamera()).zoom = MathUtils.clamp(gameState.getCameraZoom(), MIN_ZOOM, MAX_ZOOM);
-        }
-        this.pointManager = gameState.getPointManager();
-    }
-
     public boolean isPaused() {
         return paused;
     }

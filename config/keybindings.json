@@ -3,6 +3,10 @@
 	"class": "java.lang.Integer",
 	"value": 152
 },
+"left": {
+	"class": "java.lang.Integer",
+	"value": 29
+},
 "sprint": {
 	"class": "java.lang.Integer",
 	"value": 59
@@ -10,6 +14,10 @@
 "zoomIn": {
 	"class": "java.lang.Integer",
 	"value": 157
+},
+"noire": {
+	"class": "java.lang.Integer",
+	"value": 151
 },
 "zoomOut": {
 	"class": "java.lang.Integer",
@@ -23,6 +31,10 @@
 	"class": "java.lang.Integer",
 	"value": 129
 },
+"up": {
+	"class": "java.lang.Integer",
+	"value": 51
+},
 "down": {
 	"class": "java.lang.Integer",
 	"value": 47
@@ -34,17 +46,5 @@
 "moreFog": {
 	"class": "java.lang.Integer",
 	"value": 153
-},
-"left": {
-	"class": "java.lang.Integer",
-	"value": 29
-},
-"noire": {
-	"class": "java.lang.Integer",
-	"value": 151
-},
-"up": {
-	"class": "java.lang.Integer",
-	"value": 51
 }
 }

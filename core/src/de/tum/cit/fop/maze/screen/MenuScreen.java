@@ -11,7 +11,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.viewport.FitViewport;
-import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import de.tum.cit.fop.maze.MazeRunnerGame;
 import de.tum.cit.fop.maze.system.AudioManager;
@@ -48,22 +47,22 @@ public class MenuScreen implements Screen {
 
         // Create and add a button to go to the game screen
         TextButton newGame = new TextButton("New Game", game.getSkin());
-        table.add(newGame).width(300).row();
+        table.add(newGame).width(500).padBottom(15).row();
 
         TextButton continueGame = new TextButton("Load Game", game.getSkin());
-        table.add(continueGame).width(300).row();
+        table.add(continueGame).width(500).padBottom(15).row();
 
         TextButton highscores = new TextButton("Highscores", game.getSkin());
-        table.add(highscores).width(300).row();
+        table.add(highscores).width(500).padBottom(15).row();
 
         TextButton achievements = new TextButton("Achievements", game.getSkin());
-        table.add(achievements).width(300).row();
+        table.add(achievements).width(500).padBottom(15).row();
 
         TextButton settings = new TextButton("Settings", game.getSkin());
-        table.add(settings).width(300).row();
+        table.add(settings).width(500).padBottom(15).row();
 
         TextButton exit = new TextButton("Exit", game.getSkin());
-        table.add(exit).width(300).row();
+        table.add(exit).width(500).padBottom(15).row();
 
         newGame.addListener(new ChangeListener() {
             @Override

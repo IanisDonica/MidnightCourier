@@ -8,14 +8,16 @@ import de.tum.cit.fop.maze.screen.*;
 import de.tum.cit.fop.maze.system.*;
 import games.spooky.gdx.nativefilechooser.NativeFileChooser;
 
-import java.io.ObjectInputFilter;
-
 /**
  * The MazeRunnerGame class represents the core of the Maze Runner game.
  * It manages the screens and global resources like SpriteBatch and Skin.
  */
 
 public class MazeRunnerGame extends Game {
+    private final ConfigManager configManager;
+    private final KeyHandler keyHandler;
+    private final AchievementManager achievementManager;
+    private final AudioManager audioManager;
     private MenuScreen menuScreen;
     private GameScreen gameScreen;
     private SettingsScreen settingsScreen;
@@ -25,11 +27,7 @@ public class MazeRunnerGame extends Game {
     private int currentLevelNumber = 1;
     private SpriteBatch spriteBatch;
     private Skin skin;
-    private final ConfigManager configManager;
-    private final KeyHandler keyHandler;
     private ProgressionManager progressionManager;
-    private final AchievementManager achievementManager;
-    private final AudioManager audioManager;
 
     /**
      * Constructor for MazeRunnerGame.
@@ -39,7 +37,7 @@ public class MazeRunnerGame extends Game {
     public MazeRunnerGame(NativeFileChooser fileChooser) {
         super();
         configManager = new ConfigManager();
-        this.audioManager = new AudioManager();
+        this.audioManager = new AudioManager(this);
         keyHandler = new KeyHandler(this);
         achievementManager = new AchievementManager();
     }
@@ -53,7 +51,7 @@ public class MazeRunnerGame extends Game {
         spriteBatch = new SpriteBatch(); // Create SpriteBatch
         skin = new Skin(Gdx.files.internal("craft/craftacular-ui.json")); // Load UI skin
         progressionManager = new ProgressionManager(2000);
-        audioManager.preloadSounds( "Click.wav" );
+        audioManager.preloadSounds("Click.wav");
         audioManager.playMusic("background.mp3", 1f, true);
         goToMenu(); // Navigate to the menu screen
     }
@@ -71,8 +69,6 @@ public class MazeRunnerGame extends Game {
     /**
      * Switches to the game screen.
      */
-
-
     public void goToGame() {
         if (gameScreen == null) {
             gameScreen = new GameScreen(this);

@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.math.MathUtils;
+import de.tum.cit.fop.maze.MazeRunnerGame;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -12,19 +13,23 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 public class AudioManager {
+    private final ConfigManager configManager;
     private final ExecutorService executor;
     private final Map<String, Sound> soundCache;
     private final Map<String, Music> musicCache;
     private Music currentMusic;
-    private float masterVolume = 1.0f;
-    private float soundEffectsVolume = 1.0f;
-    private float musicVolume = 1.0f;
+    private float masterVolume, soundEffectsVolume, musicVolume;
 
 
-    public AudioManager() {
+    public AudioManager(MazeRunnerGame game) {
+        this.configManager = game.getConfigManager();
         executor = Executors.newFixedThreadPool(2);
         soundCache = new HashMap<>();
         musicCache = new HashMap<>();
+        configManager.loadAudioSettings();
+        masterVolume = configManager.getVolume("masterVolume");
+        soundEffectsVolume = configManager.getVolume("soundEffectsVolume");
+        musicVolume = configManager.getVolume("musicVolume");
     }
 
     // Play sound effect asynchronously
@@ -99,28 +104,6 @@ public class AudioManager {
         });
     }
 
-    public void setMasterVolume(float volume) {
-        this.masterVolume = Math.max(0f, Math.min(1f, volume));
-        executor.submit(() -> {
-            if (currentMusic != null && currentMusic.isPlaying()) {
-                currentMusic.setVolume(currentMusic.getVolume() * masterVolume);
-            }
-        });
-    }
-
-    public void setMusicVolume(float volume) {
-        this.musicVolume = MathUtils.clamp(volume, 0f, 1f);
-        executor.submit(() -> {
-            if (currentMusic != null && currentMusic.isPlaying()) {
-                currentMusic.setVolume(currentMusic.getVolume() * masterVolume);
-            }
-        });
-    }
-
-    public void setSoundEffectsVolume(float volume) {
-        this.soundEffectsVolume = MathUtils.clamp(volume, 0f, 1f);
-    }
-
     // Load sound into cache if not already loaded
     private Sound getOrLoadSound(String path) {
         return soundCache.computeIfAbsent(path, p -> {
@@ -176,6 +159,43 @@ public class AudioManager {
             executor.shutdownNow();
             Thread.currentThread().interrupt();
         }
+    }
+
+    public float getMasterVolume() {
+        return masterVolume;
+    }
+
+    public void setMasterVolume(float volume) {
+        this.masterVolume = Math.max(0f, Math.min(1f, volume));
+        configManager.setVolume("masterVolume", masterVolume);
+        executor.submit(() -> {
+            if (currentMusic != null && currentMusic.isPlaying()) {
+                currentMusic.setVolume(currentMusic.getVolume() * masterVolume);
+            }
+        });
+    }
+
+    public float getSoundEffectsVolume() {
+        return soundEffectsVolume;
+    }
+
+    public void setSoundEffectsVolume(float volume) {
+        configManager.setVolume("soundEffectsVolume", soundEffectsVolume);
+        this.soundEffectsVolume = MathUtils.clamp(volume, 0f, 1f);
+    }
+
+    public float getMusicVolume() {
+        return musicVolume;
+    }
+
+    public void setMusicVolume(float volume) {
+        this.musicVolume = MathUtils.clamp(volume, 0f, 1f);
+        configManager.setVolume("musicVolume", musicVolume);
+        executor.submit(() -> {
+            if (currentMusic != null && currentMusic.isPlaying()) {
+                currentMusic.setVolume(currentMusic.getVolume() * masterVolume);
+            }
+        });
     }
 }
 
