@@ -13,13 +13,18 @@ import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import de.tum.cit.fop.maze.MazeRunnerGame;
+import de.tum.cit.fop.maze.system.AudioManager;
 
 public class LevelSelectScreen implements Screen {
+    private final MazeRunnerGame game;
     private final Stage stage;
+    private final AudioManager audioManager;
 
     public LevelSelectScreen(MazeRunnerGame game) {
+        this.game = game;
         var camera = new OrthographicCamera();
         camera.zoom = 1.5f;
+        audioManager = game.getAudioManager();
 
         Viewport viewport = new FitViewport(1920, 1080);
         stage = new Stage(viewport, game.getSpriteBatch());
@@ -37,6 +42,7 @@ public class LevelSelectScreen implements Screen {
             levelButton.addListener(new ChangeListener() {
                 @Override
                 public void changed(ChangeEvent event, Actor actor) {
+                    audioManager.playSound("Click.wav", 1);
                     game.goToGame(levelNumber);
                 }
             });
@@ -49,6 +55,7 @@ public class LevelSelectScreen implements Screen {
         goToMenu.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
+                audioManager.playSound("Click.wav", 1);
                 game.goToMenu();
             }
         });
@@ -74,6 +81,7 @@ public class LevelSelectScreen implements Screen {
     @Override
     public void show() {
         Gdx.input.setInputProcessor(stage);
+        stage.addListener(game.getKeyHandler());
     }
 
     @Override

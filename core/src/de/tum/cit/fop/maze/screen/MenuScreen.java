@@ -14,6 +14,7 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import de.tum.cit.fop.maze.MazeRunnerGame;
+import de.tum.cit.fop.maze.system.AudioManager;
 
 /**
  * The MenuScreen class is responsible for displaying the main menu of the game.
@@ -22,6 +23,7 @@ import de.tum.cit.fop.maze.MazeRunnerGame;
 public class MenuScreen implements Screen {
     private final MazeRunnerGame game;
     private final Stage stage;
+    private final AudioManager audioManager;
 
     /**
      * Constructor for MenuScreen. Sets up the camera, viewport, stage, and UI elements.
@@ -32,6 +34,7 @@ public class MenuScreen implements Screen {
         this.game = game;
         var camera = new OrthographicCamera();
         camera.zoom = 1.5f; // Set camera zoom for a closer view
+        audioManager = game.getAudioManager();
 
         Viewport viewport = new FitViewport(1920, 1080);
         stage = new Stage(viewport, game.getSpriteBatch()); // Create a stage for UI elements
@@ -65,6 +68,7 @@ public class MenuScreen implements Screen {
         newGame.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
+                audioManager.playSound("Click.wav", 1);
                 game.goToNewGameScreen(); // Change to the game screen when the button is pressed
             }
         });
@@ -72,6 +76,7 @@ public class MenuScreen implements Screen {
         continueGame.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
+                audioManager.playSound("Click.wav", 1);
                 game.goToContinueGameScreen(); // Change to the game screen when the button is pressed
             }
         });
@@ -79,6 +84,7 @@ public class MenuScreen implements Screen {
         highscores.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
+                audioManager.playSound("Click.wav", 1);
                 game.goToHighscoreScreen();
             }
         });
@@ -86,6 +92,7 @@ public class MenuScreen implements Screen {
         achievements.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
+                audioManager.playSound("Click.wav", 1);
                 game.goToAchievementsScreen();
             }
         });
@@ -93,6 +100,7 @@ public class MenuScreen implements Screen {
         settings.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
+                audioManager.playSound("Click.wav", 1);
                 game.goToSettingsScreen(); // Change to the game screen when the button is pressed
             }
         });
@@ -100,6 +108,7 @@ public class MenuScreen implements Screen {
         exit.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
+                audioManager.playSound("Click.wav", 1);
                 Gdx.app.exit();
             }
         });

@@ -13,6 +13,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import de.tum.cit.fop.maze.MazeRunnerGame;
+import de.tum.cit.fop.maze.system.AudioManager;
 import de.tum.cit.fop.maze.system.ConfigManager;
 
 import java.util.HashMap;
@@ -25,10 +26,12 @@ public class SettingsControlsScreen implements Screen {
     private String rebindingAction = null;
     private TextButton rebindingButton = null;
     private final Map<String, TextButton> actionButtons = new HashMap<>();
+    private final AudioManager audioManager;
 
     public SettingsControlsScreen(MazeRunnerGame game) {
         this.game = game;
         this.configManager = game.getConfigManager();
+        audioManager = game.getAudioManager();
 
         var camera = new OrthographicCamera();
         camera.zoom = 1.5f; // Set camera zoom for a closer view
@@ -57,6 +60,7 @@ public class SettingsControlsScreen implements Screen {
             keyButton.addListener(new ChangeListener() {
                 @Override
                 public void changed(ChangeEvent event, Actor actor) {
+                    audioManager.playSound("Click.wav", 1);
                     if (rebindingAction != null && rebindingButton != null) {
                         rebindingButton.setText(configManager.getKeyBindingName(rebindingAction));
                     }
@@ -75,6 +79,7 @@ public class SettingsControlsScreen implements Screen {
             @Override
             public boolean keyDown(InputEvent event, int keycode) {
                 if (rebindingAction != null) {
+                    audioManager.playSound("Click.wav", 1);
                     // Check for conflicts
                     String conflictingAction = configManager.getActionForKey(keycode);
                     if (conflictingAction != null && !conflictingAction.equals(rebindingAction)) {
@@ -106,6 +111,7 @@ public class SettingsControlsScreen implements Screen {
         backButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
+                audioManager.playSound("Click.wav", 1);
                 configManager.saveKeyBindings();
                 game.goToSettingsScreen();
             }
@@ -115,6 +121,7 @@ public class SettingsControlsScreen implements Screen {
         saveButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
+                audioManager.playSound("Click.wav", 1);
                 configManager.saveKeyBindings();
             }
         });

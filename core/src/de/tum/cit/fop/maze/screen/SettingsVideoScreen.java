@@ -2,11 +2,15 @@ package de.tum.cit.fop.maze.screen;
 
 import com.badlogic.gdx.Screen;
 import de.tum.cit.fop.maze.MazeRunnerGame;
+import de.tum.cit.fop.maze.system.AudioManager;
 
 public class SettingsVideoScreen implements Screen {
     private final MazeRunnerGame game;
+    private final AudioManager audioManager;
+
     public SettingsVideoScreen(MazeRunnerGame game) {
         this.game = game;
+        audioManager = game.getAudioManager();
     }
 
     @Override

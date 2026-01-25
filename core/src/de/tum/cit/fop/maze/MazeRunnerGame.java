@@ -29,6 +29,7 @@ public class MazeRunnerGame extends Game {
     private final KeyHandler keyHandler;
     private ProgressionManager progressionManager;
     private final AchievementManager achievementManager;
+    private final AudioManager audioManager;
 
     /**
      * Constructor for MazeRunnerGame.
@@ -38,6 +39,7 @@ public class MazeRunnerGame extends Game {
     public MazeRunnerGame(NativeFileChooser fileChooser) {
         super();
         configManager = new ConfigManager();
+        this.audioManager = new AudioManager();
         keyHandler = new KeyHandler(this);
         achievementManager = new AchievementManager();
     }
@@ -51,13 +53,8 @@ public class MazeRunnerGame extends Game {
         spriteBatch = new SpriteBatch(); // Create SpriteBatch
         skin = new Skin(Gdx.files.internal("craft/craftacular-ui.json")); // Load UI skin
         progressionManager = new ProgressionManager(2000);
-
-        // Play some background music
-        // Background sound
-        // Music backgroundMusic = Gdx.audio.newMusic(Gdx.files.internal("background.mp3"));
-        // backgroundMusic.setLooping(true);
-        // backgroundMusic.play();
-
+        audioManager.preloadSounds( "Click.wav" );
+        audioManager.playMusic("background.mp3", 1f, true);
         goToMenu(); // Navigate to the menu screen
     }
 
@@ -232,6 +229,7 @@ public class MazeRunnerGame extends Game {
         getScreen().dispose(); // Dispose of the current screen
         spriteBatch.dispose(); // Dispose the spriteBatch
         skin.dispose(); // Dispose of the skin
+        audioManager.dispose();
     }
 
     // Getter methods
@@ -261,6 +259,14 @@ public class MazeRunnerGame extends Game {
 
     public void startNewGameProgression() {
         progressionManager = new ProgressionManager(2000);
+    }
+
+    public AudioManager getAudioManager() {
+        return audioManager;
+    }
+
+    public GameScreen getGameScreen() {
+        return gameScreen;
     }
 
     private void loadProgressionFromGameState(GameState gameState) {

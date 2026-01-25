@@ -13,13 +13,18 @@ import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import de.tum.cit.fop.maze.MazeRunnerGame;
+import de.tum.cit.fop.maze.system.AudioManager;
 
 public class VictoryScreen implements Screen {
+    private final MazeRunnerGame game;
     private final Stage stage;
+    private final AudioManager audioManager;
 
     public VictoryScreen(MazeRunnerGame game){
+        this.game = game;
         var camera = new OrthographicCamera();
         camera.zoom = 1.5f; // Set camera zoom for a closer view
+        audioManager = game.getAudioManager();
 
         Viewport viewport = new FitViewport(1920, 1080);
         stage = new Stage(viewport, game.getSpriteBatch()); // Create a stage for UI elements
@@ -31,6 +36,7 @@ public class VictoryScreen implements Screen {
         mainMenuButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent changeEvent, Actor actor) {
+                audioManager.playSound("Click.wav", 1);
                 game.goToMenu();
             }
         });
@@ -39,9 +45,10 @@ public class VictoryScreen implements Screen {
         nextLevelButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent changeEvent, Actor actor) {
-                // This is dumb, if I have more time ill make it so there is a hirearchy of levels
-                // mapped to certain proeprty files or something and you dont have to do it this way
-                // for now its important that the proertyfile namesfollow the structure level-#.properties
+                // This is dumb, if I have more time ill make it, so there is a hirearchy of levels
+                // mapped to certain proeprty files or something, and you don't have to do it this way
+                // for now it's important that the proertyfile namesfollow the structure level-#.properties
+                audioManager.playSound("Click.wav", 1);
                 int currentLevel = game.getCurrentLevelNumber();
                 if (currentLevel + 1 <= 5) {
                     game.goToGame(currentLevel + 1);
@@ -77,6 +84,7 @@ public class VictoryScreen implements Screen {
     public void show() {
         // Set the input processor so the stage can receive input events
         Gdx.input.setInputProcessor(stage);
+        stage.addListener(game.getKeyHandler());
     }
 
     //The following methods are part of the Screen interface but are not used in this screen.
