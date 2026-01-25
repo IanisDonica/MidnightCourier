@@ -273,6 +273,7 @@ public class SurvivalScreen implements Screen {
         batch.end();
         batch.setShader(null);
 
+
         // render hud
         hud.update(
                 level,
