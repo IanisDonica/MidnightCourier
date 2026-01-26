@@ -19,6 +19,7 @@ public class Player extends Entity {
 
     private final CollisionHandler collisionHandler;
     private final GameOverListener gameOverListener;
+    private GameOverListener deathOverListener;
     protected Animation<TextureRegion> stunnedAnimation;
     private boolean moveUp, moveDown, moveLeft, moveRight;
     private boolean sprinting;
@@ -153,13 +154,19 @@ public class Player extends Entity {
         hp -= damage;
         if (hp <= 0 && !gameOverTriggered) {
             gameOverTriggered = true;
-            if (gameOverListener != null) {
+            if (damage >= 999 && deathOverListener != null) {
+                deathOverListener.onGameOver();
+            } else if (gameOverListener != null) {
                 gameOverListener.onGameOver();
             }
             return;
         }
         stunned = true;
         stunDuration = 0.5f;
+    }
+
+    public void setDeathOverListener(GameOverListener deathOverListener) {
+        this.deathOverListener = deathOverListener;
     }
 
     @Override

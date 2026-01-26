@@ -47,17 +47,6 @@ public class LevelSelectScreen implements Screen {
                 }
             });
         }
-        TextButton levelButton = new TextButton("Endless Survival", game.getSkin());
-        table.add(levelButton).width(300).row();
-        levelButton.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent event, Actor actor) {
-                audioManager.playSound("Click.wav", 1);
-                game.goToEndless();
-            }
-        });
-
-
         table.row();
 
         TextButton goToMenu = new TextButton("Go back to menu", game.getSkin());

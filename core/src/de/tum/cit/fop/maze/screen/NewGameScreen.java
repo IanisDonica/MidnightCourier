@@ -34,31 +34,27 @@ public class NewGameScreen implements Screen {
         table.setFillParent(true); // Make the table fill the stage
         stage.addActor(table); // Add the table to the stage
 
-        // Add a label as a title
-        table.add(new Label("The progress will be lost.\nAre you sure?", game.getSkin(), "title")).padBottom(80).row();
+        table.add(new Label("New Game", game.getSkin(), "title")).padBottom(80).row();
 
-        // Create and add a button to go to the game screen
-        TextButton yesButton = new TextButton("Yes", game.getSkin());
-        table.add(yesButton).width(300);
+        TextButton startCampaign = new TextButton("Start new campaign", game.getSkin());
+        table.add(startCampaign).width(500).padBottom(15).row();
 
-        TextButton noButton = new TextButton("No", game.getSkin());
-        table.add(noButton).width(300);
+        TextButton startEndless = new TextButton("Start endless run", game.getSkin());
+        table.add(startEndless).width(500).padBottom(15).row();
 
-        table.row();
-
-        yesButton.addListener(new ChangeListener() {
+        startCampaign.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 audioManager.playSound("Click.wav", 1);
                 game.startNewGameProgression();
-                game.goToLevelSelectScreen();
+                game.goToCutsceneScreen();
             }
         });
-        noButton.addListener(new ChangeListener() {
+        startEndless.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 audioManager.playSound("Click.wav", 1);
-                game.goToMenu(); // Change to the main menu screen when the button is pressed
+                game.goToEndless();
             }
         });
 

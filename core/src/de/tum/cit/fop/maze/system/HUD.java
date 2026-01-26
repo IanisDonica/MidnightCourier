@@ -15,9 +15,11 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import de.tum.cit.fop.maze.MazeRunnerGame;
+import com.badlogic.gdx.math.MathUtils;
 
 public class HUD {
     //private MazeRunnerGame game;
@@ -37,6 +39,8 @@ public class HUD {
     private Image regenImage;
     private Animation<TextureRegion> regenAnimation;
     private final Texture regenTexture;
+    private final Texture arrowTexture;
+    private final Image arrowImage;
 
     public HUD(MazeRunnerGame game){
         //this.game = game;
@@ -65,6 +69,13 @@ public class HUD {
         regenAnimation = new Animation<>(0.25f, regenFrames);
         regenImage = new Image(regenFrames.first());
         regenImage.setVisible(false);
+
+        arrowTexture = new Texture(Gdx.files.internal("objects.png"));
+        TextureRegion arrowRegion = new TextureRegion(arrowTexture, 64, 48, 16, 16);
+        arrowImage = new Image(arrowRegion);
+        arrowImage.setSize(64f, 64f);
+        arrowImage.setOrigin(Align.center);
+        arrowImage.setVisible(true);
 
         Table topTable = new Table();
         topTable.setFillParent(true);
@@ -140,12 +151,16 @@ public class HUD {
         bottomTable.bottom();
         bottomTable.add(shopButton).padBottom(30);
 
+        stage.addActor(arrowImage);
         stage.addActor(topTable);
         stage.addActor(pauseTable);
         stage.addActor(bottomTable);
     }
 
-    public void update(int levelNumber, int hp, int score, boolean hasKey, boolean hasRegen, float regenTimerSeconds, float regenIntervalSeconds){
+    public void update(int levelNumber, int hp, int score, boolean hasKey, boolean hasRegen,
+                       float regenTimerSeconds, float regenIntervalSeconds,
+                       float playerX, float playerY,
+                       float keyX, float keyY, float exitX, float exitY) {
         healthTable.clear();
         levelLabel.setText("Level: " + levelNumber);
         scoreLabel.setText("Score: " + score);
@@ -170,6 +185,16 @@ public class HUD {
             TextureRegion frame = regenAnimation.getKeyFrame(regenTimerSeconds, false);
             regenImage.setDrawable(new TextureRegionDrawable(frame));
         }
+
+        float targetX = hasKey ? exitX : keyX;
+        float targetY = hasKey ? exitY : keyY;
+        float dx = targetX - playerX;
+        float dy = targetY - playerY;
+        float angle = MathUtils.atan2(dy, dx) * MathUtils.radiansToDegrees;
+        arrowImage.setRotation(angle);
+        arrowImage.setSize(64f, 64f);
+        arrowImage.setPosition(10f, 10f);
+        arrowImage.setVisible(true);
     }
     
     public Stage getStage(){
@@ -199,4 +224,5 @@ public class HUD {
     public boolean isShopButtonVisible() {
         return shopButton.isVisible();
     }
+
 }

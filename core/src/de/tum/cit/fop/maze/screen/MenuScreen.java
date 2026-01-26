@@ -52,6 +52,9 @@ public class MenuScreen implements Screen {
         TextButton continueGame = new TextButton("Load Game", game.getSkin());
         table.add(continueGame).width(500).padBottom(15).row();
 
+        TextButton loadSpecificLevel = new TextButton("Load specific level", game.getSkin());
+        table.add(loadSpecificLevel).width(500).padBottom(15).row();
+
         TextButton highscores = new TextButton("Highscores", game.getSkin());
         table.add(highscores).width(500).padBottom(15).row();
 
@@ -77,6 +80,14 @@ public class MenuScreen implements Screen {
             public void changed(ChangeEvent event, Actor actor) {
                 audioManager.playSound("Click.wav", 1);
                 game.goToContinueGameScreen(); // Change to the game screen when the button is pressed
+            }
+        });
+
+        loadSpecificLevel.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                audioManager.playSound("Click.wav", 1);
+                game.goToLevelSelectScreen();
             }
         });
 

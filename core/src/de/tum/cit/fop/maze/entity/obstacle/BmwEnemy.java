@@ -8,6 +8,8 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import de.tum.cit.fop.maze.ai.RoadPathfinder;
 import de.tum.cit.fop.maze.entity.Player;
+import de.tum.cit.fop.maze.entity.obstacle.Enemy;
+import de.tum.cit.fop.maze.entity.obstacle.JandarmeriaDeath;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -64,7 +66,7 @@ public class BmwEnemy extends Obstacle {
     @Override
     protected void collision() {
         if (!player.isStunned()) {
-            player.damage(1);
+            player.damage(999);
         }
     }
 
@@ -74,15 +76,21 @@ public class BmwEnemy extends Obstacle {
             return pendingRemove;
         }
         for (int i = 0; i < stage.getActors().size; i++) {
-            if (!(stage.getActors().get(i) instanceof BmwEnemy other)) {
-                continue;
-            }
-            if (other == this || other.pendingRemove) {
-                continue;
-            }
-            if (getBounds().overlaps(other.getBounds())) {
-                handleBmwCollision(other);
-                return true;
+            Actor actor = stage.getActors().get(i);
+            if (actor instanceof BmwEnemy other) {
+                if (other == this || other.pendingRemove) {
+                    continue;
+                }
+                if (getBounds().overlaps(other.getBounds())) {
+                    handleBmwCollision(other);
+                    return true;
+                }
+            } else if (actor instanceof Enemy guard) {
+                Rectangle guardBounds = new Rectangle(guard.getX(), guard.getY(), guard.getWidth(), guard.getHeight());
+                if (getBounds().overlaps(guardBounds)) {
+                    handleGuardCollision(guard);
+                    return true;
+                }
             }
         }
         return false;
@@ -103,6 +111,19 @@ public class BmwEnemy extends Obstacle {
         spawnRandomBmws(player, stage, 2);
         remove();
         other.remove();
+    }
+
+    private void handleGuardCollision(Enemy guard) {
+        Stage stage = getStage();
+        if (stage == null) {
+            guard.remove();
+            return;
+        }
+        float centerX = guard.getX() + guard.getWidth() / 2f;
+        float centerY = guard.getY() + guard.getHeight() / 2f;
+        stage.addActor(new JandarmeriaDeath(centerX, centerY));
+        guard.remove();
+        Enemy.spawnRandomEnemies(player, stage, guard.getCollisionLayer(), 1);
     }
 
     private Rectangle getBounds() {
