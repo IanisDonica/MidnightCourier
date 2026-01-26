@@ -52,7 +52,8 @@ public class GameScreen implements Screen {
     private final ShaderProgram collisionShader;
     private final ShaderProgram combinationShader;
     private final OrthographicCamera uiCamera;
-    private float fogIntensity = 1000f;
+    private float fogIntensity = 5f ;
+    private boolean glassesApplied = false;
     private boolean noireMode = false;
     private FrameBuffer fbo;
     private TextureRegion fboRegion;
@@ -213,6 +214,11 @@ public class GameScreen implements Screen {
         player.setDrinkDurationMultiplier(drinkMultiplier);
 
         player.setPotholeImmune(progressionManager.hasUpgrade("pothol_imunity"));
+
+        if (progressionManager.hasUpgrade("new_glasses") && !glassesApplied) {
+            fogIntensity += 10f;
+            glassesApplied = true;
+        }
     }
 
     @Override

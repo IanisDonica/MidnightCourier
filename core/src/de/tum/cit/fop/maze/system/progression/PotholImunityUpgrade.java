@@ -8,7 +8,7 @@ public class PotholImunityUpgrade extends BaseUpgrade {
                 "Makes you immune to pothole traps.",
                 "assets/ui/upgrades/pothol_imunity.png",
                 260,
-                new String[] {"dash", "stealth"}
+                new String[] {"new_glasses", "stealth"}
         );
     }
 }

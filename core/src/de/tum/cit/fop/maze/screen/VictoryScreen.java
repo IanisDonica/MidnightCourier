@@ -110,6 +110,10 @@ public class VictoryScreen implements Screen {
                 audioManager.playSound("Click.wav", 1);
                 int currentLevel = game.getCurrentLevelNumber();
                 if (currentLevel + 1 <= 5) {
+                    if (currentLevel == 1) {
+                        game.goToSecondCutsceneScreen(currentLevel + 1);
+                        return;
+                    }
                     game.goToGame(currentLevel + 1);
                     return;
                 }

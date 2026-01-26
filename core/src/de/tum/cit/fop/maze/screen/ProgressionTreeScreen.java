@@ -40,7 +40,7 @@ public class ProgressionTreeScreen implements Screen {
             {"health_2", "regen"},
             {"speed_3", "master"},
             {"health_3", "master"},
-            {"dash", "pothol_imunity"},
+            {"new_glasses", "pothol_imunity"},
             {"stealth", "pothol_imunity"}
     };
 
@@ -154,7 +154,7 @@ public class ProgressionTreeScreen implements Screen {
         rowZero.add().width(260).height(120).pad(20);
         rowZero.add(createUpgradeButton("root")).width(260).height(120).pad(20);
         rowZero.add().width(260).height(120).pad(20);
-        rowZero.add(createUpgradeButton("dash")).width(260).height(120).pad(20);
+        rowZero.add(createUpgradeButton("new_glasses")).width(260).height(120).pad(20);
         treeTable.add(rowZero).row();
 
 
