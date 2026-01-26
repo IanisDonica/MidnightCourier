@@ -9,7 +9,8 @@ import de.tum.cit.fop.maze.entity.Player;
 
 public class Explosion extends Actor {
     private static final float LIFETIME = 0.6f;
-    private final TextureRegion texture;
+    private static TextureRegion texture;
+    private static boolean textureInitialized = false;
     private final Player player;
     private final float radius;
     private float timer = 0f;
@@ -18,8 +19,11 @@ public class Explosion extends Actor {
     public Explosion(float centerX, float centerY, float radius, Player player) {
         this.player = player;
         this.radius = radius;
-        Texture textureSheet = new Texture(Gdx.files.internal("objects.png"));
-        this.texture = new TextureRegion(textureSheet, 64, 48, 16, 16);
+        if (!textureInitialized) {
+            textureInitialized = true;
+            Texture textureSheet = new Texture(Gdx.files.internal("objects.png"));
+            texture = new TextureRegion(textureSheet, 64, 48, 16, 16);
+        }
         setSize(5f, 5f);
         setPosition(centerX - getWidth() / 2f, centerY - getHeight() / 2f);
     }

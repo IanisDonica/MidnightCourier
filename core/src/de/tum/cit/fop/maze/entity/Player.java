@@ -20,7 +20,10 @@ public class Player extends Entity {
     private final CollisionHandler collisionHandler;
     private final GameOverListener gameOverListener;
     private GameOverListener deathOverListener;
-    protected Animation<TextureRegion> stunnedAnimation;
+    protected Animation<TextureRegion> stunnedDownAnimation;
+    protected Animation<TextureRegion> stunnedUpAnimation;
+    protected Animation<TextureRegion> stunnedLeftAnimation;
+    protected Animation<TextureRegion> stunnedRightAnimation;
     private boolean moveUp, moveDown, moveLeft, moveRight;
     private boolean sprinting;
     private int maxHp = 3;
@@ -114,6 +117,9 @@ public class Player extends Entity {
         Texture walkSheetDownUp = new Texture(Gdx.files.internal("CharacterUpDown.png"));
         Texture walkSheetRight =  new Texture(Gdx.files.internal("Character_Right.png"));
         Texture walkSheetLeft = new Texture(Gdx.files.internal("Character_Left.png"));
+        Texture stunLeftSheet = new Texture(Gdx.files.internal("CharacterLeftStun.png"));
+        Texture stunRightSheet = new Texture(Gdx.files.internal("CharacterRightStun.png"));
+        Texture stunUpDownSheet = new Texture(Gdx.files.internal("CharacterUpDownStun.png"));
 
         int frameWidth = 16;
         int frameHeight = 32;
@@ -130,21 +136,30 @@ public class Player extends Entity {
         Array<TextureRegion> walkRightFrames = new Array<>(TextureRegion.class);
         Array<TextureRegion> walkUpFrames = new Array<>(TextureRegion.class);
         Array<TextureRegion> walkLeftFrames = new Array<>(TextureRegion.class);
-        Array<TextureRegion> stunnedFrames = new Array<>(TextureRegion.class);
+        Array<TextureRegion> stunnedDownFrames = new Array<>(TextureRegion.class);
+        Array<TextureRegion> stunnedUpFrames = new Array<>(TextureRegion.class);
+        Array<TextureRegion> stunnedLeftFrames = new Array<>(TextureRegion.class);
+        Array<TextureRegion> stunnedRightFrames = new Array<>(TextureRegion.class);
 
         for (int col = 0; col < animationFrames; col++) {
             walkUpFrames.add(new TextureRegion(walkSheetDownUp, col * frameWidthDownUp, 0, frameWidthDownUp, frameHeightDownUp));
             walkRightFrames.add(new TextureRegion(walkSheetRight, col * frameWidthRightLeft, 0, frameWidthRightLeft, frameHeightRightLeft));
             walkDownFrames.add(new TextureRegion(walkSheetDownUp, col * frameWidthDownUp, 20, frameWidthDownUp, frameHeightDownUp));
             walkLeftFrames.add(new TextureRegion(walkSheetLeft, col * frameWidthRightLeft, 0, frameWidthRightLeft, frameHeightRightLeft));
-            stunnedFrames.add(new TextureRegion(walkSheet, 80 + col * frameWidth, 96, frameWidth, frameHeight));
+            stunnedLeftFrames.add(new TextureRegion(stunLeftSheet, col * frameWidth, 0, frameWidth, frameHeight));
+            stunnedRightFrames.add(new TextureRegion(stunRightSheet, col * frameWidth, 0, frameWidth, frameHeight));
+            stunnedUpFrames.add(new TextureRegion(stunUpDownSheet, col * frameWidth, 0, frameWidth, frameHeight));
+            stunnedDownFrames.add(new TextureRegion(stunUpDownSheet, col * frameWidth, 32, frameWidth, frameHeight));
         }
 
         downAnimation = new Animation<>(0.15f, walkDownFrames);
         rightAnimation = new Animation<>(0.15f, walkRightFrames);
         upAnimation = new Animation<>(0.15f, walkUpFrames);
         leftAnimation = new Animation<>(0.15f, walkLeftFrames);
-        stunnedAnimation = new Animation<>(0.15f, stunnedFrames);
+        stunnedDownAnimation = new Animation<>(0.15f, stunnedDownFrames);
+        stunnedUpAnimation = new Animation<>(0.15f, stunnedUpFrames);
+        stunnedLeftAnimation = new Animation<>(0.15f, stunnedLeftFrames);
+        stunnedRightAnimation = new Animation<>(0.15f, stunnedRightFrames);
     }
 
     public void damage(int damage) {
@@ -173,7 +188,12 @@ public class Player extends Entity {
     public void draw(Batch batch, float parentAlpha) {
         TextureRegion currentFrame;
         if (stunned) {
-            currentFrame = stunnedAnimation.getKeyFrame(animationTime, true);
+            currentFrame = switch (facingDirection) {
+                case 'l' -> stunnedLeftAnimation.getKeyFrame(animationTime, true);
+                case 'r' -> stunnedRightAnimation.getKeyFrame(animationTime, true);
+                case 'u' -> stunnedUpAnimation.getKeyFrame(animationTime, true);
+                default -> stunnedDownAnimation.getKeyFrame(animationTime, true);
+            };
         } else {
             currentFrame = switch (facingDirection) {
                 case 'l' -> leftAnimation.getKeyFrame(animationTime, true);

@@ -11,6 +11,8 @@ import com.badlogic.gdx.utils.Array;
 public class Obstacle extends MapObject {
     Animation<TextureRegion> animation;
     int textureOffsetX, textureOffsetY, animationFrames;
+    private static Texture sharedTextureSheet;
+    private static boolean textureInitialized = false;
 
     public Obstacle(float x, float y, int w, int h, int textureOffsetX, int textureOffsetY, int animationFrames) {
         setPosition(x, y);
@@ -23,11 +25,14 @@ public class Obstacle extends MapObject {
 
     private void initAnimation() {
         //This is kinda duplicate, but it will later be useful
-        Texture textureSheet = new Texture(Gdx.files.internal("objects.png"));
+        if (!textureInitialized) {
+            textureInitialized = true;
+            sharedTextureSheet = new Texture(Gdx.files.internal("objects.png"));
+        }
         Array<TextureRegion> frames = new Array<>(TextureRegion.class);
 
         for (int col = 0; col < animationFrames; col++) {
-            frames.add(new TextureRegion(textureSheet, textureOffsetX + col * frameWidth, textureOffsetY, frameWidth, frameHeight));
+            frames.add(new TextureRegion(sharedTextureSheet, textureOffsetX + col * frameWidth, textureOffsetY, frameWidth, frameHeight));
         }
 
         animation = new Animation<>(0.25f, frames);

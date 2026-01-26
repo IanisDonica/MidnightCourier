@@ -6,6 +6,10 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import de.tum.cit.fop.maze.ai.RoadPathfinder;
 import de.tum.cit.fop.maze.entity.Player;
 import de.tum.cit.fop.maze.entity.obstacle.Enemy;
@@ -13,6 +17,7 @@ import de.tum.cit.fop.maze.entity.obstacle.JandarmeriaDeath;
 
 import java.util.ArrayList;
 import java.util.List;
+import com.badlogic.gdx.utils.Array;
 
 public class BmwEnemy extends Obstacle {
     // TODO merge common stuff
@@ -34,10 +39,21 @@ public class BmwEnemy extends Obstacle {
     private int goalX = Integer.MIN_VALUE;
     private int goalY = Integer.MIN_VALUE;
     private boolean pendingRemove = false;
+    private static Animation<TextureRegion> driveNorthAnimation;
+    private static Animation<TextureRegion> driveSouthAnimation;
+    private static Animation<TextureRegion> driveEastAnimation;
+    private static Animation<TextureRegion> driveWestAnimation;
+    private static boolean animationsInitialized = false;
+    private Direction facingDirection = Direction.N;
+
+    private enum Direction {
+        N, S, E, W
+    }
 
     public BmwEnemy(TiledMapTileLayer roadLayer, float x, float y) {
         super(x, y, BMW_WIDTH_HORIZONTAL, BMW_HEIGHT_HORIZONTAL, 0, 0, 1);
         setRoadLayer(roadLayer);
+        initDriveAnimation();
     }
 
     @Override
@@ -124,6 +140,44 @@ public class BmwEnemy extends Obstacle {
         stage.addActor(new JandarmeriaDeath(centerX, centerY));
         guard.remove();
         Enemy.spawnRandomEnemies(player, stage, guard.getCollisionLayer(), 1);
+    }
+
+    private void initDriveAnimation() {
+        if (animationsInitialized) {
+            return;
+        }
+        animationsInitialized = true;
+        Texture northSheet = new Texture(com.badlogic.gdx.Gdx.files.internal("Blue_SPORT_CLEAN_NORTH_000-sheet.png"));
+        Texture southSheet = new Texture(com.badlogic.gdx.Gdx.files.internal("Blue_SPORT_CLEAN_SOUTH_000-sheet.png"));
+        Texture eastSheet = new Texture(com.badlogic.gdx.Gdx.files.internal("Blue_SPORT_CLEAN_EAST_000-sheet.png"));
+        Texture westSheet = new Texture(com.badlogic.gdx.Gdx.files.internal("Blue_SPORT_CLEAN_WEST_000-sheet.png"));
+        int frameW = 100;
+        int frameH = 100;
+        Array<TextureRegion> northFrames = new Array<>(TextureRegion.class);
+        Array<TextureRegion> southFrames = new Array<>(TextureRegion.class);
+        Array<TextureRegion> eastFrames = new Array<>(TextureRegion.class);
+        Array<TextureRegion> westFrames = new Array<>(TextureRegion.class);
+        for (int col = 0; col < 4; col++) {
+            northFrames.add(new TextureRegion(northSheet, col * frameW, 0, frameW, frameH));
+            southFrames.add(new TextureRegion(southSheet, col * frameW, 0, frameW, frameH));
+            eastFrames.add(new TextureRegion(eastSheet, col * frameW, 0, frameW, frameH));
+            westFrames.add(new TextureRegion(westSheet, col * frameW, 0, frameW, frameH));
+        }
+        driveNorthAnimation = new Animation<>(0.3f / 4f, northFrames);
+        driveSouthAnimation = new Animation<>(0.3f / 4f, southFrames);
+        driveEastAnimation = new Animation<>(0.3f / 4f, eastFrames);
+        driveWestAnimation = new Animation<>(0.3f / 4f, westFrames);
+    }
+
+    @Override
+    public void draw(Batch batch, float parentAlpha) {
+        TextureRegion currentFrame = switch (facingDirection) {
+            case S -> driveSouthAnimation.getKeyFrame(animationTime, true);
+            case E -> driveEastAnimation.getKeyFrame(animationTime, true);
+            case W -> driveWestAnimation.getKeyFrame(animationTime, true);
+            default -> driveNorthAnimation.getKeyFrame(animationTime, true);
+        };
+        batch.draw(currentFrame, getX(), getY(), getWidth(), getHeight());
     }
 
     private Rectangle getBounds() {
@@ -296,6 +350,7 @@ public class BmwEnemy extends Obstacle {
         }
 
         updateSizeForDirection(dx, dy);
+        updateFacingDirection(dx, dy);
         float step = Math.min(speed * delta, dist);
         setPosition(getX() + (dx / dist) * step, getY() + (dy / dist) * step);
     }
@@ -313,6 +368,7 @@ public class BmwEnemy extends Obstacle {
             return;
         }
         updateSizeForDirection(dx, dy);
+        updateFacingDirection(dx, dy);
         float step = Math.min(speed * delta, dist);
         setPosition(getX() + (dx / dist) * step, getY() + (dy / dist) * step);
     }
@@ -344,6 +400,14 @@ public class BmwEnemy extends Obstacle {
             setSizeKeepingCenter(1f, 2f);
         } else {
             setSizeKeepingCenter(2f, 1f);
+        }
+    }
+
+    private void updateFacingDirection(float dx, float dy) {
+        if (Math.abs(dx) >= Math.abs(dy)) {
+            facingDirection = dx >= 0f ? Direction.E : Direction.W;
+        } else {
+            facingDirection = dy >= 0f ? Direction.N : Direction.S;
         }
     }
 

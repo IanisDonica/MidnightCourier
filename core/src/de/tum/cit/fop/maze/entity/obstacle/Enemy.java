@@ -1,6 +1,10 @@
 package de.tum.cit.fop.maze.entity.obstacle;
 
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
@@ -14,6 +18,7 @@ import de.tum.cit.fop.maze.entity.collectible.Collectible;
 import de.tum.cit.fop.maze.entity.Player;
 import java.util.ArrayList;
 import java.util.List;
+import com.badlogic.gdx.utils.Array;
 
 public class Enemy extends Obstacle {
     private enum EnemyState {
@@ -45,6 +50,12 @@ public class Enemy extends Obstacle {
     private int lastGoalY = Integer.MIN_VALUE;
     private int lastRetreatToken = 0;
     private EnemyState state = EnemyState.CHASING; // Initial state
+    private char facingDirection = 'd';
+    private static Animation<TextureRegion> walkNorthAnimation;
+    private static Animation<TextureRegion> walkSouthAnimation;
+    private static Animation<TextureRegion> walkEastAnimation;
+    private static Animation<TextureRegion> walkWestAnimation;
+    private static boolean animationsInitialized = false;
 
     public Enemy(TiledMapTileLayer collisionLayer, float x, float y) {
         super(x, y, 1,1, 0,0,3);
@@ -56,6 +67,7 @@ public class Enemy extends Obstacle {
         this.retreatBehavior = new RetreatBehavior(mapWidth, mapHeight, collisionLayer);
         this.patrolBehavior = new PatrolBehaviour(mapWidth, mapHeight, collisionLayer);
         this.speed = 5f;
+        initWalkAnimations();
     }
 
     public TiledMapTileLayer getCollisionLayer() {
@@ -168,6 +180,7 @@ public class Enemy extends Obstacle {
             return;
         }
 
+        updateFacingDirection(dx, dy);
         float speedScale = (state == EnemyState.PATROLLING || state == EnemyState.RETREATING) ? PATROL_SPEED_SCALE : 1f;
         float step = Math.min(speed * speedScale * delta, dist);
         setPosition(getX() + (dx / dist) * step, getY() + (dy / dist) * step);
@@ -185,8 +198,60 @@ public class Enemy extends Obstacle {
             setPosition(getX() + dx, getY() + dy);
             return;
         }
+        updateFacingDirection(dx, dy);
         float step = Math.min(speed * delta, dist);
         setPosition(getX() + (dx / dist) * step, getY() + (dy / dist) * step);
+    }
+
+    private void updateFacingDirection(float dx, float dy) {
+        if (Math.abs(dx) >= Math.abs(dy)) {
+            facingDirection = dx >= 0f ? 'r' : 'l';
+        } else {
+            facingDirection = dy >= 0f ? 'u' : 'd';
+        }
+    }
+
+    private void initWalkAnimations() {
+        if (animationsInitialized) {
+            return;
+        }
+        animationsInitialized = true;
+        Texture northSheet = new Texture(com.badlogic.gdx.Gdx.files.internal("Police/NORTH_MOVEMENT.png"));
+        Texture southSheet = new Texture(com.badlogic.gdx.Gdx.files.internal("Police/SOUTH_MOVEMENT.png"));
+        Texture eastSheet = new Texture(com.badlogic.gdx.Gdx.files.internal("Police/EAST_MOVEMENT.png"));
+        Texture westSheet = new Texture(com.badlogic.gdx.Gdx.files.internal("Police/WEST_MOVEMENT.png"));
+
+        int frameW = 24;
+        int frameH = 24;
+        Array<TextureRegion> northFrames = new Array<>(TextureRegion.class);
+        Array<TextureRegion> southFrames = new Array<>(TextureRegion.class);
+        Array<TextureRegion> eastFrames = new Array<>(TextureRegion.class);
+        Array<TextureRegion> westFrames = new Array<>(TextureRegion.class);
+
+        for (int col = 0; col < 6; col++) {
+            northFrames.add(new TextureRegion(northSheet, col * frameW, 0, frameW, frameH));
+            southFrames.add(new TextureRegion(southSheet, col * frameW, 0, frameW, frameH));
+        }
+        for (int col = 0; col < 4; col++) {
+            eastFrames.add(new TextureRegion(eastSheet, col * frameW, 0, frameW, frameH));
+            westFrames.add(new TextureRegion(westSheet, col * frameW, 0, frameW, frameH));
+        }
+
+        walkNorthAnimation = new Animation<>(0.15f, northFrames);
+        walkSouthAnimation = new Animation<>(0.15f, southFrames);
+        walkEastAnimation = new Animation<>(0.15f, eastFrames);
+        walkWestAnimation = new Animation<>(0.15f, westFrames);
+    }
+
+    @Override
+    public void draw(Batch batch, float parentAlpha) {
+        TextureRegion currentFrame = switch (facingDirection) {
+            case 'l' -> walkWestAnimation.getKeyFrame(animationTime, true);
+            case 'r' -> walkEastAnimation.getKeyFrame(animationTime, true);
+            case 'u' -> walkNorthAnimation.getKeyFrame(animationTime, true);
+            default -> walkSouthAnimation.getKeyFrame(animationTime, true);
+        };
+        batch.draw(currentFrame, getX(), getY(), getWidth(), getHeight());
     }
 
     public static void spawnRandomEnemies(Player player, Stage stage, TiledMapTileLayer collisionLayer, int amount) {
