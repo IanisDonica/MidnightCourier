@@ -1,12 +1,12 @@
 package de.tum.cit.fop.maze.system;
 
-import de.tum.cit.fop.maze.system.progression.DashUpgrade;
 import de.tum.cit.fop.maze.system.progression.DrinkSpeedIUpgrade;
 import de.tum.cit.fop.maze.system.progression.DrinkSpeedIIUpgrade;
 import de.tum.cit.fop.maze.system.progression.HealthBoostIIUpgrade;
 import de.tum.cit.fop.maze.system.progression.HealthBoostIIIUpgrade;
 import de.tum.cit.fop.maze.system.progression.HealthUpgrade;
 import de.tum.cit.fop.maze.system.progression.MasterUpgrade;
+import de.tum.cit.fop.maze.system.progression.NewGlassesUpgrade;
 import de.tum.cit.fop.maze.system.progression.PotholImunityUpgrade;
 import de.tum.cit.fop.maze.system.progression.RegenUpgrade;
 import de.tum.cit.fop.maze.system.progression.RootUpgrade;
@@ -130,7 +130,7 @@ public class ProgressionManager {
         upgradesByName.put("health_2", new HealthBoostIIUpgrade());
         upgradesByName.put("speed_3", new SpeedIIIUpgrade());
         upgradesByName.put("health_3", new HealthBoostIIIUpgrade());
-        upgradesByName.put("dash", new DashUpgrade());
+        upgradesByName.put("new_glasses", new NewGlassesUpgrade());
         upgradesByName.put("regen", new RegenUpgrade());
         upgradesByName.put("master", new MasterUpgrade());
         upgradesByName.put("drink_speed_1", new DrinkSpeedIUpgrade());

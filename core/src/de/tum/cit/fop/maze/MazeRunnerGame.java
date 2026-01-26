@@ -140,6 +140,10 @@ public class MazeRunnerGame extends Game {
         this.setScreen(new CutsceneScreen(this));
     }
 
+    public void goToSecondCutsceneScreen(int targetLevel) {
+        this.setScreen(new SecondCutsceneScreen(this, targetLevel));
+    }
+
     /**
      * Switches to the continue game screen.
      */

@@ -43,6 +43,7 @@ public class SurvivalScreen implements Screen {
     private final ShaderProgram combinedShader;
     private final OrthographicCamera uiCamera;
     private float fogIntensity = 7f;
+    private boolean glassesApplied = false;
     private boolean noireMode = false;
     private FrameBuffer fbo;
     private TextureRegion fboRegion;
@@ -210,6 +211,11 @@ public class SurvivalScreen implements Screen {
         player.setDrinkDurationMultiplier(drinkMultiplier);
 
         player.setPotholeImmune(progressionManager.hasUpgrade("pothol_imunity"));
+
+        if (progressionManager.hasUpgrade("new_glasses") && !glassesApplied) {
+            fogIntensity += 2f;
+            glassesApplied = true;
+        }
     }
 
     @Override
