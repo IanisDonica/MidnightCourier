@@ -58,6 +58,10 @@ public class Enemy extends Obstacle {
         this.speed = 5f;
     }
 
+    public TiledMapTileLayer getCollisionLayer() {
+        return collisionLayer;
+    }
+
     @Override
     protected void onAddedToStage() {
         super.onAddedToStage();

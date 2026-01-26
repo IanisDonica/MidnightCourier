@@ -81,6 +81,10 @@ public class PointManager implements Serializable {
         }
     }
 
+    public float getElapsedTime() {
+        return elapsedTime;
+    }
+
     public void saveScore(int playerHp) {
         //THis is just to make the JSON handaling easier
         ScoreRecord record = new ScoreRecord(getPoints(), elapsedTime, playerHp, level);

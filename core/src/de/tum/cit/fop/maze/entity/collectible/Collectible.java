@@ -72,4 +72,10 @@ public class Collectible extends MapObject {
             pickUpFrameCounter--;
         }
     }
+
+    @Override
+    protected void updateBounds() {
+        // Use full tile bounds for collectibles to make pickup/exit collisions reliable.
+        bounds.set(getX(), getY(), getWidth(), getHeight());
+    }
 }

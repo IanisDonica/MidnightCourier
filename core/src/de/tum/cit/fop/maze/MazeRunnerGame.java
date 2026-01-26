@@ -136,6 +136,10 @@ public class MazeRunnerGame extends Game {
         }
     }
 
+    public void goToCutsceneScreen() {
+        this.setScreen(new CutsceneScreen(this));
+    }
+
     /**
      * Switches to the continue game screen.
      */
@@ -225,6 +229,14 @@ public class MazeRunnerGame extends Game {
 
     public void goToGameOverScreen() {
         this.setScreen(new GameOverScreen(this)); // Set the current screen to GameScreen
+        if (settingsScreen != null) {
+            settingsScreen.dispose(); // Dispose the menu screen if it exists
+            settingsScreen = null;
+        }
+    }
+
+    public void goToDeathOverScreen() {
+        this.setScreen(new DeathOverScreen(this));
         if (settingsScreen != null) {
             settingsScreen.dispose(); // Dispose the menu screen if it exists
             settingsScreen = null;

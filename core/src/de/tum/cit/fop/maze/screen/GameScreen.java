@@ -15,6 +15,7 @@ import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.*;
 import de.tum.cit.fop.maze.system.HUD;
@@ -98,6 +99,7 @@ public class GameScreen implements Screen {
         roadLayer = mapLoader.buildRoadLayerFromProperties(map, this.propertiesPath);
         de.tum.cit.fop.maze.entity.obstacle.BmwEnemy.setRoadLayer(roadLayer);
         player = new Player(collisionLayer, 78,46, game::goToGameOverScreen);
+        player.setDeathOverListener(game::goToDeathOverScreen);
         player.setWorldBounds(WORLD_WIDTH, WORLD_HEIGHT);
         applyUpgrades();
         devConsole.setPlayer(player);
@@ -133,6 +135,7 @@ public class GameScreen implements Screen {
         roadLayer = mapLoader.buildRoadLayerFromProperties(map, this.propertiesPath);
         de.tum.cit.fop.maze.entity.obstacle.BmwEnemy.setRoadLayer(roadLayer);
         player = new Player(collisionLayer, 78,46, game::goToGameOverScreen);
+        player.setDeathOverListener(game::goToDeathOverScreen);
         player.setWorldBounds(WORLD_WIDTH, WORLD_HEIGHT);
         applyUpgrades();
         devConsole.setPlayer(player);
@@ -258,6 +261,19 @@ public class GameScreen implements Screen {
         batch.setShader(null);
 
         // render hud
+        float keyX = Float.NaN;
+        float keyY = Float.NaN;
+        float exitX = Float.NaN;
+        float exitY = Float.NaN;
+        for (de.tum.cit.fop.maze.entity.collectible.Collectible collectible : collectibles) {
+            if (collectible instanceof de.tum.cit.fop.maze.entity.collectible.Key && !collectible.getPickedUp()) {
+                keyX = collectible.getSpawnX();
+                keyY = collectible.getSpawnY();
+            } else if (collectible instanceof de.tum.cit.fop.maze.entity.collectible.ExitDoor) {
+                exitX = collectible.getSpawnX();
+                exitY = collectible.getSpawnY();
+            }
+        }
         hud.update(
                 level,
                 player.getHp(),
@@ -265,7 +281,10 @@ public class GameScreen implements Screen {
                 player.hasKey(),
                 game.getProgressionManager().hasUpgrade("regen"),
                 regenTimer,
-                REGEN_INTERVAL_SECONDS
+                REGEN_INTERVAL_SECONDS,
+                player.getX() + player.getWidth() / 2f,
+                player.getY() + player.getHeight() / 2f,
+                keyX, keyY, exitX, exitY
         );
         hud.getStage().act(delta);
         hud.getStage().draw();
