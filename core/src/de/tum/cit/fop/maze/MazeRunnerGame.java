@@ -2,10 +2,12 @@ package de.tum.cit.fop.maze;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import de.tum.cit.fop.maze.screen.*;
 import de.tum.cit.fop.maze.system.*;
+import de.tum.cit.fop.maze.screen.AchievementPopupScreen;
 import games.spooky.gdx.nativefilechooser.NativeFileChooser;
 
 /**
@@ -16,8 +18,8 @@ import games.spooky.gdx.nativefilechooser.NativeFileChooser;
 public class MazeRunnerGame extends Game {
     private final ConfigManager configManager;
     private final KeyHandler keyHandler;
-    private final AchievementManager achievementManager;
     private final AudioManager audioManager;
+    private AchievementPopupScreen achievementPopupScreen;
     private MenuScreen menuScreen;
     private GameScreen gameScreen;
     private SurvivalScreen survivalScreen;
@@ -29,6 +31,7 @@ public class MazeRunnerGame extends Game {
     private SpriteBatch spriteBatch;
     private Skin skin;
     private ProgressionManager progressionManager;
+    private Screen settingsReturnScreen;
 
 
     /**
@@ -41,7 +44,6 @@ public class MazeRunnerGame extends Game {
         configManager = new ConfigManager();
         this.audioManager = new AudioManager(this);
         keyHandler = new KeyHandler(this);
-        achievementManager = new AchievementManager();
     }
 
     /**
@@ -51,8 +53,11 @@ public class MazeRunnerGame extends Game {
     public void create() {
         configManager.loadKeyBindings();
         audioManager.loadSettings();
+        AchievementManager.init();
         spriteBatch = new SpriteBatch(); // Create SpriteBatch
         skin = new Skin(Gdx.files.internal("craft/craftacular-ui.json")); // Load UI skin
+        achievementPopupScreen = new AchievementPopupScreen(this);
+        AchievementManager.setPopupScreen(achievementPopupScreen);
         progressionManager = new ProgressionManager(2000);
         audioManager.preloadSounds("Click.wav");
         audioManager.playMusic("background.mp3", 1f, true);
@@ -74,11 +79,19 @@ public class MazeRunnerGame extends Game {
      */
     public void goToGame() {
         if (gameScreen == null) {
-            survivalScreen = new SurvivalScreen(this);
+            gameScreen = new GameScreen(this, Math.max(currentLevelNumber, 1));
         }
-        this.setScreen(survivalScreen);
+        if (survivalScreen != null) {
+            survivalScreen.dispose();
+            survivalScreen = null;
+        }
+        this.setScreen(gameScreen);
     }
     public void goToEndless() {
+        if (gameScreen != null) {
+            gameScreen.dispose();
+            gameScreen = null;
+        }
         if (survivalScreen != null) {
             survivalScreen.dispose();
             survivalScreen = null;
@@ -88,6 +101,10 @@ public class MazeRunnerGame extends Game {
         this.setScreen(survivalScreen);
     }
     public void goToEndless(int levelNumber) {
+        if (gameScreen != null) {
+            gameScreen.dispose();
+            gameScreen = null;
+        }
         if (survivalScreen != null) {
             survivalScreen.dispose();
             survivalScreen = null;
@@ -97,12 +114,27 @@ public class MazeRunnerGame extends Game {
         this.setScreen(survivalScreen);
     }
 
+    public void goToSurvival() {
+        if (survivalScreen == null) {
+            survivalScreen = new SurvivalScreen(this);
+        }
+        if (gameScreen != null) {
+            gameScreen.dispose();
+            gameScreen = null;
+        }
+        this.setScreen(survivalScreen);
+    }
+
     public void goToGame(int levelNumber) {
         // This will be the case after Try again/Next level
         // If this is not done, there will be a memory leak
         if (gameScreen != null) {
             gameScreen.dispose();
             gameScreen = null;
+        }
+        if (survivalScreen != null) {
+            survivalScreen.dispose();
+            survivalScreen = null;
         }
         currentLevelNumber = levelNumber;
         gameScreen = new GameScreen(this, currentLevelNumber);
@@ -118,6 +150,10 @@ public class MazeRunnerGame extends Game {
         if (gameScreen != null) {
             gameScreen.dispose();
             gameScreen = null;
+        }
+        if (survivalScreen != null) {
+            survivalScreen.dispose();
+            survivalScreen = null;
         }
         currentLevelNumber = gameState.getLevel();
         gameScreen = new GameScreen(this, gameState);
@@ -163,10 +199,34 @@ public class MazeRunnerGame extends Game {
     }
 
     public void goToSettingsScreen() {
+        Screen current = getScreen();
+        if (!(current instanceof SettingsScreen
+                || current instanceof SettingsAudioScreen
+                || current instanceof SettingsVideoScreen
+                || current instanceof SettingsControlsScreen
+                || current instanceof SettingsGameScreen)) {
+            settingsReturnScreen = current;
+        }
         if (settingsScreen == null) {
             settingsScreen = new SettingsScreen(this);
         }
         this.setScreen(settingsScreen);
+    }
+
+    public void goBackFromSettings() {
+        if (settingsReturnScreen instanceof SurvivalScreen && survivalScreen != null) {
+            this.setScreen(survivalScreen);
+            return;
+        }
+        if (settingsReturnScreen instanceof GameScreen && gameScreen != null) {
+            this.setScreen(gameScreen);
+            return;
+        }
+        if (settingsReturnScreen instanceof MenuScreen && menuScreen != null) {
+            this.setScreen(menuScreen);
+            return;
+        }
+        goToMenu();
     }
 
     public void goToHighscoreScreen() {
@@ -200,7 +260,7 @@ public class MazeRunnerGame extends Game {
     }
 
     public void goToAchievementsScreen() {
-        this.setScreen(new AchievementsScreen(this, achievementManager)); // Set the current screen to GameScreen
+        this.setScreen(new AchievementsScreen(this)); // Set the current screen to GameScreen
         if (menuScreen != null) {
             menuScreen.dispose(); // Dispose the menu screen if it exists
             menuScreen = null;
@@ -263,6 +323,28 @@ public class MazeRunnerGame extends Game {
         spriteBatch.dispose(); // Dispose the spriteBatch
         skin.dispose(); // Dispose of the skin
         audioManager.dispose();
+        if (achievementPopupScreen != null) {
+            achievementPopupScreen.dispose();
+        }
+    }
+
+    @Override
+    public void render() {
+        super.render();
+
+        // So its not tied to a screen
+        if (achievementPopupScreen != null) {
+            achievementPopupScreen.act(Gdx.graphics.getDeltaTime());
+            achievementPopupScreen.draw();
+        }
+    }
+
+    @Override
+    public void resize(int width, int height) {
+        super.resize(width, height);
+        if (achievementPopupScreen != null) {
+            achievementPopupScreen.resize(width, height);
+        }
     }
 
     // Getter methods

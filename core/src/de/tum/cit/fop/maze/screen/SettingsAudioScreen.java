@@ -4,9 +4,12 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.EventListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.Touchable;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Slider;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
@@ -16,12 +19,14 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import de.tum.cit.fop.maze.MazeRunnerGame;
 import de.tum.cit.fop.maze.system.AudioManager;
 import de.tum.cit.fop.maze.system.ConfigManager;
+import de.tum.cit.fop.maze.system.UiUtils;
 
 public class SettingsAudioScreen implements Screen {
     private final MazeRunnerGame game;
     private final Stage stage;
     private final AudioManager audioManager;
     private final ConfigManager configManager;
+    private final Texture vignetteTexture;
 
     public SettingsAudioScreen(MazeRunnerGame game) {
         this.game = game;
@@ -33,6 +38,12 @@ public class SettingsAudioScreen implements Screen {
 
         Viewport viewport = new FitViewport(1920, 1080);
         stage = new Stage(viewport, game.getSpriteBatch());
+
+        vignetteTexture = UiUtils.buildVignetteTexture(512, 512, 0.9f);
+        Image vignetteImage = new Image(vignetteTexture);
+        vignetteImage.setFillParent(true);
+        vignetteImage.setTouchable(Touchable.disabled);
+        stage.addActor(vignetteImage);
 
         Table table = new Table(); // Create a table for layout
         table.setFillParent(true); // Make the table fill the stage
@@ -83,7 +94,6 @@ public class SettingsAudioScreen implements Screen {
                 configManager.saveAudioSettings();
             }
         });
-
     }
 
     @Override
@@ -121,6 +131,7 @@ public class SettingsAudioScreen implements Screen {
 
     @Override
     public void dispose() {
-
+        stage.dispose();
+        vignetteTexture.dispose();
     }
 }

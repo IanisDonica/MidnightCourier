@@ -3,10 +3,12 @@ package de.tum.cit.fop.maze.screen;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.viewport.FitViewport;
@@ -14,6 +16,7 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import de.tum.cit.fop.maze.MazeRunnerGame;
 import de.tum.cit.fop.maze.system.AudioManager;
 import de.tum.cit.fop.maze.system.ConfigManager;
+import de.tum.cit.fop.maze.system.UiUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -24,6 +27,7 @@ public class SettingsControlsScreen implements Screen {
     private final ConfigManager configManager;
     private final Map<String, TextButton> actionButtons = new HashMap<>();
     private final AudioManager audioManager;
+    private final Texture vignetteTexture;
     private String rebindingAction = null;
     private TextButton rebindingButton = null;
 
@@ -34,6 +38,12 @@ public class SettingsControlsScreen implements Screen {
 
         Viewport viewport = new FitViewport(1920, 1080);
         stage = new Stage(viewport, game.getSpriteBatch()); // Create a stage for UI elements
+
+        vignetteTexture = UiUtils.buildVignetteTexture(512, 512, 0.9f);
+        Image vignetteImage = new Image(vignetteTexture);
+        vignetteImage.setFillParent(true);
+        vignetteImage.setTouchable(Touchable.disabled);
+        stage.addActor(vignetteImage);
 
         Table table = new Table(); // Create a table for layout
         table.pad(80);
@@ -155,6 +165,7 @@ public class SettingsControlsScreen implements Screen {
     public void dispose() {
         // Dispose of the stage when the screen is disposed
         stage.dispose();
+        vignetteTexture.dispose();
     }
 
     @Override

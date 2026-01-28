@@ -28,6 +28,10 @@ public class PointManager implements Serializable {
         return points + timePointsSurvival;
     }
 
+    public int getLevel() {
+        return level;
+    }
+
     public int getTimePoints() {
         return timePoints;
     }

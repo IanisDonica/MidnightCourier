@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import de.tum.cit.fop.maze.system.AchievementManager;
 import de.tum.cit.fop.maze.ai.RoadPathfinder;
 import de.tum.cit.fop.maze.entity.Player;
 import de.tum.cit.fop.maze.entity.obstacle.Enemy;
@@ -82,6 +83,9 @@ public class BmwEnemy extends Obstacle {
     @Override
     protected void collision() {
         if (!player.isStunned()) {
+            if (!player.isGodMode()) {
+                AchievementManager.incrementProgress("german_engineering", 1);
+            }
             player.damage(999);
         }
     }

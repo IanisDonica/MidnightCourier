@@ -408,6 +408,7 @@ public class GameScreen implements Screen {
     @Override
     public void dispose() {
         stage.dispose();
+        hud.dispose();
         disposeFrameBuffers();
         collisionFbo.dispose();
         grayScaleShader.dispose();

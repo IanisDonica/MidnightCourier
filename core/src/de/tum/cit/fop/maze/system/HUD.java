@@ -14,8 +14,8 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
-import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Align;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import de.tum.cit.fop.maze.MazeRunnerGame;
@@ -207,6 +207,12 @@ public class HUD {
 
     public void resize(int width, int height) {
         viewport.update(width, height, true);
+    }
+
+    public void dispose() {
+        stage.dispose();
+        regenTexture.dispose();
+        arrowTexture.dispose();
     }
 
     public void setShopButtonVisible(boolean visible) {

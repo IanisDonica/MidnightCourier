@@ -1,5 +1,6 @@
 package de.tum.cit.fop.maze.entity.collectible;
 
+import de.tum.cit.fop.maze.system.AchievementManager;
 import de.tum.cit.fop.maze.system.PointManager;
 
 public class ExitDoor extends Collectible {
@@ -26,6 +27,11 @@ public class ExitDoor extends Collectible {
         if (this.player.hasKey()) {
             triggered = true;
             this.pointManager.saveScore(this.player.getHp());
+            AchievementManager.incrementProgress("first_delivery", 1);
+            AchievementManager.incrementProgress("complete_100_deliveries", 1);
+            if (this.pointManager.getLevel() == 5) {
+                AchievementManager.incrementProgress("finish_level_5", 1);
+            }
             if (victoryListener != null) {
                 victoryListener.onVictory();
             }

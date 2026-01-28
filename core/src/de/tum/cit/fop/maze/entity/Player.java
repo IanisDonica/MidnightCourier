@@ -309,4 +309,8 @@ public class Player extends Entity {
     public boolean isGodMode() {
         return godMode;
     }
+
+    public boolean isGameOverTriggered() {
+        return gameOverTriggered;
+    }
 }
