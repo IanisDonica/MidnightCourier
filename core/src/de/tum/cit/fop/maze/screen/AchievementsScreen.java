@@ -41,7 +41,7 @@ public class AchievementsScreen implements Screen {
 
         Viewport viewport = new FitViewport(1920, 1080);
         stage = new Stage(viewport, game.getSpriteBatch()); // Create a stage for UI elements
-        backgroundTexture = new Texture(Gdx.files.internal("trohpyRoom.png"));
+        backgroundTexture = new Texture(Gdx.files.internal("trohpyRoom.png")); // placeholder image
         Image backgroundImage = new Image(backgroundTexture);
         backgroundImage.setFillParent(true);
         stage.addActor(backgroundImage);

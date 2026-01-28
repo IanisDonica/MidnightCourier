@@ -141,12 +141,15 @@ public class KeyHandler extends InputListener {
         if (keycode == configManager.getKeyBinding("pause")) {
             audioManager.playSound("Click.wav", 1);
             Screen s = game.getScreen();
+            if (s instanceof CutsceneScreen || s instanceof SecondCutsceneScreen) {
+                return true;
+            }
             if (s instanceof GameScreen || s instanceof SurvivalScreen) {
                 game.pause();
             } else if (s instanceof ProgressionTreeScreen) {
                 game.goBackFromProgressionTree();
-            } else if (s instanceof SettingsScreen && game.getGameScreen() != null && game.getGameScreen().isPaused()) {
-                game.goToGame();
+            } else if (s instanceof SettingsScreen) {
+                game.goBackFromSettings();
             } else if (s instanceof SettingsGameScreen || s instanceof SettingsVideoScreen || s instanceof SettingsAudioScreen || s instanceof SettingsControlsScreen) {
                 game.goToSettingsScreen();
             } else {
