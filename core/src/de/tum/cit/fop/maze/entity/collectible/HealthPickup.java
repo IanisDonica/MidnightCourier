@@ -5,7 +5,7 @@ import de.tum.cit.fop.maze.system.PointManager;
 public class HealthPickup extends Collectible {
     public HealthPickup(float x, float y, PointManager pointManager) {
         super(x, y, 1, 1, pointManager);
-        initSpinAnimation(0, 48, 4);
+        initSpinAnimation(0, 64, 4);
     }
 
     @Override

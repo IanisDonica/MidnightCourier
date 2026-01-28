@@ -41,6 +41,9 @@ public class GameOverScreen implements Screen {
         if (game.getGameScreen() != null && game.getGameScreen().pointManager != null) {
             survivedSeconds = game.getGameScreen().pointManager.getElapsedTime();
             finalPoints = game.getGameScreen().pointManager.getPoints();
+        } else if (game.getSurvivalScreen() != null && game.getSurvivalScreen().pointManager != null) {
+            survivedSeconds = game.getSurvivalScreen().pointManager.getElapsedTime();
+            finalPoints = game.getSurvivalScreen().pointManager.getPoints();
         } else {
             survivedSeconds = 0f;
             finalPoints = 0;
@@ -152,7 +155,9 @@ public class GameOverScreen implements Screen {
 
     @Override
     public void render(float delta) {
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT); // Clear the screen
+        if (!game.shouldRenderMenuBackground()) {
+            Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT); // Clear the screen
+        }
         stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f)); // Update the stage
         fadeTimer += delta;
         float t = fadeTimer / FADE_DURATION;

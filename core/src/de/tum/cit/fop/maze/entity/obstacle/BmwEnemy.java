@@ -128,7 +128,15 @@ public class BmwEnemy extends Obstacle {
         float centerX = (getX() + getWidth() / 2f + other.getX() + other.getWidth() / 2f) / 2f;
         float centerY = (getY() + getHeight() / 2f + other.getY() + other.getHeight() / 2f) / 2f;
         stage.addActor(new Explosion(centerX, centerY, 5f, player));
-        spawnRandomBmws(player, stage, 2);
+        Rectangle cameraView = null;
+        if (stage.getCamera() instanceof com.badlogic.gdx.graphics.OrthographicCamera camera) {
+            float viewW = camera.viewportWidth * camera.zoom;
+            float viewH = camera.viewportHeight * camera.zoom;
+            float viewX = camera.position.x - viewW / 2f;
+            float viewY = camera.position.y - viewH / 2f;
+            cameraView = new Rectangle(viewX, viewY, viewW, viewH);
+        }
+        spawnRandomBmws(player, stage, 2, cameraView);
         remove();
         other.remove();
     }
@@ -143,7 +151,6 @@ public class BmwEnemy extends Obstacle {
         float centerY = guard.getY() + guard.getHeight() / 2f;
         stage.addActor(new JandarmeriaDeath(centerX, centerY));
         guard.remove();
-        Enemy.spawnRandomEnemies(player, stage, guard.getCollisionLayer(), 1);
     }
 
     private void initDriveAnimation() {
@@ -189,6 +196,10 @@ public class BmwEnemy extends Obstacle {
     }
 
     public static void spawnRandomBmws(Player player, Stage stage, int amount) {
+        spawnRandomBmws(player, stage, amount, null);
+    }
+
+    public static void spawnRandomBmws(Player player, Stage stage, int amount, Rectangle cameraView) {
         if (roadLayer == null || player == null || stage == null) {
             return;
         }
@@ -204,6 +215,9 @@ public class BmwEnemy extends Obstacle {
             float centerX = target.x + 0.5f;
             float centerY = target.y + 0.5f;
             if (wouldCollideAt(stage, centerX, centerY)) {
+                continue;
+            }
+            if (cameraView != null && wouldOverlapCamera(centerX, centerY, cameraView)) {
                 continue;
             }
             float spawnX = centerX - (BMW_WIDTH_HORIZONTAL / 2f);
@@ -283,6 +297,22 @@ public class BmwEnemy extends Obstacle {
             }
         }
         return false;
+    }
+
+    private static boolean wouldOverlapCamera(float centerX, float centerY, Rectangle cameraView) {
+        Rectangle spawnBoundsHorizontal = new Rectangle(
+                centerX - (BMW_WIDTH_HORIZONTAL / 2f),
+                centerY - (BMW_HEIGHT_HORIZONTAL / 2f),
+                BMW_WIDTH_HORIZONTAL,
+                BMW_HEIGHT_HORIZONTAL
+        );
+        Rectangle spawnBoundsVertical = new Rectangle(
+                centerX - (BMW_WIDTH_VERTICAL / 2f),
+                centerY - (BMW_HEIGHT_VERTICAL / 2f),
+                BMW_WIDTH_VERTICAL,
+                BMW_HEIGHT_VERTICAL
+        );
+        return spawnBoundsHorizontal.overlaps(cameraView) || spawnBoundsVertical.overlaps(cameraView);
     }
 
     private static void cacheRoadTiles() {

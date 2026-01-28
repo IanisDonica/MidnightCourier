@@ -288,6 +288,7 @@ public class GameScreen implements Screen {
                 game.getProgressionManager().hasUpgrade("regen"),
                 regenTimer,
                 REGEN_INTERVAL_SECONDS,
+                -1f,
                 player.getX() + player.getWidth() / 2f,
                 player.getY() + player.getHeight() / 2f,
                 keyX, keyY, exitX, exitY

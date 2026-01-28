@@ -285,6 +285,10 @@ public class Player extends Entity {
         this.hasKey = true;
     }
 
+    public void clearKey() {
+        this.hasKey = false;
+    }
+
     public boolean hasKey() {
         return hasKey;
     }
