@@ -144,7 +144,9 @@ public class SecondCutsceneScreen implements Screen {
 
     @Override
     public void render(float delta) {
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+        if (!game.shouldRenderMenuBackground()) {
+            Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+        }
         switch (state) {
             case SHOW_SLIDES -> {
                 elapsed += delta;
