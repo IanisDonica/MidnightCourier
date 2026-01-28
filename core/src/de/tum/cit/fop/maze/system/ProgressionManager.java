@@ -15,6 +15,7 @@ import de.tum.cit.fop.maze.system.progression.SpeedIIIUpgrade;
 import de.tum.cit.fop.maze.system.progression.SpeedUpgrade;
 import de.tum.cit.fop.maze.system.progression.StealthUpgrade;
 import de.tum.cit.fop.maze.system.progression.Upgrade;
+import de.tum.cit.fop.maze.system.AchievementManager;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -60,6 +61,10 @@ public class ProgressionManager {
         }
         points -= upgrade.getCost();
         ownedUpgrades.add(upgradeName);
+        AchievementManager.incrementProgress("first_upgrade", 1);
+        if ("master".equals(upgradeName)) {
+            AchievementManager.incrementProgress("mastery_upgrade", 1);
+        }
         return true;
     }
 

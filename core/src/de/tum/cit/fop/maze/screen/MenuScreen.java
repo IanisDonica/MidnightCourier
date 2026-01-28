@@ -4,8 +4,11 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.Touchable;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
@@ -14,6 +17,7 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import de.tum.cit.fop.maze.MazeRunnerGame;
 import de.tum.cit.fop.maze.system.AudioManager;
+import de.tum.cit.fop.maze.system.UiUtils;
 
 /**
  * The MenuScreen class is responsible for displaying the main menu of the game.
@@ -23,6 +27,7 @@ public class MenuScreen implements Screen {
     private final MazeRunnerGame game;
     private final Stage stage;
     private final AudioManager audioManager;
+    private final Texture vignetteTexture;
 
     /**
      * Constructor for MenuScreen. Sets up the camera, viewport, stage, and UI elements.
@@ -37,6 +42,12 @@ public class MenuScreen implements Screen {
 
         Viewport viewport = new FitViewport(1920, 1080);
         stage = new Stage(viewport, game.getSpriteBatch()); // Create a stage for UI elements
+
+        vignetteTexture = UiUtils.buildVignetteTexture(512, 512, 0.9f);
+        Image vignetteImage = new Image(vignetteTexture);
+        vignetteImage.setFillParent(true);
+        vignetteImage.setTouchable(Touchable.disabled);
+        stage.addActor(vignetteImage);
 
         Table table = new Table(); // Create a table for layout
         table.setFillParent(true); // Make the table fill the stage
@@ -140,6 +151,7 @@ public class MenuScreen implements Screen {
     public void dispose() {
         // Dispose of the stage when the screen is disposed
         stage.dispose();
+        vignetteTexture.dispose();
     }
 
     @Override

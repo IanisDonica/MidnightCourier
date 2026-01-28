@@ -16,6 +16,7 @@ import de.tum.cit.fop.maze.ai.PatrolBehaviour;
 import de.tum.cit.fop.maze.ai.RetreatBehavior;
 import de.tum.cit.fop.maze.entity.collectible.Collectible;
 import de.tum.cit.fop.maze.entity.Player;
+import de.tum.cit.fop.maze.system.AchievementManager;
 import java.util.ArrayList;
 import java.util.List;
 import com.badlogic.gdx.utils.Array;
@@ -333,7 +334,14 @@ public class Enemy extends Obstacle {
     @Override
     protected void collision() {
         if (!player.isStunned() && state != EnemyState.RETREATING && state != EnemyState.RETREAT_WAIT) {
+            boolean willArrest = !player.isGodMode()
+                    && !player.isGameOverTriggered()
+                    && player.getHp() <= 1;
             player.damage(1);
+            if (willArrest) {
+                AchievementManager.incrementProgress("first_time_for_everything", 1);
+                AchievementManager.incrementProgress("third_strike_and_out", 1);
+            }
             globalRetreatToken++; // causes all enemies to go into retreat
             lastRetreatToken = globalRetreatToken;
             enterRetreating();

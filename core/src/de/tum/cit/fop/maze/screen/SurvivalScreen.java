@@ -450,6 +450,7 @@ public class SurvivalScreen implements Screen {
     @Override
     public void dispose() {
         stage.dispose();
+        hud.dispose();
         fbo.dispose();
         grayScaleShader.dispose();
         combinedShader.dispose();
