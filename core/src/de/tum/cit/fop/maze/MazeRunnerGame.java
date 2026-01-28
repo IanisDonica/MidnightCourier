@@ -9,7 +9,6 @@ import de.tum.cit.fop.maze.screen.*;
 import de.tum.cit.fop.maze.system.*;
 import de.tum.cit.fop.maze.screen.AchievementPopupScreen;
 import games.spooky.gdx.nativefilechooser.NativeFileChooser;
-
 /**
  * The MazeRunnerGame class represents the core of the Maze Runner game.
  * It manages the screens and global resources like SpriteBatch and Skin.
@@ -32,6 +31,7 @@ public class MazeRunnerGame extends Game {
     private SpriteBatch spriteBatch;
     private Skin skin;
     private ProgressionManager progressionManager;
+    private Screen settingsReturnScreen;
 
 
     /**
@@ -44,7 +44,6 @@ public class MazeRunnerGame extends Game {
         configManager = new ConfigManager();
         this.audioManager = new AudioManager(this);
         keyHandler = new KeyHandler(this);
-        achievementManager = new AchievementManager();
         graphicsManager = new GraphicsManager();
     }
 

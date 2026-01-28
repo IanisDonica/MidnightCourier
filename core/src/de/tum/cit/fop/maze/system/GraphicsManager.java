@@ -158,13 +158,15 @@ public class GraphicsManager {
     public void setWindowed() {
         this.displayMode = 0;
         setResizable(true);
-        Gdx.graphics.setWindowedMode(width, height);
+        Gdx.graphics.setUndecorated(false);
+        Gdx.graphics.setWindowedMode(width / 2, height / 2); // Temp just so I can move it
     }
 
     public void setBorderless(){
         this.displayMode = 2;
         setResizable(false);
-        Gdx.graphics.setWindowedMode(width, height);
+        Gdx.graphics.setUndecorated(true);
+        Gdx.graphics.setWindowedMode(width / 2, height / 2); // Temp just so I can move it
         //Todo prompt for restart
     }
 

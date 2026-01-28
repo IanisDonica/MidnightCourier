@@ -2,18 +2,20 @@ package de.tum.cit.fop.maze.screen;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
-import com.badlogic.gdx.utils.viewport.FitViewport;
-import com.badlogic.gdx.utils.viewport.Viewport;
-import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.*;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.List;
+import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
+import com.badlogic.gdx.scenes.scene2d.ui.SelectBox;
+import com.badlogic.gdx.scenes.scene2d.ui.Slider;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
@@ -65,8 +67,7 @@ public class SettingsVideoScreen implements Screen {
 
 
         Label displayLabel = new Label("Display mode:", game.getSkin(), "title");
-        SelectBox<String> displayMode = new SelectBox<>(game.getSkin());
-        //Todo skin for selectbox
+        SelectBox<String> displayMode = new SelectBox<>(buildSelectBoxStyle());
         displayMode.setItems("Windowed", "Borderless Windowed", "Fullscreen");
         displayMode.setSelected(graphicsManager.getDisplayModeAsString());
         displayMode.addListener(new ChangeListener() {
@@ -157,5 +158,21 @@ public class SettingsVideoScreen implements Screen {
     public void dispose() {
         stage.dispose();
         vignetteTexture.dispose();
+    }
+
+    private SelectBox.SelectBoxStyle buildSelectBoxStyle() {
+        SelectBox.SelectBoxStyle style = new SelectBox.SelectBoxStyle();
+        style.font = game.getSkin().getFont("font");
+        style.fontColor = Color.WHITE;
+        style.background = game.getSkin().getDrawable("cell");
+        style.scrollStyle = game.getSkin().get("default", ScrollPane.ScrollPaneStyle.class);
+
+        List.ListStyle listStyle = new List.ListStyle();
+        listStyle.font = style.font;
+        listStyle.fontColorSelected = Color.WHITE;
+        listStyle.fontColorUnselected = Color.WHITE;
+        listStyle.selection = game.getSkin().getDrawable("cell");
+        style.listStyle = listStyle;
+        return style;
     }
 }
