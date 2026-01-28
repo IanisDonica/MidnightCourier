@@ -45,8 +45,16 @@ com.badlogic.gdx.scenes.scene2d.ui.Skin$TintedDrawable: {
       color: { r: 1, g: 1, b: 1, a: 0 }
     },
     hoverBorder: {
-      name: white
+      name: WhiteBorder
       color: { r: 1, g: 1, b: 1, a: 1 }
+    },
+    whiteBlack: {
+      name: WhiteBlack
+      color: { r: 0, g: 0, b: 0, a: 0.9 }
+    },
+    whiteBlackDim: {
+      name: WhiteBlack
+      color: { r: 0.7, g: 0.7, b: 0.7, a: 0.9 }
     }
 }
 com.badlogic.gdx.scenes.scene2d.ui.Button$ButtonStyle: {

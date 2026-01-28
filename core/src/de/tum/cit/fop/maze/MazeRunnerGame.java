@@ -4,6 +4,7 @@ import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import de.tum.cit.fop.maze.screen.*;
 import de.tum.cit.fop.maze.system.*;
@@ -56,7 +57,18 @@ public class MazeRunnerGame extends Game {
         audioManager.loadSettings();
         AchievementManager.init();
         spriteBatch = new SpriteBatch(); // Create SpriteBatch
-        skin = new Skin(Gdx.files.internal("craft/craftacular-ui.json")); // Load UI skin
+
+        TextureAtlas mainAtlas = new TextureAtlas(Gdx.files.internal("craft/craftacular-ui.atlas"));
+        TextureAtlas extraAtlas = new TextureAtlas(Gdx.files.internal("craft/extra.atlas"));
+
+        skin = new Skin();
+        skin.addRegions(mainAtlas);
+        skin.addRegions(extraAtlas);
+
+        skin.load(Gdx.files.internal("craft/craftacular-ui.json"));
+
+        ///skin = new Skin(Gdx.files.internal("craft/craftacular-ui.json")); // Load UI skin
+        ///skin.addRegions(new TextureAtlas(Gdx.files.internal("craft/extra.atlas")));
         achievementPopupScreen = new AchievementPopupScreen(this);
         AchievementManager.setPopupScreen(achievementPopupScreen);
         progressionManager = new ProgressionManager(2000);

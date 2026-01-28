@@ -54,7 +54,7 @@ public class AchievementsScreen implements Screen {
         stage.addActor(table);
         table.setFillParent(true);
         Table contentBox = new Table();
-        contentBox.setBackground(game.getSkin().getDrawable("cell"));
+        contentBox.setBackground(game.getSkin().getDrawable("transparent"));
         contentBox.setColor(1f, 1f, 1f, 1f);
         contentBox.pad(30);
         contentBox.add(new Label("Achievements", game.getSkin(), "title")).padTop(10).row();
@@ -93,10 +93,10 @@ public class AchievementsScreen implements Screen {
         int index = 0;
         for (var achievement : AchievementManager.getAchievements()) {
             Table achievementTable = new Table(game.getSkin());
-            achievementTable.setBackground(game.getSkin().getDrawable("cell"));
+            achievementTable.setBackground(game.getSkin().getDrawable("whiteBlack"));
             achievementTable.pad(24);
             if (!achievement.isUnlocked()) {
-                achievementTable.setColor(0.7f, 0.7f, 0.7f, 1f);
+                achievementTable.setBackground(game.getSkin().getDrawable("whiteBlackDim"));
             }
             Label nameLabel = new Label(achievement.getName(), game.getSkin());
             nameLabel.setAlignment(com.badlogic.gdx.utils.Align.center);
@@ -129,8 +129,8 @@ public class AchievementsScreen implements Screen {
         contentBox.add(scrollPane).width(1200).height(visibleHeight);
         contentBox.row();
         Table buttons = new Table();
-        buttons.add(resetButton).padRight(20);
-        buttons.add(mainMenuButton);
+        buttons.add(resetButton).padRight(20).width(500);
+        buttons.add(mainMenuButton).width(320);
         contentBox.add(buttons).padTop(20);
         table.add(contentBox).center();
     }
