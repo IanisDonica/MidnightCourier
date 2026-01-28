@@ -3,7 +3,7 @@
 	"id": "complete_100_deliveries",
 	"name": "Certified Delivery Man",
 	"description": "Complete 100 deliveries",
-	"progress": 1,
+	"progress": 31,
 	"target": 100
 },
 {
@@ -18,13 +18,17 @@
 	"id": "first_time_for_everything",
 	"name": "First time for everythihing",
 	"description": "Get arrested by a police officer for the first time",
-	"target": 1
+	"progress": 1,
+	"target": 1,
+	"unlocked": true
 },
 {
 	"id": "first_upgrade",
 	"name": "First upgrade",
 	"description": "Buy your first upgrade",
-	"target": 1
+	"progress": 1,
+	"target": 1,
+	"unlocked": true
 },
 {
 	"id": "mastery_upgrade",
@@ -36,7 +40,9 @@
 	"id": "third_strike_and_out",
 	"name": "Three strike rule",
 	"description": "Get arrested 3 times",
-	"target": 3
+	"progress": 3,
+	"target": 3,
+	"unlocked": true
 },
 {
 	"id": "finish_level_5",
@@ -48,6 +54,8 @@
 	"id": "german_engineering",
 	"name": "German Engineering",
 	"description": "Get run over by a BMW",
-	"target": 1
+	"progress": 1,
+	"target": 1,
+	"unlocked": true
 }
 ]

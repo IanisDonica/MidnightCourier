@@ -168,10 +168,6 @@ public class MazeRunnerGame extends Game {
      */
     public void goToNewGameScreen() {
         this.setScreen(new NewGameScreen(this)); // Set the current screen to GameScreen
-        if (menuScreen != null) {
-            menuScreen.dispose(); // Dispose the menu screen if it exists
-            menuScreen = null;
-        }
     }
 
     public void goToCutsceneScreen() {
@@ -187,10 +183,6 @@ public class MazeRunnerGame extends Game {
      */
     public void goToContinueGameScreen() {
         this.setScreen(new ContinueGameScreen(this)); // Set the current screen to GameScreen
-        if (menuScreen != null) {
-            menuScreen.dispose(); // Dispose the menu screen if it exists
-            menuScreen = null;
-        }
     }
 
     public void goToLevelSelectScreen() {
@@ -248,6 +240,8 @@ public class MazeRunnerGame extends Game {
     public void goBackFromProgressionTree() {
         if (gameScreen != null) {
             this.setScreen(gameScreen);
+        } else if (survivalScreen != null) {
+            this.setScreen(survivalScreen);
         } else {
             goToMenu();
         }
@@ -263,10 +257,6 @@ public class MazeRunnerGame extends Game {
 
     public void goToAchievementsScreen() {
         this.setScreen(new AchievementsScreen(this)); // Set the current screen to GameScreen
-        if (menuScreen != null) {
-            menuScreen.dispose(); // Dispose the menu screen if it exists
-            menuScreen = null;
-        }
     }
 
     public void goToSettingsVideoScreen() {
@@ -332,6 +322,13 @@ public class MazeRunnerGame extends Game {
 
     @Override
     public void render() {
+        Screen current = getScreen();
+        if (shouldRenderMenuBackground() && !(current instanceof MenuScreen)) {
+            if (menuScreen == null) {
+                menuScreen = new MenuScreen(this);
+            }
+            menuScreen.renderBackground(Gdx.graphics.getDeltaTime());
+        }
         super.render();
 
         // So its not tied to a screen
@@ -392,6 +389,11 @@ public class MazeRunnerGame extends Game {
 
     public GraphicsManager getGraphicsManager() {
         return graphicsManager;
+    }
+
+    public boolean shouldRenderMenuBackground() {
+        Screen current = getScreen();
+        return !(current instanceof GameScreen) && !(current instanceof SurvivalScreen);
     }
 
     private void loadProgressionFromGameState(GameState gameState) {
