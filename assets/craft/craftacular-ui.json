@@ -39,19 +39,27 @@ com.badlogic.gdx.scenes.scene2d.ui.Skin$TintedDrawable: {
 			b: 0.73666674
 			a: 1
 		}
-	}
+	},
+    transparent: {
+      name: white
+      color: { r: 1, g: 1, b: 1, a: 0 }
+    },
+    hoverBorder: {
+      name: white
+      color: { r: 1, g: 1, b: 1, a: 1 }
+    }
 }
 com.badlogic.gdx.scenes.scene2d.ui.Button$ButtonStyle: {
 	default: {
 		up: button
-		over: button-hover
+		over: hoverBorder
 		disabled: button-disabled
 	}
 }
 com.badlogic.gdx.scenes.scene2d.ui.ImageButton$ImageButtonStyle: {
 	default: {
 		up: button
-		over: button-hover
+		over: hoverBorder
 		disabled: button-disabled
 	}
 }
@@ -59,7 +67,7 @@ com.badlogic.gdx.scenes.scene2d.ui.ImageTextButton$ImageTextButtonStyle: {
 	default: {
 		font: font
 		up: button
-		over: button-hover
+		over: hoverBorder
 		disabled: button-disabled
 	}
 }
@@ -130,12 +138,21 @@ com.badlogic.gdx.scenes.scene2d.ui.Slider$SliderStyle: {
 }
 com.badlogic.gdx.scenes.scene2d.ui.TextButton$TextButtonStyle: {
 	default: {
-		font: font
-		up: button
-		over: button-hover
-		disabled: button-disabled
-	}
-}
+        font: font
+        fontColor: white
+        up: transparent
+        over: hoverBorder
+        down: hoverBorder
+	},
+  menu: {
+    font: font
+    fontColor: white
+    up: transparent
+    over: hoverBorder
+    down: hoverBorder
+  }
+
+},
 com.badlogic.gdx.scenes.scene2d.ui.TextField$TextFieldStyle: {
 	default: {
 		font: font
