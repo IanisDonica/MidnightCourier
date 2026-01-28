@@ -2,9 +2,8 @@ package de.tum.cit.fop.maze.screen;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.*;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
@@ -13,6 +12,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import de.tum.cit.fop.maze.MazeRunnerGame;
@@ -28,6 +28,7 @@ public class MenuScreen implements Screen {
     private final Stage stage;
     private final AudioManager audioManager;
     private final Texture vignetteTexture;
+    
 
     /**
      * Constructor for MenuScreen. Sets up the camera, viewport, stage, and UI elements.
@@ -57,6 +58,7 @@ public class MenuScreen implements Screen {
         table.add(new Label("TestMenu", game.getSkin(), "title")).padBottom(80).row();
 
         // Create and add a button to go to the game screen
+
         TextButton newGame = new TextButton("New Game", game.getSkin());
         table.add(newGame).width(500).padBottom(15).row();
 
@@ -172,5 +174,14 @@ public class MenuScreen implements Screen {
 
     @Override
     public void hide() {
+    }
+
+    private Texture makeSolidTexture(int w, int h, Color color) {
+        Pixmap pm = new Pixmap(w, h, Pixmap.Format.RGBA8888);
+        pm.setColor(color);
+        pm.fill();
+        Texture tex = new Texture(pm);
+        pm.dispose();
+        return tex;
     }
 }

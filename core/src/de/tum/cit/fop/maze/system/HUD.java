@@ -70,8 +70,8 @@ public class HUD {
         regenImage = new Image(regenFrames.first());
         regenImage.setVisible(false);
 
-        arrowTexture = new Texture(Gdx.files.internal("objects.png"));
-        TextureRegion arrowRegion = new TextureRegion(arrowTexture, 64, 48, 16, 16);
+        arrowTexture = new Texture(Gdx.files.internal("Pointer.png"));
+        TextureRegion arrowRegion = new TextureRegion(arrowTexture, 0, 0, 24, 24);
         arrowImage = new Image(arrowRegion);
         arrowImage.setSize(64f, 64f);
         arrowImage.setOrigin(Align.center);
