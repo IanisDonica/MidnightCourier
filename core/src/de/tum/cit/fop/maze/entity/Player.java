@@ -41,6 +41,7 @@ public class Player extends Entity {
     private float worldHeight = 0f;
     private float debugSpeedMultiplier = 1f;
     private boolean godMode = false;
+    ///private final GameOverListener trapOverListener;
 
     //Initialize the player on a specific coordinate point
     public Player(TiledMapTileLayer collisionLayer, float x, float y, GameOverListener gameOverListener) {
@@ -183,6 +184,7 @@ public class Player extends Entity {
     public void setDeathOverListener(GameOverListener deathOverListener) {
         this.deathOverListener = deathOverListener;
     }
+
 
     @Override
     public void draw(Batch batch, float parentAlpha) {
