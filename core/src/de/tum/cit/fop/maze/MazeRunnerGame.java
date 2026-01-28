@@ -18,6 +18,7 @@ public class MazeRunnerGame extends Game {
     private final KeyHandler keyHandler;
     private final AchievementManager achievementManager;
     private final AudioManager audioManager;
+    private final GraphicsManager graphicsManager;
     private MenuScreen menuScreen;
     private GameScreen gameScreen;
     private SurvivalScreen survivalScreen;
@@ -42,6 +43,7 @@ public class MazeRunnerGame extends Game {
         this.audioManager = new AudioManager(this);
         keyHandler = new KeyHandler(this);
         achievementManager = new AchievementManager();
+        graphicsManager = new GraphicsManager();
     }
 
     /**
@@ -56,6 +58,7 @@ public class MazeRunnerGame extends Game {
         progressionManager = new ProgressionManager(2000);
         audioManager.preloadSounds("Click.wav");
         audioManager.playMusic("background.mp3", 1f, true);
+        graphicsManager.load();
         goToMenu(); // Navigate to the menu screen
     }
 
@@ -306,6 +309,10 @@ public class MazeRunnerGame extends Game {
         return survivalScreen;
     }
 
+    public GraphicsManager getGraphicsManager() {
+        return graphicsManager;
+    }
+
     private void loadProgressionFromGameState(GameState gameState) {
         int points = gameState.getProgressionPoints();
         if (gameState.getOwnedUpgrades() == null) {
@@ -315,5 +322,4 @@ public class MazeRunnerGame extends Game {
         loaded.setOwnedUpgrades(gameState.getOwnedUpgrades());
         progressionManager = loaded;
     }
-
 }
