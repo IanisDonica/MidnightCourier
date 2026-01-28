@@ -34,7 +34,10 @@ public class Enemy extends Obstacle {
     private static final float TARGET_EPS = 0.05f;
     private static final float CENTER_EPS = 0.02f;
     private static final float PATROL_SPEED_SCALE = 0.5f;
-    private static final int VISION_RANGE_TILES = 6;
+    private static final int VISION_RANGE_TILES = 20;
+    private static final float MAX_RETREAT_DURATION_SECONDS = 4f;
+    private static final float RUN_DURATION_SECONDS = 10f;
+    private static final float RUN_SPEED_MULTIPLIER = 2f;
     private final TiledMapTileLayer collisionLayer;
     private final int mapWidth;
     private final int mapHeight;
@@ -47,6 +50,9 @@ public class Enemy extends Obstacle {
     private ArrayList<GridPoint2> path = new ArrayList<>();
     private int pathIndex = 0;
     private float pathRecalcTimer = 0f;
+    private float retreatTimer = 0f;
+    private float runTimer = 0f;
+    private boolean running = false;
     private int lastGoalX = Integer.MIN_VALUE; // TODO Remove this
     private int lastGoalY = Integer.MIN_VALUE;
     private int lastRetreatToken = 0;
@@ -67,7 +73,7 @@ public class Enemy extends Obstacle {
         this.chaseBehavior = new ChaseBehavior(mapWidth, mapHeight, collisionLayer);
         this.retreatBehavior = new RetreatBehavior(mapWidth, mapHeight, collisionLayer);
         this.patrolBehavior = new PatrolBehaviour(mapWidth, mapHeight, collisionLayer);
-        this.speed = 5f;
+        this.speed = 2.2f;
         initWalkAnimations();
     }
 
@@ -101,6 +107,15 @@ public class Enemy extends Obstacle {
             }
         }
 
+        if (state == EnemyState.RETREATING || state == EnemyState.RETREAT_WAIT) {
+            retreatTimer += delta;
+            if (retreatTimer >= MAX_RETREAT_DURATION_SECONDS) {
+                chaseBehavior.reset();
+                enterPatrolling();
+                return;
+            }
+        }
+
         switch (state) {
             case RETREAT_WAIT:
                 if (retreatBehavior.updateWait(delta)) {
@@ -127,6 +142,10 @@ public class Enemy extends Obstacle {
                 if (chaseBehavior.shouldRetreat(canSeePlayer(), delta)) {
                     enterRetreating();
                     return;
+                }
+                if (!running && canSeePlayer()) {
+                    running = true;
+                    runTimer = 0f;
                 }
                 break;
             case RETREATING:
@@ -163,6 +182,13 @@ public class Enemy extends Obstacle {
     }
 
     private void followPath(float delta) {
+        if (running) {
+            runTimer += delta;
+            if (runTimer >= RUN_DURATION_SECONDS) {
+                running = false;
+                runTimer = 0f;
+            }
+        }
         if (pathIndex >= path.size()) {
             moveToTileCenter(delta);
             return;
@@ -183,6 +209,9 @@ public class Enemy extends Obstacle {
 
         updateFacingDirection(dx, dy);
         float speedScale = (state == EnemyState.PATROLLING || state == EnemyState.RETREATING) ? PATROL_SPEED_SCALE : 1f;
+        if (running && state == EnemyState.CHASING) {
+            speedScale *= RUN_SPEED_MULTIPLIER;
+        }
         float step = Math.min(speed * speedScale * delta, dist);
         setPosition(getX() + (dx / dist) * step, getY() + (dy / dist) * step);
     }
@@ -256,6 +285,15 @@ public class Enemy extends Obstacle {
     }
 
     public static void spawnRandomEnemies(Player player, Stage stage, TiledMapTileLayer collisionLayer, int amount) {
+        spawnRandomEnemies(player, stage, collisionLayer, amount, null, null);
+    }
+
+    public static void spawnRandomEnemies(Player player,
+                                          Stage stage,
+                                          TiledMapTileLayer collisionLayer,
+                                          int amount,
+                                          Rectangle cameraView,
+                                          List<Enemy> outEnemies) {
         if (player == null || stage == null || collisionLayer == null) {
             return;
         }
@@ -270,10 +308,20 @@ public class Enemy extends Obstacle {
             GridPoint2 target = candidates.remove(index);
             float spawnX = target.x;
             float spawnY = target.y;
+            if (cameraView != null) {
+                Rectangle spawnBounds = new Rectangle(spawnX, spawnY, 1f, 1f);
+                if (spawnBounds.overlaps(cameraView)) {
+                    continue;
+                }
+            }
             if (wouldCollideAt(stage, spawnX, spawnY)) {
                 continue;
             }
-            stage.addActor(new Enemy(collisionLayer, spawnX, spawnY));
+            Enemy enemy = new Enemy(collisionLayer, spawnX, spawnY);
+            stage.addActor(enemy);
+            if (outEnemies != null) {
+                outEnemies.add(enemy);
+            }
             spawned++;
         }
     }
@@ -443,6 +491,9 @@ public class Enemy extends Obstacle {
         state = EnemyState.RETREATING;
         patrolBehavior.clear();
         retreatBehavior.startRetreat();
+        retreatTimer = 0f;
+        running = false;
+        runTimer = 0f;
         resetPathing();
         chaseBehavior.reset();
     }
@@ -450,24 +501,33 @@ public class Enemy extends Obstacle {
     private void enterPatrolling() {
         state = EnemyState.PATROLLING;
         patrolBehavior.startPatrol();
+        retreatTimer = 0f;
+        running = false;
+        runTimer = 0f;
         resetPathing();
     }
 
     private void enterPatrolWait() {
         state = EnemyState.PATROL_WAIT;
         patrolBehavior.startWaiting();
+        retreatTimer = 0f;
+        running = false;
+        runTimer = 0f;
         pathRecalcTimer = 0f;
     }
 
     private void enterRetreatWait() {
         state = EnemyState.RETREAT_WAIT;
         retreatBehavior.startWaiting();
+        running = false;
+        runTimer = 0f;
         pathRecalcTimer = 0f;
     }
 
     private void enterChasing() {
         state = EnemyState.CHASING;
         patrolBehavior.clear();
+        retreatTimer = 0f;
         resetPathing();
         chaseBehavior.reset();
     }
