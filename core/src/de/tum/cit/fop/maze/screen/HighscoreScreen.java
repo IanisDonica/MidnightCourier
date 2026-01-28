@@ -36,12 +36,18 @@ public class HighscoreScreen implements Screen {
     private final TextButton backButton;
     private final AudioManager audioManager;
     private final Texture vignetteTexture;
+    private final Texture backgroundTexture;
 
     public HighscoreScreen(MazeRunnerGame game) {
         this.game = game;
         Viewport viewport = new FitViewport(1920, 1080);
         stage = new Stage(viewport, game.getSpriteBatch());
         audioManager = game.getAudioManager();
+
+        backgroundTexture = new Texture(Gdx.files.internal("HighscoreBackground.jpg"));
+        Image backgroundImage = new Image(backgroundTexture);
+        backgroundImage.setFillParent(true);
+        stage.addActor(backgroundImage);
 
         vignetteTexture = UiUtils.buildVignetteTexture(512, 512, 0.9f);
         Image vignetteImage = new Image(vignetteTexture);
@@ -166,21 +172,21 @@ public class HighscoreScreen implements Screen {
             String finishedText = bestHpByLevel[i] >= 0 ? bestHpByLevel[i] + " HP left" : "N/A";
 
             Table scoreBox = new Table();
-            scoreBox.setBackground(game.getSkin().getDrawable("cell"));
+            scoreBox.setBackground(game.getSkin().getDrawable("whiteBlack"));
             Label levelLabel = new Label("Level " + i, game.getSkin());
             Label scoreLabel = new Label(scoreText, game.getSkin());
             scoreBox.add(levelLabel).padTop(10).row();
             scoreBox.add(scoreLabel).padTop(6).padBottom(10).row();
 
             Table completedBox = new Table();
-            completedBox.setBackground(game.getSkin().getDrawable("cell"));
+            completedBox.setBackground(game.getSkin().getDrawable("whiteBlack"));
             Label completedLabel = new Label("Completed on", game.getSkin());
             Label completedValueLabel = new Label(completedText, game.getSkin());
             completedBox.add(completedLabel).padTop(10).row();
             completedBox.add(completedValueLabel).padTop(6).padBottom(10).row();
 
             Table finishedBox = new Table();
-            finishedBox.setBackground(game.getSkin().getDrawable("cell"));
+            finishedBox.setBackground(game.getSkin().getDrawable("whiteBlack"));
             Label finishedLabel = new Label("Finished with", game.getSkin());
             Label finishedValueLabel = new Label(finishedText, game.getSkin());
             finishedBox.add(finishedLabel).padTop(10).row();
@@ -194,7 +200,7 @@ public class HighscoreScreen implements Screen {
 
 
         Table globalBox = new Table();
-        globalBox.setBackground(game.getSkin().getDrawable("cell"));
+        globalBox.setBackground(game.getSkin().getDrawable("whiteBlack"));
         Label globalLabel = new Label("You can also check out top scores from other players on [#0000EE]transprut.solutions[]", game.getSkin());
         globalLabel.setWrap(true);
         globalLabel.setAlignment(Align.center);
@@ -210,7 +216,7 @@ public class HighscoreScreen implements Screen {
         globalBox.add(globalButton).padTop(10).padBottom(20).center().row();
 
         Table datesBox = new Table();
-        datesBox.setBackground(game.getSkin().getDrawable("cell"));
+        datesBox.setBackground(game.getSkin().getDrawable("whiteBlack"));
         Label firstDateLabel = new Label("First score on:", game.getSkin());
         Label firstDateValueLabel = new Label(firstScoreDateText, game.getSkin());
         Label lastDateLabel = new Label("Most recent score on:", game.getSkin());
@@ -226,7 +232,7 @@ public class HighscoreScreen implements Screen {
         rightColumn.add(globalBox).width(420).height(255).padBottom(20).padTop(60).row();
         rightColumn.add(datesBox).width(420).height(200).row();
         Table totalsBox = new Table();
-        totalsBox.setBackground(game.getSkin().getDrawable("cell"));
+        totalsBox.setBackground(game.getSkin().getDrawable("whiteBlack"));
         Label totalsLabel = new Label("Scores logged:", game.getSkin());
         Label totalsValueLabel = new Label(String.valueOf(totalScores), game.getSkin());
         totalsBox.add(totalsLabel).padTop(12).padLeft(16).padRight(16).center().row();
