@@ -101,11 +101,32 @@ public class ConfigManager {
             if (file.exists()) {
                 Json json = new Json();
                 @SuppressWarnings("unchecked")
-                Map<String, Float> loaded = json.fromJson(HashMap.class, file);
+                Map<String, Object> loaded = json.fromJson(HashMap.class, file);
                 if (loaded != null) {
-                    audioSettings = loaded;
+                    for (Map.Entry<String, Object> entry : loaded.entrySet()) {
+                        Object value = entry.getValue();
+                        if (value instanceof Float) {
+                            audioSettings.put(entry.getKey(), (Float) value);
+                        } else if (value instanceof Map) {
+                            // Handle the case where it's serialized as a map with class/value
+                            Map<String, Object> valueMap = (Map<String, Object>) value;
+                            if (valueMap.containsKey("value")) {
+                                Object val = valueMap.get("value");
+                                if (val instanceof Number) {
+                                    audioSettings.put(entry.getKey(), ((Number) val).floatValue());
+                                }
+                            }
+                        } else if (value instanceof Number) {
+                            audioSettings.put(entry.getKey(), ((Number) value).floatValue());
+                        }
+                    }
                 }
             }
+            // Ensure defaults if missing from file
+            if (!audioSettings.containsKey("masterVolume")) audioSettings.put("masterVolume", 1f);
+            if (!audioSettings.containsKey("soundEffectsVolume")) audioSettings.put("soundEffectsVolume", 1f);
+            if (!audioSettings.containsKey("musicVolume")) audioSettings.put("musicVolume", 1f);
+
         } catch (Exception e) {
             System.err.println("Could not load audio Settings, using defaults: " + e.getMessage());
             initializeAudioSettings();
@@ -125,7 +146,7 @@ public class ConfigManager {
     }
 
     public float getVolume(String type) {
-        return audioSettings.get(type);
+        return audioSettings.getOrDefault(type, 1.0f);
     }
 
     public void setVolume(String type, float volume) {

@@ -84,6 +84,14 @@ public class SettingsScreen implements Screen {
                 game.goToSettingsAudioScreen();
             }
         });
+
+        videoSettings.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                audioManager.playSound("Click.wav", 1);
+                game.goToSettingsVideoScreen();
+            }
+        });
     }
 
 
