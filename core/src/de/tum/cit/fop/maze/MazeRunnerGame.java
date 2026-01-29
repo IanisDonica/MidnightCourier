@@ -9,6 +9,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import de.tum.cit.fop.maze.screen.*;
 import de.tum.cit.fop.maze.system.*;
 import de.tum.cit.fop.maze.screen.AchievementPopupScreen;
+import de.tum.cit.fop.maze.entity.DeathCause;
 import games.spooky.gdx.nativefilechooser.NativeFileChooser;
 /**
  * The MazeRunnerGame class represents the core of the Maze Runner game.
@@ -311,12 +312,41 @@ public class MazeRunnerGame extends Game {
         }
     }
 
+    public void goToPotholeDeathScreen() {
+        this.setScreen(new PotholeDeathScreen(this));
+        if (settingsScreen != null) {
+            settingsScreen.dispose(); // Dispose the menu screen if it exists
+            settingsScreen = null;
+        }
+    }
+
+    public void goToBmwExplosionDeathScreen() {
+        this.setScreen(new BmwExplosionDeathScreen(this));
+        if (settingsScreen != null) {
+            settingsScreen.dispose(); // Dispose the menu screen if it exists
+            settingsScreen = null;
+        }
+    }
+
     public void goToVictoryScreen() {
         progressionManager.addPoints(500);
         this.setScreen(new VictoryScreen(this)); // Set the current screen to GameScreen
         if (settingsScreen != null) {
             settingsScreen.dispose(); // Dispose the menu screen if it exists
             settingsScreen = null;
+        }
+    }
+
+    public void handlePlayerDeath(DeathCause cause) {
+        if (cause == null) {
+            goToGameOverScreen();
+            return;
+        }
+        switch (cause) {
+            case BMW -> goToDeathOverScreen();
+            case BMW_EXPLOSION -> goToBmwExplosionDeathScreen();
+            case POTHOLE -> goToPotholeDeathScreen();
+            case TIMEOUT, ARRESTED -> goToGameOverScreen();
         }
     }
 

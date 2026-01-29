@@ -49,7 +49,7 @@ public class DeathOverScreen implements Screen {
 
         Viewport viewport = new FitViewport(1920, 1080);
         stage = new Stage(viewport, game.getSpriteBatch());
-        backgroundTexture = new Texture(Gdx.files.internal("Assets_Map/Orthodox_crosses_in_Fort_Ross.jpg"));
+        backgroundTexture = new Texture(Gdx.files.internal("BmwScreen.jpg"));
         backgroundImage = new Image(backgroundTexture);
         backgroundImage.setFillParent(true);
         backgroundImage.setColor(1f, 1f, 1f, 0f);

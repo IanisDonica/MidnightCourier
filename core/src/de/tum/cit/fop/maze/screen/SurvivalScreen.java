@@ -142,7 +142,7 @@ public class SurvivalScreen implements Screen {
         float spawnX = spawnPoint != null ? spawnPoint.x : 78f;
         float spawnY = spawnPoint != null ? spawnPoint.y : 46f;
         player = new Player(collisionLayer, spawnX, spawnY, game::goToGameOverScreen);
-        player.setDeathOverListener(game::goToDeathOverScreen);
+        player.setDeathCauseListener(game::handlePlayerDeath);
 
         player.setWorldBounds(WORLD_WIDTH, WORLD_HEIGHT);
         applyUpgrades();
@@ -190,7 +190,7 @@ public class SurvivalScreen implements Screen {
         float spawnX = spawnPoint != null ? spawnPoint.x : 78f;
         float spawnY = spawnPoint != null ? spawnPoint.y : 46f;
         player = new Player(collisionLayer, spawnX, spawnY, game::goToGameOverScreen);
-        player.setDeathOverListener(game::goToDeathOverScreen);
+        player.setDeathCauseListener(game::handlePlayerDeath);
         player.setWorldBounds(WORLD_WIDTH, WORLD_HEIGHT);
         applyUpgrades();
         devConsole.setPlayer(player);
@@ -545,7 +545,7 @@ public class SurvivalScreen implements Screen {
         if (deliveryTimer <= 0f) {
             deliveryTimerActive = false;
             deliveryTimer = 0f;
-            player.damage(999);
+            player.damage(999, de.tum.cit.fop.maze.entity.DeathCause.TIMEOUT);
         }
     }
 

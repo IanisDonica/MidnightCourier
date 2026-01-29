@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Array;
+import de.tum.cit.fop.maze.entity.DeathCause;
 import de.tum.cit.fop.maze.system.PointManager;
 
 public class Trap extends Obstacle {
@@ -18,7 +19,7 @@ public class Trap extends Obstacle {
             return;
         }
         if (!player.isStunned()) {
-            player.damage(999);
+            player.damage(1, DeathCause.POTHOLE);
         }
     }
 

@@ -49,6 +49,7 @@ public class SecondCutsceneScreen implements Screen {
     private float buttonTimer = 0f;
     private CutsceneState state = CutsceneState.SHOW_SLIDES;
     private final boolean useRollingText;
+    private final boolean isEndCutscene;
 
     private enum CutsceneState {
         SHOW_SLIDES,
@@ -59,7 +60,8 @@ public class SecondCutsceneScreen implements Screen {
     public SecondCutsceneScreen(MazeRunnerGame game, int targetLevel) {
         this.game = game;
         this.targetLevel = targetLevel;
-        this.useRollingText = !(targetLevel == 3 || targetLevel == 4 || targetLevel == 5);
+        this.isEndCutscene = targetLevel == 6;
+        this.useRollingText = !(targetLevel == 3 || targetLevel == 4 || targetLevel == 5 || isEndCutscene);
 
         Viewport viewport = new FitViewport(1920, 1080);
         stage = new Stage(viewport, game.getSpriteBatch());
@@ -105,7 +107,11 @@ public class SecondCutsceneScreen implements Screen {
 
         acceptButton = new TextButton("Accept delivery", game.getSkin());
         if (!useRollingText) {
-            acceptButton.setText(String.format("Start your %d delivery", targetLevel));
+            if (isEndCutscene) {
+                acceptButton.setText("Go to endless mode");
+            } else {
+                acceptButton.setText(String.format("Start your %d delivery", targetLevel));
+            }
         }
         acceptButton.setVisible(false);
         acceptButton.addListener(new ChangeListener() {
@@ -164,6 +170,19 @@ public class SecondCutsceneScreen implements Screen {
                 Gdx.files.internal("Comic-Level5-6.png"),
                 Gdx.files.internal("Comic-Level5-7.png"),
                 Gdx.files.internal("Comic-Level5-8.png")
+            );
+        }
+        if (targetLevel == 6) {
+            return List.of(
+                Gdx.files.internal("Comic-End-0.png"),
+                Gdx.files.internal("Comic-End-1.png"),
+                Gdx.files.internal("Comic-End-2.png"),
+                Gdx.files.internal("Comic-End-3.png"),
+                Gdx.files.internal("Comic-End-4.png"),
+                Gdx.files.internal("Comic-End-5.png"),
+                Gdx.files.internal("Comic-End-6.png"),
+                Gdx.files.internal("Comic-End-7.png"),
+                Gdx.files.internal("Comic-End-8.png")
             );
         }
         List<FileHandle> slideFiles = new ArrayList<>();
@@ -270,7 +289,11 @@ public class SecondCutsceneScreen implements Screen {
             return;
         }
         finished = true;
-        game.goToGame(targetLevel);
+        if (isEndCutscene) {
+            game.goToEndless();
+        } else {
+            game.goToGame(targetLevel);
+        }
     }
 
     @Override

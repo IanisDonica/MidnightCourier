@@ -169,6 +169,8 @@ public class KeyHandler extends InputListener {
                 game.goBackFromSettings();
             } else if (s instanceof SettingsGameScreen || s instanceof SettingsVideoScreen || s instanceof SettingsAudioScreen || s instanceof SettingsControlsScreen) {
                 game.goToSettingsScreen();
+            } else if (s instanceof PotholeDeathScreen || s instanceof DeathOverScreen || s instanceof GameOverScreen || s instanceof BmwExplosionDeathScreen) {
+                return true;
             } else {
                 game.goToMenu();
             }

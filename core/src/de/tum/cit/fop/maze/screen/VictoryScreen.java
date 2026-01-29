@@ -102,7 +102,7 @@ public class VictoryScreen implements Screen {
 
         int currentLevel = game.getCurrentLevelNumber();
         boolean isLastLevel = currentLevel >= 5;
-        TextButton nextLevelButton = new TextButton(isLastLevel ? "Go to Endless Mode" : "Next Level", game.getSkin());
+        TextButton nextLevelButton = new TextButton(isLastLevel ? "Go on your vacation" : "Next Level", game.getSkin());
         nextLevelButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent changeEvent, Actor actor) {
@@ -111,7 +111,7 @@ public class VictoryScreen implements Screen {
                 // for now it's important that the proertyfile namesfollow the structure level-#.properties
                 audioManager.playSound("Click.wav", 1);
                 if (isLastLevel) {
-                    game.goToEndless();
+                    game.goToSecondCutsceneScreen(6);
                     return;
                 }
                 if (currentLevel + 1 <= 5) {

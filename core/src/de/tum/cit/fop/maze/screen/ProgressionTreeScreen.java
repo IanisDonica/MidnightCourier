@@ -203,9 +203,15 @@ public class ProgressionTreeScreen implements Screen {
         int cost = upgrade == null ? 0 : upgrade.getCost();
         TextButton button = new TextButton(title + "\n[#FFD54F]" + cost + " lei[]", game.getSkin());
         button.getLabel().getStyle().font.getData().markupEnabled = true;
-        boolean canPurchase = progressionManager.canPurchase(upgradeName);
+        boolean lockGlasses = "new_glasses".equals(upgradeName)
+                && (game.getCurrentLevelNumber() == 1 || game.getCurrentLevelNumber() == 2);
+        boolean canPurchase = !lockGlasses && progressionManager.canPurchase(upgradeName);
         boolean owned = progressionManager.hasUpgrade(upgradeName);
-        if (!canPurchase || owned) {
+        if (lockGlasses && !owned) {
+            button.setDisabled(true);
+            button.setTouchable(Touchable.disabled);
+            button.getLabel().setColor(Color.GRAY);
+        } else if (!canPurchase || owned) {
             button.setDisabled(true);
             button.setTouchable(Touchable.disabled);
             if (owned) {

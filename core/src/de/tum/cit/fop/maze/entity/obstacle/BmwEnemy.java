@@ -12,6 +12,7 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import de.tum.cit.fop.maze.system.AchievementManager;
 import de.tum.cit.fop.maze.ai.RoadPathfinder;
+import de.tum.cit.fop.maze.entity.DeathCause;
 import de.tum.cit.fop.maze.entity.Player;
 import de.tum.cit.fop.maze.entity.obstacle.Enemy;
 import de.tum.cit.fop.maze.entity.obstacle.JandarmeriaDeath;
@@ -86,7 +87,7 @@ public class BmwEnemy extends Obstacle {
             if (!player.isGodMode()) {
                 AchievementManager.incrementProgress("german_engineering", 1);
             }
-            player.damage(999);
+            player.damage(999, DeathCause.BMW);
         }
     }
 
