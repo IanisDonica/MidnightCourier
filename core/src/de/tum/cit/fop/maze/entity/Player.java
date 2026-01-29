@@ -146,10 +146,10 @@ public class Player extends Entity {
             walkRightFrames.add(new TextureRegion(walkSheetRight, col * frameWidthRightLeft, 0, frameWidthRightLeft, frameHeightRightLeft));
             walkDownFrames.add(new TextureRegion(walkSheetDownUp, col * frameWidthDownUp, 20, frameWidthDownUp, frameHeightDownUp));
             walkLeftFrames.add(new TextureRegion(walkSheetLeft, col * frameWidthRightLeft, 0, frameWidthRightLeft, frameHeightRightLeft));
-            stunnedLeftFrames.add(new TextureRegion(stunLeftSheet, col * frameWidth, 0, frameWidth, frameHeight));
-            stunnedRightFrames.add(new TextureRegion(stunRightSheet, col * frameWidth, 0, frameWidth, frameHeight));
-            stunnedUpFrames.add(new TextureRegion(stunUpDownSheet, col * frameWidth, 0, frameWidth, frameHeight));
-            stunnedDownFrames.add(new TextureRegion(stunUpDownSheet, col * frameWidth, 32, frameWidth, frameHeight));
+            stunnedLeftFrames.add(new TextureRegion(stunLeftSheet, col * frameWidthRightLeft, 0, frameWidthRightLeft, frameHeightRightLeft));
+            stunnedRightFrames.add(new TextureRegion(stunRightSheet, col * frameWidthRightLeft, 0, frameWidthRightLeft, frameHeightRightLeft));
+            stunnedUpFrames.add(new TextureRegion(stunUpDownSheet, col * frameWidthDownUp, 0, frameWidthDownUp, frameHeightDownUp));
+            stunnedDownFrames.add(new TextureRegion(stunUpDownSheet, col * frameWidthDownUp, 20, frameWidthDownUp, frameHeightDownUp));
         }
 
         downAnimation = new Animation<>(0.15f, walkDownFrames);
