@@ -30,6 +30,23 @@ public class KeyHandler extends InputListener {
         return handleKey(keycode, false);
     }
 
+    @Override
+    public boolean scrolled(InputEvent event, float x, float y, float amountX, float amountY) {
+        Screen s = game.getScreen();
+        GameScreen gameScreen = (s instanceof GameScreen) ? game.getGameScreen() : null;
+        SurvivalScreen survivalScreen = (s instanceof SurvivalScreen) ? game.getSurvivalScreen() : null;
+        if (gameScreen == null && survivalScreen == null) {
+            return false;
+        }
+        float zoomDelta = amountY * 0.02f;
+        if (gameScreen != null) {
+            gameScreen.adjustZoom(zoomDelta);
+        } else {
+            survivalScreen.adjustZoom(zoomDelta);
+        }
+        return true;
+    }
+
     private boolean handleKey(int keycode, boolean isDown) {
         // Player movement and sprint
         if (player != null && checkMovementKeys(keycode, isDown)) return true;

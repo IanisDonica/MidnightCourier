@@ -22,8 +22,8 @@ public class Trap extends Obstacle {
         }
     }
 
-    ///@Override
-    private void initAnimation() {
+    @Override
+    protected void initAnimation() {
         //This is kinda duplicate, but it will later be useful
         Texture textureSheet = new Texture(Gdx.files.internal("Pixel_manhole_open_16x16.png"));
         Array<TextureRegion> frames = new Array<>(TextureRegion.class);

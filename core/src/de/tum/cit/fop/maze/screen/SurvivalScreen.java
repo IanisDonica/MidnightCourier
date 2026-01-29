@@ -19,7 +19,6 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.*;
 import de.tum.cit.fop.maze.system.HUD;
@@ -75,8 +74,8 @@ public class SurvivalScreen implements Screen {
     private float regenTimer = 0f;
     private static final float BMW_SPAWN_INTERVAL_SECONDS = 8f;
     private float bmwSpawnTimer = 0f;
-    private static final float DELIVERY_TIME_START_SECONDS = 25f;
-    private static final float DELIVERY_TIME_MIN_SECONDS = 8f;
+    private static final float DELIVERY_TIME_START_SECONDS = 90f;
+    private static final float DELIVERY_TIME_MIN_SECONDS = 30f;
     private static final float DELIVERY_TIME_DECREASE_SECONDS = 2f;
     private float deliveryTimeLimit = DELIVERY_TIME_START_SECONDS;
     private float deliveryTimer = 0f;
@@ -115,7 +114,6 @@ public class SurvivalScreen implements Screen {
         keyPreviewRegion.flip(false, true);
         keyPreviewCamera = new OrthographicCamera(40f, 20f);
         keyPreviewMarker = buildKeyPreviewMarker();
-        System.out.println("8");
 
         grayScaleShader = new ShaderProgram(Gdx.files.internal("shaders/vertex.glsl"), Gdx.files.internal("shaders/grayscale.frag"));
         combinedShader = new ShaderProgram(Gdx.files.internal("shaders/vertex.glsl"), Gdx.files.internal("shaders/combined.frag"));
@@ -127,7 +125,10 @@ public class SurvivalScreen implements Screen {
         roadLayer = mapLoader.buildRoadLayerFromProperties(map, this.propertiesPath);
         de.tum.cit.fop.maze.entity.obstacle.BmwEnemy.setRoadLayer(roadLayer);
 
-        player = new Player(collisionLayer, 78,46, game::goToGameOverScreen);
+        GridPoint2 spawnPoint = mapLoader.findPlayerSpawnFromProperties(this.propertiesPath);
+        float spawnX = spawnPoint != null ? spawnPoint.x : 78f;
+        float spawnY = spawnPoint != null ? spawnPoint.y : 46f;
+        player = new Player(collisionLayer, spawnX, spawnY, game::goToGameOverScreen);
         player.setDeathOverListener(game::goToDeathOverScreen);
 
         player.setWorldBounds(WORLD_WIDTH, WORLD_HEIGHT);
@@ -171,7 +172,10 @@ public class SurvivalScreen implements Screen {
         collisionLayer = mapLoader.buildCollisionLayerFromProperties(map, this.propertiesPath);
         roadLayer = mapLoader.buildRoadLayerFromProperties(map, this.propertiesPath);
         BmwEnemy.setRoadLayer(roadLayer);
-        player = new Player(collisionLayer, 78,46, game::goToGameOverScreen);
+        GridPoint2 spawnPoint = mapLoader.findPlayerSpawnFromProperties(this.propertiesPath);
+        float spawnX = spawnPoint != null ? spawnPoint.x : 78f;
+        float spawnY = spawnPoint != null ? spawnPoint.y : 46f;
+        player = new Player(collisionLayer, spawnX, spawnY, game::goToGameOverScreen);
         player.setDeathOverListener(game::goToDeathOverScreen);
         player.setWorldBounds(WORLD_WIDTH, WORLD_HEIGHT);
         applyUpgrades();
@@ -248,13 +252,11 @@ public class SurvivalScreen implements Screen {
     public void render(float delta) {
         Adder *= 1.0003;
         Delta += Adder;
-        System.out.println(Adder);
 
         ensureKeyAndExit();
 
         while(Delta >= 80)
         {
-            System.out.println(Adder);
             Delta = -80;
             Enemy.spawnRandomEnemies(player, stage, collisionLayer, 1, getCameraViewBounds(), enemies);
         }
