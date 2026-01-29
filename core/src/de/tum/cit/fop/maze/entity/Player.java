@@ -7,23 +7,20 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import de.tum.cit.fop.maze.system.CollisionHandler;
-
-import java.awt.*;
+import de.tum.cit.fop.maze.system.DriftyMovementController;
 
 public class Player extends Entity {
-    public interface GameOverListener {
-        void onGameOver();
-    }
-
+    private final DriftyMovementController driftyMovementController;
     private final CollisionHandler collisionHandler;
     private final GameOverListener gameOverListener;
-    private GameOverListener deathOverListener;
     protected Animation<TextureRegion> stunnedDownAnimation;
     protected Animation<TextureRegion> stunnedUpAnimation;
     protected Animation<TextureRegion> stunnedLeftAnimation;
     protected Animation<TextureRegion> stunnedRightAnimation;
+    private GameOverListener deathOverListener;
     private boolean moveUp, moveDown, moveLeft, moveRight;
     private boolean sprinting;
     private int maxHp = 3;
@@ -36,12 +33,12 @@ public class Player extends Entity {
     private char lastInputDirection = 'd';
     private boolean gameOverTriggered = false;
     private float speedMultiplier = 1f;
+    private float speedX, speedY;
     private boolean potholeImmune = false;
     private float worldWidth = 0f;
     private float worldHeight = 0f;
-    private float debugSpeedMultiplier = 1f;
     private boolean godMode = false;
-    ///private final GameOverListener trapOverListener;
+    /// private final GameOverListener trapOverListener;
 
     //Initialize the player on a specific coordinate point
     public Player(TiledMapTileLayer collisionLayer, float x, float y, GameOverListener gameOverListener) {
@@ -50,6 +47,7 @@ public class Player extends Entity {
         setSize(0.75f, 0.75f);
         this.collisionHandler = new CollisionHandler(collisionLayer);
         this.gameOverListener = gameOverListener;
+        this.driftyMovementController = new DriftyMovementController();
     }
 
     public void setMoveUp(boolean moveUp) {
@@ -88,25 +86,17 @@ public class Player extends Entity {
         this.speedMultiplier = speedMultiplier;
     }
 
-    public void setDebugSpeedMultiplier(float debugSpeedMultiplier) {
-        this.debugSpeedMultiplier = debugSpeedMultiplier;
-    }
-
     public void setWorldBounds(float worldWidth, float worldHeight) {
         this.worldWidth = worldWidth;
         this.worldHeight = worldHeight;
     }
 
-    public void setPotholeImmune(boolean potholeImmune) {
-        this.potholeImmune = potholeImmune;
+    public int getMaxHp() {
+        return maxHp;
     }
 
     public void setMaxHp(int maxHp) {
         this.maxHp = maxHp;
-    }
-
-    public int getMaxHp() {
-        return maxHp;
     }
 
     public void setDrinkDurationMultiplier(float drinkDurationMultiplier) {
@@ -116,7 +106,7 @@ public class Player extends Entity {
     private void initialiseAnimations() {
         Texture walkSheet = new Texture(Gdx.files.internal("character.png"));
         Texture walkSheetDownUp = new Texture(Gdx.files.internal("CharacterUpDown.png"));
-        Texture walkSheetRight =  new Texture(Gdx.files.internal("Character_Right.png"));
+        Texture walkSheetRight = new Texture(Gdx.files.internal("Character_Right.png"));
         Texture walkSheetLeft = new Texture(Gdx.files.internal("Character_Left.png"));
         Texture stunLeftSheet = new Texture(Gdx.files.internal("CharacterLeftStun.png"));
         Texture stunRightSheet = new Texture(Gdx.files.internal("CharacterRightStun.png"));
@@ -185,7 +175,6 @@ public class Player extends Entity {
         this.deathOverListener = deathOverListener;
     }
 
-
     @Override
     public void draw(Batch batch, float parentAlpha) {
         TextureRegion currentFrame;
@@ -211,69 +200,103 @@ public class Player extends Entity {
     @Override
     public void act(float delta) {
         super.act(delta);
-        speed = 2.5f * delta * speedMultiplier * debugSpeedMultiplier;
-        if (sprinting) {speed *= 2f;}
-        float deltaX = 0, deltaY = 0;
-
-        if (speedUpTimer > 0) {
-            speed *= 2.5f;
-            speedUpTimer -= delta; //This can go into the negatives but it shouldn't really be a big deal
-        }
 
         if (!stunned) {
-            if (moveUp) {deltaY += speed;}
-            if (moveDown) {deltaY -= speed;}
-            if (moveLeft) {deltaX -= speed;}
-            if (moveRight) {deltaX += speed;}
-        } else {
-            switch (lastInputDirection) {
-                case 'u' -> deltaY -= speed * 10;
-                case 'd' -> deltaY += speed * 10;
-                case 'l' -> deltaX += speed * 10;
-                case 'r' -> deltaX -= speed * 10;
-                default -> deltaX += speed * 10;
+            driftyMovementController.update(delta, moveUp, moveDown, moveLeft, moveRight, sprinting);
+
+            Vector2 vel = driftyMovementController.getVelocity();
+            speedX = vel.x * delta * speedMultiplier;
+            speedY = vel.y * delta * speedMultiplier;
+
+            float nextX = getX() + speedX;
+            float nextY = getY() + speedY;
+
+            if (speedX > 0) {
+                if (collisionHandler.checkCollision(this, 'r')) {
+                    setX(nextX);
+                } else {
+                    driftyMovementController.velocity.x = 0;
+                }
+            } else if (speedX < 0) {
+                if (collisionHandler.checkCollision(this, 'l')) {
+                    setX(nextX);
+                } else {
+                    driftyMovementController.velocity.x = 0;
+                }
             }
+
+            if (speedY > 0) {
+                if (collisionHandler.checkCollision(this, 'u')) {
+                    setY(nextY);
+                } else {
+                    driftyMovementController.velocity.y = 0;
+                }
+            } else if (speedY < 0) {
+                if (collisionHandler.checkCollision(this, 'd')) {
+                    setY(nextY);
+                } else {
+                    driftyMovementController.velocity.y = 0;
+                }
+            }
+
+        } else {
+            // Handle stunned state (knockback)
+            float speed = 2.5f * delta * speedMultiplier;
+            float deltaX = 0, deltaY = 0;
+            switch (lastInputDirection) {
+                case 'u' -> deltaY -= speed;
+                case 'd' -> deltaY += speed;
+                case 'l' -> deltaX += speed;
+                case 'r' -> deltaX -= speed;
+                default -> deltaX = 0;
+            }
+
             stunDuration -= delta;
             if (stunDuration < 0) {
                 stunned = false;
             }
+
+            if ((deltaX > 0 && collisionHandler.checkCollision(this, 'r')) || (deltaX < 0 && collisionHandler.checkCollision(this, 'l'))){
+                setX(getX() + deltaX);
+            }
+
+            if ((deltaY > 0 && collisionHandler.checkCollision(this, 'u')) || (deltaY < 0 && collisionHandler.checkCollision(this, 'd'))) {
+                setY(getY() + deltaY);
+            }
         }
 
-        if (deltaX != 0 || deltaY != 0) {
-            float length = (float) Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-            deltaX = deltaX * speed / length;
-            deltaY = deltaY * speed / length;
-        } else return;
-
-        float nextX = deltaX + getX(), nextY = deltaY + getY();
-
-        if (deltaY > 0 && collisionHandler.checkCollision(this, 'u')) {
-            setPosition(getX(), nextY);
-            facingDirection = 'u';
-        }
-        if (deltaY < 0 && collisionHandler.checkCollision(this, 'd')) {
-            setPosition(getX(), nextY);
-            facingDirection = 'd';
-        }
-        if (deltaX > 0 && collisionHandler.checkCollision(this, 'r')) {
-            setPosition(nextX, getY());
-            facingDirection = 'r';
-        }
-        if (deltaX < 0 && collisionHandler.checkCollision(this, 'l')) {
-            setPosition(nextX, getY());
-            facingDirection = 'l';
-        }
-
-        if (worldWidth > 0f && worldHeight > 0f) {
-            float clampedX = MathUtils.clamp(getX(), 0f, worldWidth - getWidth());
-            float clampedY = MathUtils.clamp(getY(), 0f, worldHeight - getHeight());
-            setPosition(clampedX, clampedY);
-        }
-
+        // Update animation
         animationTime += delta;
+
+        // Handle speed-up buff
+        if (speedUpTimer > 0) {
+            speedUpTimer -= delta;
+        }
+
+        // Update facing direction based on drifty controller orientation
+        float orientation = driftyMovementController.getOrientation();
+        if (orientation >= 315 || orientation < 45) {
+            facingDirection = 'r'; // Right (0°)
+        } else if (orientation >= 45 && orientation < 135) {
+            facingDirection = 'u'; // Up (90°)
+        } else if (orientation >= 135 && orientation < 225) {
+            facingDirection = 'l'; // Left (180°)
+        } else {
+            facingDirection = 'd'; // Down (270°)
+        }
+
+        // Update camera to follow player
         this.getStage().getCamera().position.set(getX() + getWidth() / 2, getY() + getHeight() / 2, 0);
         this.getStage().getCamera().update();
     }
+
+    // Add getter for movement controller
+    public DriftyMovementController getMovementController() {
+        return driftyMovementController;
+    }
+
+
+
 
     public void drinkEnergyDrink() {
         //This method seems useless, but it its mostly for later in order to handle sounds / screen effects etc.
@@ -285,15 +308,24 @@ public class Player extends Entity {
         this.hasKey = true;
     }
 
+    public float getSpeedX(){
+        return speedX;
+    }
+
+    public float getSpeedY(){
+        return speedY;
+    }
+
     public boolean hasKey() {
         return hasKey;
     }
 
-    public void setHp(int hp) {
-        this.hp = Math.min(hp, maxHp);
-    }
     public int getHp() {
         return this.hp;
+    }
+
+    public void setHp(int hp) {
+        this.hp = Math.min(hp, maxHp);
     }
 
     public boolean isStunned() {
@@ -304,15 +336,23 @@ public class Player extends Entity {
         return potholeImmune;
     }
 
-    public void setGodMode(boolean godMode) {
-        this.godMode = godMode;
+    public void setPotholeImmune(boolean potholeImmune) {
+        this.potholeImmune = potholeImmune;
     }
 
     public boolean isGodMode() {
         return godMode;
     }
 
+    public void setGodMode(boolean godMode) {
+        this.godMode = godMode;
+    }
+
     public boolean isGameOverTriggered() {
         return gameOverTriggered;
+    }
+
+    public interface GameOverListener {
+        void onGameOver();
     }
 }

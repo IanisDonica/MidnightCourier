@@ -18,7 +18,9 @@
 	"id": "first_time_for_everything",
 	"name": "First time for everythihing",
 	"description": "Get arrested by a police officer for the first time",
-	"target": 1
+	"progress": 1,
+	"target": 1,
+	"unlocked": true
 },
 {
 	"id": "first_upgrade",
@@ -36,7 +38,9 @@
 	"id": "third_strike_and_out",
 	"name": "Three strike rule",
 	"description": "Get arrested 3 times",
-	"target": 3
+	"progress": 3,
+	"target": 3,
+	"unlocked": true
 },
 {
 	"id": "finish_level_5",

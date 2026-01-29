@@ -145,7 +145,6 @@ public class PointManager implements Serializable {
             this.playerHp = playerHp;
             this.level = level;
             this.dateTime = LocalDateTime.now().toString();
-            System.out.println(dateTime);
         }
     }
 }

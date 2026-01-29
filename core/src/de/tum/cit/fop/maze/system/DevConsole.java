@@ -154,7 +154,7 @@ public class DevConsole {
                 } else {
                     try {
                         float multiplier = Float.parseFloat(parts[1]);
-                        player.setDebugSpeedMultiplier(multiplier);
+                        player.setSpeedMultiplier(multiplier);
                         appendLine("multiplier set to " + multiplier);
                     } catch (NumberFormatException ex) {
                         appendLine("Invalid command.");
