@@ -90,8 +90,6 @@ public class SurvivalScreen implements Screen {
     ///}
 
     public SurvivalScreen(MazeRunnerGame game) {
-        System.out.println("6");
-
         this.game = game;
         this.hud = new HUD(game);
         this.devConsole = new DevConsole(game);
@@ -103,7 +101,6 @@ public class SurvivalScreen implements Screen {
         map = new TmxMapLoader().load(String.valueOf(Gdx.files.local(generatedMapPath)));
         mapRenderer = new OrthogonalTiledMapRenderer(map, 1 / 32f, game.getSpriteBatch());
         createFrameBuffers(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        System.out.println("8");
 
         grayScaleShader = new ShaderProgram(Gdx.files.internal("shaders/vertex.glsl"), Gdx.files.internal("shaders/grayscale.frag"));
         fogShader = new ShaderProgram(Gdx.files.internal("shaders/vertex.glsl"), Gdx.files.internal("shaders/fog.frag"));
@@ -112,27 +109,21 @@ public class SurvivalScreen implements Screen {
         ((OrthographicCamera) stage.getCamera()).zoom = MIN_ZOOM;
         uiCamera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         pointManager = new PointManager(level);
-        System.out.println("9");
 
         collisionLayer = mapLoader.buildCollisionLayerFromProperties(map, this.propertiesPath);
         generateFBO();
         roadLayer = mapLoader.buildRoadLayerFromProperties(map, this.propertiesPath);
         de.tum.cit.fop.maze.entity.obstacle.BmwEnemy.setRoadLayer(roadLayer);
-        System.out.println("3");
 
         player = new Player(collisionLayer, 78,46, game::goToGameOverScreen);
         player.setDeathOverListener(game::goToDeathOverScreen);
-        System.out.println("4");
 
         player.setWorldBounds(WORLD_WIDTH, WORLD_HEIGHT);
         applyUpgrades();
-        System.out.println("5");
 
         devConsole.setPlayer(player);
         devConsole.setSpawnLayers(collisionLayer, roadLayer);
         devConsole.addToStage(hud.getStage());
-
-        System.out.println("7");
     }
 
     public SurvivalScreen(MazeRunnerGame game, GameState gameState) {
@@ -235,8 +226,9 @@ public class SurvivalScreen implements Screen {
 
     @Override
     public void render(float delta) {
-        Adder *= 2.0003;
-        Delta += Adder;
+        Adder *= 1.0003f;
+        Adder = MathUtils.clamp(Adder, 10f,  1000f);
+        Delta += (int) Adder;
         System.out.println(Adder);
 
 
@@ -476,12 +468,10 @@ public class SurvivalScreen implements Screen {
         }
         regenTimer += delta;
 
-        System.out.println(regenTimer);
         if (regenTimer >= REGEN_INTERVAL_SECONDS) {
             regenTimer = 0;
             if (player.getHp() < player.getMaxHp()) {
                 player.setHp(player.getHp() + 1);
-                System.out.println("Here");
             } else {
                 pointManager.add(REGEN_POINTS_ON_FULL);
             }

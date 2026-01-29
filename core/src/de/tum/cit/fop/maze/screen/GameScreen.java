@@ -446,12 +446,10 @@ public class GameScreen implements Screen {
         }
         regenTimer += delta;
 
-        System.out.println(regenTimer);
         if (regenTimer >= REGEN_INTERVAL_SECONDS) {
             regenTimer = 0;
             if (player.getHp() < player.getMaxHp()) {
                 player.setHp(player.getHp() + 1);
-                System.out.println("Here");
             } else {
                 pointManager.add(REGEN_POINTS_ON_FULL);
             }

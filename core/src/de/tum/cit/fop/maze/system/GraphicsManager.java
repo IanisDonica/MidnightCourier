@@ -11,7 +11,7 @@ public class GraphicsManager {
     private static final String TAG = "GraphicsSettings";
 
     private int targetFrameRate = 60;
-    private boolean vsyncEnabled = true;
+    private boolean vsyncEnabled = false;
 
     private AAMode antiAliasingMode = AAMode.MSAA_4;
 
@@ -112,7 +112,7 @@ public class GraphicsManager {
     }
 
     public void setFrameLimit(int fps) {
-        this.targetFrameRate = MathUtils.clamp(fps, 30, 360);
+        this.targetFrameRate = MathUtils.clamp(fps, 15, 360);
         applyFrameRateSettings();
     }
 
@@ -135,7 +135,6 @@ public class GraphicsManager {
 
     public void setAntiAliasingMode(AAMode mode) {
         this.antiAliasingMode = mode;
-        //Todo prompt restart
         Gdx.app.log(TAG, String.format("Anti-aliasing mode set to: %s (Samples: %d)", mode.displayName, mode.samples));
     }
 
@@ -166,8 +165,7 @@ public class GraphicsManager {
         this.displayMode = 2;
         setResizable(false);
         Gdx.graphics.setUndecorated(true);
-        Gdx.graphics.setWindowedMode(width / 2, height / 2); // Temp just so I can move it
-        //Todo prompt for restart
+        Gdx.graphics.setWindowedMode(width, height); // Temp just so I can move it
     }
 
     public int getWidth() {return width;}

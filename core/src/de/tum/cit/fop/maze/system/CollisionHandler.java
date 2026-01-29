@@ -4,10 +4,17 @@ import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import de.tum.cit.fop.maze.entity.Player;
 
 public class CollisionHandler {
+
     private final TiledMapTileLayer collisionLayer;
 
     public CollisionHandler(TiledMapTileLayer collisionLayer) {
         this.collisionLayer = collisionLayer;
+    }
+
+    private boolean isSolid(int x, int y) {
+        if (x < 0 || y < 0) return true; // Treat out of bounds as solid
+        TiledMapTileLayer.Cell cell = collisionLayer.getCell(x, y);
+        return cell != null;
     }
 
     public boolean checkCollision(Player player, char direction) {
@@ -16,39 +23,38 @@ public class CollisionHandler {
         float topBound = player.getY() + player.getHeight() / 4;
         float bottomBound = player.getY() + player.getHeight() / 6;
 
-        TiledMapTileLayer.Cell topCell, bottomCell, leftCell, rightCell;
-
         switch (direction) {
-            case 'u':
-                topBound += player.getSpeed();
-                leftCell = collisionLayer.getCell((int) leftBound, (int) topBound);
-                rightCell = collisionLayer.getCell((int) rightBound, (int) topBound);
-                return (leftCell == null && rightCell == null);
-            case 'l':
-                leftBound -= player.getSpeed();
-                topCell = collisionLayer.getCell((int) leftBound, (int) topBound);
-                bottomCell = collisionLayer.getCell((int) leftBound, (int) bottomBound);
-                return (topCell == null && bottomCell == null);
-            case 'r':
-                rightBound += player.getSpeed();
-                topCell = collisionLayer.getCell((int) rightBound, (int) topBound);
-                bottomCell = collisionLayer.getCell((int) rightBound, (int) bottomBound);
-                return (topCell == null && bottomCell == null);
-            case 'd':
-                bottomBound -= player.getSpeed();
-                leftCell = collisionLayer.getCell((int) leftBound, (int) bottomBound);
-                rightCell = collisionLayer.getCell((int) rightBound, (int) bottomBound);
-                return (leftCell == null && rightCell == null);
+            case 'u': // Moving up
+                topBound += player.getSpeedY();
+                return !isSolid((int) leftBound, (int) topBound) && !isSolid((int) rightBound, (int) topBound);
+
+            case 'l': // Moving left
+                leftBound += player.getSpeedX();
+                return !isSolid((int) leftBound, (int) topBound) && !isSolid((int) leftBound, (int) bottomBound);
+
+            case 'r': // Moving right
+                rightBound += player.getSpeedX();
+                return !isSolid((int) rightBound, (int) topBound) && !isSolid((int) rightBound, (int) bottomBound);
+
+            case 'd': // Moving down
+                bottomBound += player.getSpeedY();
+                return !isSolid((int) leftBound, (int) bottomBound) && !isSolid((int) rightBound, (int) bottomBound);
+
             default:
                 return true;
         }
-
     }
 
-
-
-    //public boolean colidingWithPlayer(Player player, Entity entity) {
-
-    //}
-
+    public void stopMomentum(Player player, char direction) {
+        switch (direction) {
+            case 'u':
+            case 'd':
+                player.getMovementController().velocity.y = 0; // Stop Y momentum
+                break;
+            case 'l':
+            case 'r':
+                player.getMovementController().velocity.x = 0; // Stop X momentum
+                break;
+        }
+    }
 }
