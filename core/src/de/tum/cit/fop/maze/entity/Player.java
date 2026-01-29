@@ -19,7 +19,7 @@ public class Player extends Entity {
     protected Animation<TextureRegion> stunnedUpAnimation;
     protected Animation<TextureRegion> stunnedLeftAnimation;
     protected Animation<TextureRegion> stunnedRightAnimation;
-    private GameOverListener deathOverListener;
+    private DeathCauseListener deathCauseListener;
     private boolean moveUp, moveDown, moveLeft, moveRight;
     private boolean sprinting;
     private int maxHp = 3;
@@ -163,14 +163,18 @@ public class Player extends Entity {
     }
 
     public void damage(int damage) {
+        damage(damage, DeathCause.ARRESTED);
+    }
+
+    public void damage(int damage, DeathCause cause) {
         if (godMode) {
             return;
         }
         hp -= damage;
         if (hp <= 0 && !gameOverTriggered) {
             gameOverTriggered = true;
-            if (damage >= 999 && deathOverListener != null) {
-                deathOverListener.onGameOver();
+            if (deathCauseListener != null) {
+                deathCauseListener.onDeath(cause);
             } else if (gameOverListener != null) {
                 gameOverListener.onGameOver();
             }
@@ -180,8 +184,8 @@ public class Player extends Entity {
         stunDuration = 0.5f;
     }
 
-    public void setDeathOverListener(GameOverListener deathOverListener) {
-        this.deathOverListener = deathOverListener;
+    public void setDeathCauseListener(DeathCauseListener deathCauseListener) {
+        this.deathCauseListener = deathCauseListener;
     }
 
     @Override
@@ -364,5 +368,9 @@ public class Player extends Entity {
 
     public interface GameOverListener {
         void onGameOver();
+    }
+
+    public interface DeathCauseListener {
+        void onDeath(DeathCause cause);
     }
 }

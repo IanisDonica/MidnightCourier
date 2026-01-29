@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
@@ -20,7 +21,7 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import de.tum.cit.fop.maze.MazeRunnerGame;
 import de.tum.cit.fop.maze.system.AudioManager;
 
-public class VictoryScreen implements Screen {
+public class BmwExplosionDeathScreen implements Screen {
     private final MazeRunnerGame game;
     private final Stage stage;
     private final AudioManager audioManager;
@@ -33,9 +34,9 @@ public class VictoryScreen implements Screen {
     private float fadeTimer = 0f;
     private static final float FADE_DURATION = 2f;
     private static final float BUTTON_FADE_DURATION = 1.0f;
-    private static final int DAILY_REWARD = 500;
+    private final Texture fadeTexture;
 
-    public VictoryScreen(MazeRunnerGame game){
+    public BmwExplosionDeathScreen(MazeRunnerGame game) {
         this.game = game;
         if (game.getGameScreen() != null && game.getGameScreen().pointManager != null) {
             survivedSeconds = game.getGameScreen().pointManager.getElapsedTime();
@@ -45,15 +46,16 @@ public class VictoryScreen implements Screen {
             finalPoints = 0;
         }
         var camera = new OrthographicCamera();
-        camera.zoom = 1.5f; // Set camera zoom for a closer view
+        camera.zoom = 1.5f;
         audioManager = game.getAudioManager();
 
         Viewport viewport = new FitViewport(1920, 1080);
-        stage = new Stage(viewport, game.getSpriteBatch()); // Create a stage for UI elements
-        backgroundTexture = new Texture(Gdx.files.internal("VictoryScreen.jpg"));
+        stage = new Stage(viewport, game.getSpriteBatch());
+        backgroundTexture = new Texture(Gdx.files.internal("Assets_Map/Orthodox_crosses_in_Fort_Ross.jpg"));
         backgroundImage = new Image(backgroundTexture);
         backgroundImage.setFillParent(true);
         backgroundImage.setColor(1f, 1f, 1f, 0f);
+        backgroundImage.setTouchable(Touchable.disabled);
         stage.addActor(backgroundImage);
         Table table = new Table();
         table.setFillParent(true);
@@ -61,12 +63,12 @@ public class VictoryScreen implements Screen {
         Table content = new Table();
         content.defaults().center();
 
-        Label titleLabel = new Label("Delivery Sucessfull", game.getSkin(), "title");
+        Label titleLabel = new Label("You died!", game.getSkin(), "title");
         titleLabel.setAlignment(com.badlogic.gdx.utils.Align.center);
         content.add(titleLabel).center().padBottom(10).row();
 
-        Label subtitleLabel = new Label("(you earned " + DAILY_REWARD + " lei, go to a shop to get upgrades)", game.getSkin());
-        subtitleLabel.setFontScale(1.1f);
+        Label subtitleLabel = new Label("GlovoDriver 2004-2026", game.getSkin());
+        subtitleLabel.setFontScale(1.2f);
         subtitleLabel.setAlignment(com.badlogic.gdx.utils.Align.center);
         content.add(subtitleLabel).center().padBottom(20).row();
 
@@ -75,22 +77,22 @@ public class VictoryScreen implements Screen {
         int totalSeconds = Math.max(0, (int) survivedSeconds);
         int minutes = totalSeconds / 60;
         int seconds = totalSeconds % 60;
-        Label survivedLabel = new Label("You have completed the deliver in " + String.format("%d:%02d", minutes, seconds), game.getSkin());
-        Label pointsLabel = new Label("You have the completed the level with " + finalPoints + " score", game.getSkin());
+        Label survivedLabel = new Label("You survived for: " + String.format("%d:%02d", minutes, seconds), game.getSkin());
+        Label pointsLabel = new Label("You had a score of " + finalPoints + " points", game.getSkin());
         statsTable.add(survivedLabel).pad(10).row();
         statsTable.add(pointsLabel).pad(10);
-        content.add(statsTable).width(900).center().padBottom(12).row();
+        content.add(statsTable).width(700).center().padBottom(12).row();
 
-        Label savedLabel = new Label("This score has been saved", game.getSkin());
-        savedLabel.setFontScale(0.9f);
-        savedLabel.setAlignment(com.badlogic.gdx.utils.Align.center);
-        content.add(savedLabel).center().padBottom(40).row();
+        Label unsavedLabel = new Label("(This score has not been saved)", game.getSkin());
+        unsavedLabel.setFontScale(0.9f);
+        unsavedLabel.setAlignment(com.badlogic.gdx.utils.Align.center);
+        content.add(unsavedLabel).center().padBottom(40).row();
 
         Table contentBox = new Table();
         contentBox.setBackground(game.getSkin().getDrawable("cell"));
-        contentBox.pad(40);
-        contentBox.add(content).width(980);
-        table.add(contentBox).width(1060).center().padTop(50).row();
+        contentBox.pad(30);
+        contentBox.add(content).width(820);
+        table.add(contentBox).width(900).center().padTop(50).row();
         TextButton mainMenuButton = new TextButton("Main Menu", game.getSkin());
         mainMenuButton.addListener(new ChangeListener() {
             @Override
@@ -100,32 +102,33 @@ public class VictoryScreen implements Screen {
             }
         });
 
-        int currentLevel = game.getCurrentLevelNumber();
-        boolean isLastLevel = currentLevel >= 5;
-        TextButton nextLevelButton = new TextButton(isLastLevel ? "Go on your vacation" : "Next Level", game.getSkin());
-        nextLevelButton.addListener(new ChangeListener() {
+        TextButton retryButton = new TextButton("Reincarnate", game.getSkin());
+        retryButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent changeEvent, Actor actor) {
-                // This is dumb, if I have more time ill make it, so there is a hirearchy of levels
-                // mapped to certain proeprty files or something, and you don't have to do it this way
-                // for now it's important that the proertyfile namesfollow the structure level-#.properties
                 audioManager.playSound("Click.wav", 1);
-                if (isLastLevel) {
-                    game.goToSecondCutsceneScreen(6);
-                    return;
+                if (game.getCurrentLevelNumber() != 0) {
+                    game.goToGame(game.getCurrentLevelNumber());
+                } else {
+                    System.out.print("S");
+                    game.goToEndless();
                 }
-                if (currentLevel + 1 <= 5) {
-                    game.goToSecondCutsceneScreen(currentLevel + 1);
-                    return;
-                }
-                game.goToGame(currentLevel);
+            }
+        });
+
+        TextButton rageQuitButton = new TextButton("Rage quit", game.getSkin());
+        rageQuitButton.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent changeEvent, Actor actor) {
+                Gdx.app.exit();
             }
         });
 
         Table buttons = new Table();
         buttons.defaults().center();
-        buttons.add(nextLevelButton).padRight(20);
-        buttons.add(mainMenuButton);
+        buttons.add(retryButton).padRight(20);
+        buttons.add(mainMenuButton).padRight(20);
+        buttons.add(rageQuitButton);
         content.add(buttons).center().padTop(10).row();
 
         buttonGroup = new WidgetGroup();
@@ -137,64 +140,48 @@ public class VictoryScreen implements Screen {
         Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
         pixmap.setColor(Color.BLACK);
         pixmap.fill();
-        Texture fadeTexture = new Texture(pixmap);
+        fadeTexture = new Texture(pixmap);
         pixmap.dispose();
         fadeOverlay = new Image(fadeTexture);
         fadeOverlay.setFillParent(true);
         fadeOverlay.setColor(0f, 0f, 0f, 1f);
+        fadeOverlay.setTouchable(Touchable.disabled);
         stage.addActor(fadeOverlay);
     }
 
     @Override
     public void render(float delta) {
         if (!game.shouldRenderMenuBackground()) {
-            Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT); // Clear the screen
+            Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         }
-        stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f)); // Update the stage
         fadeTimer += delta;
-        float t = fadeTimer / FADE_DURATION;
-        if (t > 1f) {
-            t = 1f;
-        } else if (t < 0f) {
-            t = 0f;
-        }
-        float k = 9f;
-        float overlayAlpha = (float) (Math.log1p(k * (1f - t)) / Math.log1p(k));
-        fadeOverlay.setColor(0f, 0f, 0f, overlayAlpha);
-        backgroundImage.setColor(1f, 1f, 1f, 1f - overlayAlpha);
-        if (overlayAlpha <= 0f) {
-            fadeOverlay.setVisible(false);
-        }
-        float buttonAlpha = (fadeTimer - FADE_DURATION) / BUTTON_FADE_DURATION;
-        if (buttonAlpha < 0f) {
-            buttonAlpha = 0f;
-        } else if (buttonAlpha > 1f) {
-            buttonAlpha = 1f;
-        }
+        float alpha = Math.min(1f, fadeTimer / FADE_DURATION);
+        backgroundImage.setColor(1f, 1f, 1f, alpha);
+        float buttonAlpha = Math.min(1f, fadeTimer / BUTTON_FADE_DURATION);
         buttonGroup.getColor().a = buttonAlpha;
-        stage.draw(); // Draw the stage
+        fadeOverlay.setColor(0f, 0f, 0f, 1f - alpha);
+        stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
+        stage.draw();
     }
 
     @Override
     public void resize(int width, int height) {
-        stage.getViewport().update(width, height, true); // Update the stage viewport on resize
+        stage.getViewport().update(width, height, true);
     }
 
     @Override
     public void dispose() {
-        // Dispose of the stage when the screen is disposed
         stage.dispose();
         backgroundTexture.dispose();
+        fadeTexture.dispose();
     }
 
     @Override
     public void show() {
-        // Set the input processor so the stage can receive input events
         Gdx.input.setInputProcessor(stage);
         stage.addListener(game.getKeyHandler());
     }
 
-    //The following methods are part of the Screen interface but are not used in this screen.
     @Override
     public void pause() {
     }

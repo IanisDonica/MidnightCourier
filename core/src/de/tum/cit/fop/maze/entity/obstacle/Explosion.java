@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import de.tum.cit.fop.maze.entity.DeathCause;
 import de.tum.cit.fop.maze.entity.Player;
 
 public class Explosion extends Actor {
@@ -39,7 +40,7 @@ public class Explosion extends Actor {
             float dy = playerCenterY - (getY() + getHeight() / 2f);
             float dist = (float) Math.sqrt(dx * dx + dy * dy);
             if (dist <= radius) {
-                player.damage(1);
+                player.damage(1, DeathCause.BMW_EXPLOSION);
             }
         }
         timer += delta;

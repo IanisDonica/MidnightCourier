@@ -68,6 +68,7 @@ public class GameScreen implements Screen {
     private float regenTimer = 0f;
     private static final float MIN_ZOOM = 0.05f;
     private static final float MAX_ZOOM = 0.3f;
+    private static final float EARLY_LEVEL_FOG_INTENSITY = 50f;
 
     /**
      * Constructor for GameScreen. Sets up the camera and font.
@@ -104,9 +105,10 @@ public class GameScreen implements Screen {
         float spawnX = spawnPoint != null ? spawnPoint.x : 78f; // 78 x 46 is the default spawn if there is no spawn place in the map
         float spawnY = spawnPoint != null ? spawnPoint.y : 46f;
         player = new Player(collisionLayer, spawnX, spawnY, game::goToGameOverScreen);
-        player.setDeathOverListener(game::goToDeathOverScreen);
+        player.setDeathCauseListener(game::handlePlayerDeath);
         player.setWorldBounds(WORLD_WIDTH, WORLD_HEIGHT);
         applyUpgrades();
+        applyEarlyLevelFog();
         this.driftParticleSystem = new DriftParticleSystem(player);
         stage.addActor(driftParticleSystem);
         devConsole.setPlayer(player);
@@ -145,9 +147,10 @@ public class GameScreen implements Screen {
         float spawnX = spawnPoint != null ? spawnPoint.x : 78f;
         float spawnY = spawnPoint != null ? spawnPoint.y : 46f;
         player = new Player(collisionLayer, spawnX, spawnY, game::goToGameOverScreen);
-        player.setDeathOverListener(game::goToDeathOverScreen);
+        player.setDeathCauseListener(game::handlePlayerDeath);
         player.setWorldBounds(WORLD_WIDTH, WORLD_HEIGHT);
         applyUpgrades();
+        applyEarlyLevelFog();
         devConsole.setPlayer(player);
         devConsole.setSpawnLayers(collisionLayer, roadLayer);
         devConsole.addToStage(hud.getStage());
@@ -184,6 +187,12 @@ public class GameScreen implements Screen {
 
     public void toggleNoireMode() {
         noireMode = !noireMode;
+    }
+
+    private void applyEarlyLevelFog() {
+        if (level == 1 || level == 2) {
+            fogIntensity = Math.max(fogIntensity, EARLY_LEVEL_FOG_INTENSITY);
+        }
     }
 
     // If I have more time ill make it, so this isn't polled every frame (the original idea was to make it fired in the upgrade classes),
