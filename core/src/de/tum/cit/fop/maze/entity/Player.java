@@ -13,7 +13,6 @@ import de.tum.cit.fop.maze.system.CollisionHandler;
 import de.tum.cit.fop.maze.system.DriftyMovementController;
 
 public class Player extends Entity {
-    private final DriftyMovementController driftyMovementController;
     private final CollisionHandler collisionHandler;
     private final GameOverListener gameOverListener;
     protected Animation<TextureRegion> stunnedDownAnimation;
@@ -86,9 +85,21 @@ public class Player extends Entity {
         this.speedMultiplier = speedMultiplier;
     }
 
+    public void setDebugSpeedMultiplier(float debugSpeedMultiplier) {
+        this.debugSpeedMultiplier = debugSpeedMultiplier;
+    }
+
     public void setWorldBounds(float worldWidth, float worldHeight) {
         this.worldWidth = worldWidth;
         this.worldHeight = worldHeight;
+    }
+
+    public void setPotholeImmune(boolean potholeImmune) {
+        this.potholeImmune = potholeImmune;
+    }
+
+    public void setMaxHp(int maxHp) {
+        this.maxHp = maxHp;
     }
 
     public int getMaxHp() {
@@ -200,7 +211,6 @@ public class Player extends Entity {
     @Override
     public void act(float delta) {
         super.act(delta);
-
         if (!stunned) {
             // Update controller with current input
             // Controller now handles smooth rotation toward input direction
@@ -318,6 +328,10 @@ public class Player extends Entity {
         return speedY;
     }
 
+    public void clearKey() {
+        this.hasKey = false;
+    }
+
     public boolean hasKey() {
         return hasKey;
     }
@@ -348,6 +362,10 @@ public class Player extends Entity {
 
     public void setGodMode(boolean godMode) {
         this.godMode = godMode;
+    }
+
+    public boolean isGodMode() {
+        return godMode;
     }
 
     public boolean isGameOverTriggered() {

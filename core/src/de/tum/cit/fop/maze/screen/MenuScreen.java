@@ -4,6 +4,11 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.maps.tiled.TiledMap;
+import com.badlogic.gdx.maps.tiled.TmxMapLoader;
+import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
+import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
@@ -16,7 +21,11 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import de.tum.cit.fop.maze.MazeRunnerGame;
+import de.tum.cit.fop.maze.entity.Player;
+import de.tum.cit.fop.maze.entity.obstacle.BmwEnemy;
+import de.tum.cit.fop.maze.entity.obstacle.Enemy;
 import de.tum.cit.fop.maze.system.AudioManager;
+import de.tum.cit.fop.maze.map.MapLoader;
 import de.tum.cit.fop.maze.system.UiUtils;
 
 /**
@@ -28,7 +37,17 @@ public class MenuScreen implements Screen {
     private final Stage stage;
     private final AudioManager audioManager;
     private final Texture vignetteTexture;
-    
+    private final TiledMap backgroundMap;
+    private final OrthogonalTiledMapRenderer backgroundRenderer;
+    private final OrthographicCamera backgroundCamera;
+    private final MapLoader mapLoader;
+    private final Stage backgroundStage;
+    private final Stage vignetteStage;
+    private final TiledMapTileLayer collisionLayer;
+    private final TiledMapTileLayer roadLayer;
+    private static final float BACKGROUND_VIEW_HEIGHT = 100f;
+    private static final float BACKGROUND_OFFSET_X = -100f;
+    private static final float BACKGROUND_OFFSET_Y = 0f;
 
     /**
      * Constructor for MenuScreen. Sets up the camera, viewport, stage, and UI elements.
@@ -38,24 +57,45 @@ public class MenuScreen implements Screen {
     public MenuScreen(MazeRunnerGame game) {
         this.game = game;
         var camera = new OrthographicCamera();
-        camera.zoom = 1.5f; // Set camera zoom for a closer view
+        camera.zoom = 1.5f; // UI camera zoom
         audioManager = game.getAudioManager();
 
         Viewport viewport = new FitViewport(1920, 1080);
         stage = new Stage(viewport, game.getSpriteBatch()); // Create a stage for UI elements
 
+        mapLoader = new MapLoader();
+        String propertiesPath = "maps/level-6.properties";
+        String templateMapPath = "Assets_Map/THE_MAP.tmx";
+        String outputPath = "assets/Assets_Map/generated-menu-level-6.tmx";
+        mapLoader.buildTmxFromProperties(propertiesPath, templateMapPath, outputPath);
+        backgroundMap = new TmxMapLoader().load(String.valueOf(Gdx.files.local(outputPath)));
+        backgroundRenderer = new OrthogonalTiledMapRenderer(backgroundMap, 1 / 32f, game.getSpriteBatch());
+        backgroundCamera = new OrthographicCamera();
+        updateBackgroundCamera(1920, 1080);
+        centerBackgroundCamera();
+        backgroundStage = new Stage(new FitViewport(backgroundCamera.viewportWidth, backgroundCamera.viewportHeight, backgroundCamera), game.getSpriteBatch());
+        collisionLayer = mapLoader.buildCollisionLayerFromProperties(backgroundMap, propertiesPath);
+        roadLayer = mapLoader.buildRoadLayerFromProperties(backgroundMap, propertiesPath);
+        BmwEnemy.setRoadLayer(roadLayer);
+        MenuDummyPlayer dummyPlayer = new MenuDummyPlayer(collisionLayer, 0f, 0f);
+        backgroundStage.addActor(dummyPlayer);
+        centerDummyPlayer(dummyPlayer);
+        Enemy.spawnRandomEnemies(dummyPlayer, backgroundStage, collisionLayer, 400);
+        BmwEnemy.spawnRandomBmws(dummyPlayer, backgroundStage, 600);
+
         vignetteTexture = UiUtils.buildVignetteTexture(512, 512, 0.9f);
         Image vignetteImage = new Image(vignetteTexture);
         vignetteImage.setFillParent(true);
         vignetteImage.setTouchable(Touchable.disabled);
-        stage.addActor(vignetteImage);
+        vignetteStage = new Stage(new FitViewport(1920, 1080), game.getSpriteBatch());
+        vignetteStage.addActor(vignetteImage);
 
         Table table = new Table(); // Create a table for layout
         table.setFillParent(true); // Make the table fill the stage
         stage.addActor(table); // Add the table to the stage
 
         // Add a label as a title
-        table.add(new Label("TestMenu", game.getSkin(), "title")).padBottom(80).row();
+        table.add(new Label("Midnight Courier", game.getSkin(), "title")).padBottom(80).row();
 
         // Create and add a button to go to the game screen
 
@@ -139,7 +179,10 @@ public class MenuScreen implements Screen {
 
     @Override
     public void render(float delta) {
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT); // Clear the screen
+        if (!game.shouldRenderMenuBackground()) {
+            Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT); // Clear the screen
+        }
+        renderBackground(delta);
         stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f)); // Update the stage
         stage.draw(); // Draw the stage
     }
@@ -147,13 +190,21 @@ public class MenuScreen implements Screen {
     @Override
     public void resize(int width, int height) {
         stage.getViewport().update(width, height, true); // Update the stage viewport on resize
+        updateBackgroundCamera(width, height);
+        centerBackgroundCamera();
+        backgroundStage.getViewport().update(width, height, false);
+        vignetteStage.getViewport().update(width, height, true);
     }
 
     @Override
     public void dispose() {
         // Dispose of the stage when the screen is disposed
         stage.dispose();
+        backgroundStage.dispose();
+        vignetteStage.dispose();
         vignetteTexture.dispose();
+        backgroundRenderer.dispose();
+        backgroundMap.dispose();
     }
 
     @Override
@@ -183,5 +234,69 @@ public class MenuScreen implements Screen {
         Texture tex = new Texture(pm);
         pm.dispose();
         return tex;
+    }
+
+    private void updateBackgroundCamera(int width, int height) {
+        float aspect = width / (float) height;
+        backgroundCamera.viewportHeight = BACKGROUND_VIEW_HEIGHT;
+        backgroundCamera.viewportWidth = BACKGROUND_VIEW_HEIGHT * aspect;
+        backgroundCamera.update();
+    }
+
+    public void renderBackground(float delta) {
+        updateBackgroundCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        centerBackgroundCamera();
+        backgroundStage.getViewport().update(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), false);
+        backgroundStage.getViewport().apply();
+        backgroundRenderer.setView(backgroundCamera);
+        backgroundRenderer.render();
+        backgroundStage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
+        backgroundStage.draw();
+        vignetteStage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
+        vignetteStage.draw();
+    }
+
+    private void centerBackgroundCamera() {
+        TiledMapTileLayer layer = (TiledMapTileLayer) backgroundMap.getLayers().get(0);
+        float mapCenterX = layer.getWidth() / 2f + BACKGROUND_OFFSET_X;
+        float mapCenterY = layer.getHeight() / 2f + BACKGROUND_OFFSET_Y;
+        float halfW = backgroundCamera.viewportWidth / 2f;
+        float halfH = backgroundCamera.viewportHeight / 2f;
+        float minX = halfW;
+        float maxX = layer.getWidth() - halfW;
+        float minY = halfH;
+        float maxY = layer.getHeight() - halfH;
+        mapCenterX = MathUtils.clamp(mapCenterX, minX, maxX);
+        mapCenterY = MathUtils.clamp(mapCenterY, minY, maxY);
+        backgroundCamera.position.set(mapCenterX, mapCenterY, 0f);
+        backgroundCamera.update();
+    }
+
+    private void centerDummyPlayer(MenuDummyPlayer dummyPlayer) {
+        TiledMapTileLayer layer = (TiledMapTileLayer) backgroundMap.getLayers().get(0);
+        float mapCenterX = layer.getWidth() / 2f + BACKGROUND_OFFSET_X;
+        float mapCenterY = layer.getHeight() / 2f + BACKGROUND_OFFSET_Y;
+        float halfW = backgroundCamera.viewportWidth / 2f;
+        float halfH = backgroundCamera.viewportHeight / 2f;
+        float minX = halfW;
+        float maxX = layer.getWidth() - halfW;
+        float minY = halfH;
+        float maxY = layer.getHeight() - halfH;
+        mapCenterX = MathUtils.clamp(mapCenterX, minX, maxX);
+        mapCenterY = MathUtils.clamp(mapCenterY, minY, maxY);
+        dummyPlayer.setPosition(mapCenterX, mapCenterY);
+    }
+
+    private static class MenuDummyPlayer extends Player {
+        public MenuDummyPlayer(TiledMapTileLayer collisionLayer, float x, float y) {
+            super(collisionLayer, x, y, null);
+            setVisible(false);
+            setSize(0f, 0f);
+        }
+
+        @Override
+        public void act(float delta) {
+            // No movement or camera updates in menu background.
+        }
     }
 }

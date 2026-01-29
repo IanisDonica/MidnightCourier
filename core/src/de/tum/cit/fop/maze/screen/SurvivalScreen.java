@@ -9,12 +9,16 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
+import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.*;
@@ -25,7 +29,6 @@ import de.tum.cit.fop.maze.map.MapLoader;
 import de.tum.cit.fop.maze.system.*;
 import de.tum.cit.fop.maze.system.ProgressionManager;
 import de.tum.cit.fop.maze.entity.obstacle.Enemy;
-import java.util.Random;
 import java.util.ArrayList;
 import java.util.List;
 import de.tum.cit.fop.maze.entity.obstacle.BmwEnemy;
@@ -48,6 +51,13 @@ public class SurvivalScreen implements Screen {
     private boolean noireMode = false;
     private FrameBuffer fbo;
     private TextureRegion fboRegion;
+    private FrameBuffer keyPreviewFbo;
+    private TextureRegion keyPreviewRegion;
+    private OrthographicCamera keyPreviewCamera;
+    private Texture keyPreviewMarker;
+    private boolean keyPreviewVisible = false;
+    private float keyPreviewCenterX = 0f;
+    private float keyPreviewCenterY = 0f;
     private final Player player;
     public PointManager pointManager;
     private final MapLoader mapLoader = new MapLoader();
@@ -63,6 +73,14 @@ public class SurvivalScreen implements Screen {
     private static final float REGEN_INTERVAL_SECONDS = 10f;
     private static final int REGEN_POINTS_ON_FULL = 100;
     private float regenTimer = 0f;
+    private static final float BMW_SPAWN_INTERVAL_SECONDS = 8f;
+    private float bmwSpawnTimer = 0f;
+    private static final float DELIVERY_TIME_START_SECONDS = 25f;
+    private static final float DELIVERY_TIME_MIN_SECONDS = 8f;
+    private static final float DELIVERY_TIME_DECREASE_SECONDS = 2f;
+    private float deliveryTimeLimit = DELIVERY_TIME_START_SECONDS;
+    private float deliveryTimer = 0f;
+    private boolean deliveryTimerActive = false;
     private static final float MIN_ZOOM = 0.03f;
     private static final float MAX_ZOOM = 0.3f;
     private int Delta = 0;
@@ -81,6 +99,7 @@ public class SurvivalScreen implements Screen {
         this.game = game;
         this.hud = new HUD(game);
         this.devConsole = new DevConsole(game);
+        this.hud.setShowLevel(false);
         this.level = 0;
         this.propertiesPath = toPropertiesPath(level);
         Viewport viewport = new ExtendViewport(WORLD_WIDTH, WORLD_HEIGHT);
@@ -91,6 +110,12 @@ public class SurvivalScreen implements Screen {
         fbo = new FrameBuffer(Pixmap.Format.RGBA8888, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), false);
         fboRegion = new TextureRegion(fbo.getColorBufferTexture());
         fboRegion.flip(false, true);
+        keyPreviewFbo = new FrameBuffer(Pixmap.Format.RGBA8888, 640, 320, false);
+        keyPreviewRegion = new TextureRegion(keyPreviewFbo.getColorBufferTexture());
+        keyPreviewRegion.flip(false, true);
+        keyPreviewCamera = new OrthographicCamera(40f, 20f);
+        keyPreviewMarker = buildKeyPreviewMarker();
+        System.out.println("8");
 
         grayScaleShader = new ShaderProgram(Gdx.files.internal("shaders/vertex.glsl"), Gdx.files.internal("shaders/grayscale.frag"));
         combinedShader = new ShaderProgram(Gdx.files.internal("shaders/vertex.glsl"), Gdx.files.internal("shaders/combined.frag"));
@@ -119,6 +144,7 @@ public class SurvivalScreen implements Screen {
         this.gameState = gameState;
         this.hud = new HUD(game);
         this.devConsole = new DevConsole(game);
+        this.hud.setShowLevel(false);
         if (gameState.getMapPath() != null) {
             this.mapPath = gameState.getMapPath();
         }
@@ -133,6 +159,11 @@ public class SurvivalScreen implements Screen {
         fbo = new FrameBuffer(Pixmap.Format.RGBA8888, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), false);
         fboRegion = new TextureRegion(fbo.getColorBufferTexture());
         fboRegion.flip(false, true);
+        keyPreviewFbo = new FrameBuffer(Pixmap.Format.RGBA8888, 640, 320, false);
+        keyPreviewRegion = new TextureRegion(keyPreviewFbo.getColorBufferTexture());
+        keyPreviewRegion.flip(false, true);
+        keyPreviewCamera = new OrthographicCamera(40f, 20f);
+        keyPreviewMarker = buildKeyPreviewMarker();
         grayScaleShader = new ShaderProgram(Gdx.files.internal("shaders/vertex.glsl"), Gdx.files.internal("shaders/grayscale.frag"));
         combinedShader = new ShaderProgram(Gdx.files.internal("shaders/vertex.glsl"), Gdx.files.internal("shaders/combined.frag"));
         ((OrthographicCamera) stage.getCamera()).zoom = MAX_ZOOM;
@@ -215,21 +246,17 @@ public class SurvivalScreen implements Screen {
 
     @Override
     public void render(float delta) {
-        Adder *= 1.0003f;
-        Adder = MathUtils.clamp(Adder, 10f,  1000f);
-        Delta += (int) Adder;
+        Adder *= 1.0003;
+        Delta += Adder;
         System.out.println(Adder);
 
-
-        Random random = new Random();
+        ensureKeyAndExit();
 
         while(Delta >= 80)
         {
             System.out.println(Adder);
             Delta = -80;
-            Enemy enemy = new Enemy(collisionLayer, player.getX() + random.nextInt(5, 30), player.getY() + random.nextInt(5, 30));
-            stage.addActor(enemy);
-            enemies.add(enemy);
+            Enemy.spawnRandomEnemies(player, stage, collisionLayer, 1, getCameraViewBounds(), enemies);
         }
 
 
@@ -238,8 +265,16 @@ public class SurvivalScreen implements Screen {
         if (!paused) {
             applyUpgrades();
             handleRegen(delta);
+            handleBmwSpawns(delta);
+            handleDeliveryTimer(delta);
             stage.act(delta);
             pointManager.act(delta);
+        }
+        if (keyPreviewVisible) {
+            renderKeyPreview(keyPreviewCenterX, keyPreviewCenterY);
+        }
+        if (keyPreviewVisible) {
+            hud.showKeyPreview(keyPreviewRegion, true);
         }
         // Doing it through a listener is better, as this happens every frame, but this is easier
         noireMode = player.getHp() <= 1;
@@ -314,6 +349,7 @@ public class SurvivalScreen implements Screen {
                 game.getProgressionManager().hasUpgrade("regen"),
                 regenTimer,
                 REGEN_INTERVAL_SECONDS,
+                deliveryTimerActive ? deliveryTimer : -1f,
                 player.getX() + player.getWidth() / 2f,
                 player.getY() + player.getHeight() / 2f,
                 keyX, keyY, exitX, exitY
@@ -404,8 +440,10 @@ public class SurvivalScreen implements Screen {
         stage.addActor(player);
 
         if (enemies.isEmpty() && collectibles.isEmpty()) {
-            mapLoader.spawnEntitiesFromProperties(stage, pointManager, collisionLayer, roadLayer, propertiesPath, hud, enemies, collectibles, game::goToVictoryScreen);
+            mapLoader.spawnEntitiesFromProperties(stage, pointManager, collisionLayer, roadLayer, propertiesPath, hud, enemies, collectibles, this::handleEndlessVictory);
         }
+        ensureKeyAndExit();
+        updateKeyPreviewFromExistingKey();
 
         if (gameState != null) {
             if (gameState.getEnemies() != null) {
@@ -448,6 +486,8 @@ public class SurvivalScreen implements Screen {
         stage.dispose();
         hud.dispose();
         fbo.dispose();
+        keyPreviewFbo.dispose();
+        keyPreviewMarker.dispose();
         grayScaleShader.dispose();
         combinedShader.dispose();
         map.dispose();
@@ -489,5 +529,187 @@ public class SurvivalScreen implements Screen {
                 pointManager.add(REGEN_POINTS_ON_FULL);
             }
         }
+    }
+
+    private void handleBmwSpawns(float delta) {
+        bmwSpawnTimer += delta;
+        if (bmwSpawnTimer >= BMW_SPAWN_INTERVAL_SECONDS) {
+            bmwSpawnTimer = 0f;
+            BmwEnemy.spawnRandomBmws(player, stage, 1, getCameraViewBounds());
+        }
+    }
+
+    private void handleDeliveryTimer(float delta) {
+        if (player.hasKey()) {
+            if (!deliveryTimerActive) {
+                deliveryTimerActive = true;
+                deliveryTimer = deliveryTimeLimit;
+            }
+        }
+        if (!deliveryTimerActive) {
+            return;
+        }
+        deliveryTimer -= delta;
+        if (deliveryTimer <= 0f) {
+            deliveryTimerActive = false;
+            deliveryTimer = 0f;
+            player.damage(999);
+        }
+    }
+
+    private Rectangle getCameraViewBounds() {
+        OrthographicCamera camera = (OrthographicCamera) stage.getCamera();
+        float viewW = camera.viewportWidth * camera.zoom;
+        float viewH = camera.viewportHeight * camera.zoom;
+        float viewX = camera.position.x - viewW / 2f;
+        float viewY = camera.position.y - viewH / 2f;
+        return new Rectangle(viewX, viewY, viewW, viewH);
+    }
+
+    private void handleEndlessVictory() {
+        hud.showKeyPreview(null, false);
+        keyPreviewVisible = false;
+        deliveryTimerActive = false;
+        deliveryTimer = 0f;
+        deliveryTimeLimit = Math.max(DELIVERY_TIME_MIN_SECONDS, deliveryTimeLimit - DELIVERY_TIME_DECREASE_SECONDS);
+        player.clearKey();
+        for (de.tum.cit.fop.maze.entity.collectible.Collectible collectible : collectibles) {
+            if (collectible instanceof de.tum.cit.fop.maze.entity.collectible.ExitDoor
+                    || collectible instanceof de.tum.cit.fop.maze.entity.collectible.Key) {
+                collectible.markPickedUp();
+            }
+        }
+        ensureKeyAndExit();
+    }
+
+    private void ensureKeyAndExit() {
+        collectibles.removeIf(collectible -> collectible.getPickedUp() && collectible.getStage() == null);
+        boolean hasKeyActor = false;
+        boolean hasExitActor = false;
+        for (de.tum.cit.fop.maze.entity.collectible.Collectible collectible : collectibles) {
+            if (collectible.getPickedUp()) {
+                continue;
+            }
+            if (collectible instanceof de.tum.cit.fop.maze.entity.collectible.Key) {
+                hasKeyActor = true;
+            } else if (collectible instanceof de.tum.cit.fop.maze.entity.collectible.ExitDoor) {
+                hasExitActor = true;
+            }
+        }
+
+        if (!hasKeyActor) {
+            spawnKeyAtRandomTile();
+        }
+        if (!hasExitActor) {
+            spawnExitAtRandomTile();
+        }
+    }
+
+    private void spawnKeyAtRandomTile() {
+        GridPoint2 tile = pickSpawnTile();
+        if (tile == null) {
+            return;
+        }
+        de.tum.cit.fop.maze.entity.collectible.Key key =
+                new de.tum.cit.fop.maze.entity.collectible.Key(tile.x, tile.y, pointManager);
+        stage.addActor(key);
+        collectibles.add(key);
+        triggerKeyPreview(tile.x + 0.5f, tile.y + 0.5f);
+    }
+
+    private void spawnExitAtRandomTile() {
+        GridPoint2 tile = pickSpawnTile();
+        if (tile == null) {
+            return;
+        }
+        de.tum.cit.fop.maze.entity.collectible.ExitDoor exitDoor =
+                new de.tum.cit.fop.maze.entity.collectible.ExitDoor(tile.x, tile.y, pointManager, this::handleEndlessVictory);
+        stage.addActor(exitDoor);
+        collectibles.add(exitDoor);
+    }
+
+    private GridPoint2 pickSpawnTile() {
+        List<GridPoint2> walkableTiles = collectWalkableTiles(collisionLayer);
+        if (walkableTiles.isEmpty()) {
+            return null;
+        }
+        int attempts = Math.min(200, walkableTiles.size());
+        for (int i = 0; i < attempts; i++) {
+            int index = MathUtils.random(walkableTiles.size() - 1);
+            GridPoint2 target = walkableTiles.get(index);
+            if (!wouldCollideAt(stage, target.x, target.y)) {
+                return target;
+            }
+        }
+        return null;
+    }
+
+    private static List<GridPoint2> collectWalkableTiles(TiledMapTileLayer collisionLayer) {
+        List<GridPoint2> tiles = new ArrayList<>();
+        int width = collisionLayer.getWidth();
+        int height = collisionLayer.getHeight();
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                if (collisionLayer.getCell(x, y) == null) {
+                    tiles.add(new GridPoint2(x, y));
+                }
+            }
+        }
+        return tiles;
+    }
+
+    private static boolean wouldCollideAt(Stage stage, float x, float y) {
+        if (stage == null) {
+            return true;
+        }
+        Rectangle spawnBounds = new Rectangle(x, y, 1f, 1f);
+        for (Actor actor : stage.getActors()) {
+            Rectangle actorBounds = new Rectangle(actor.getX(), actor.getY(), actor.getWidth(), actor.getHeight());
+            if (spawnBounds.overlaps(actorBounds)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void triggerKeyPreview(float centerX, float centerY) {
+        keyPreviewCenterX = centerX;
+        keyPreviewCenterY = centerY;
+        keyPreviewCamera.position.set(centerX, centerY, 0f);
+        keyPreviewCamera.update();
+        renderKeyPreview(centerX, centerY);
+        hud.showKeyPreview(keyPreviewRegion, true);
+        keyPreviewVisible = true;
+    }
+
+    private void updateKeyPreviewFromExistingKey() {
+        for (de.tum.cit.fop.maze.entity.collectible.Collectible collectible : collectibles) {
+            if (collectible instanceof de.tum.cit.fop.maze.entity.collectible.Key && !collectible.getPickedUp()) {
+                triggerKeyPreview(collectible.getSpawnX() + 0.5f, collectible.getSpawnY() + 0.5f);
+                return;
+            }
+        }
+    }
+
+    private void renderKeyPreview(float keyCenterX, float keyCenterY) {
+        keyPreviewFbo.begin();
+        ScreenUtils.clear(0, 0, 0, 1);
+        mapRenderer.setView(keyPreviewCamera);
+        mapRenderer.render();
+        Batch batch = mapRenderer.getBatch();
+        batch.setProjectionMatrix(keyPreviewCamera.combined);
+        batch.begin();
+        batch.draw(keyPreviewMarker, keyCenterX - 0.5f, keyCenterY - 0.5f, 1f, 1f);
+        batch.end();
+        keyPreviewFbo.end();
+    }
+
+    private Texture buildKeyPreviewMarker() {
+        Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
+        pixmap.setColor(1f, 0f, 0f, 1f);
+        pixmap.fill();
+        Texture texture = new Texture(pixmap);
+        pixmap.dispose();
+        return texture;
     }
 }

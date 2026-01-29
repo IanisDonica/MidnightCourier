@@ -23,7 +23,6 @@ public class AchievementsScreen implements Screen {
     private Stage stage;
     private MazeRunnerGame game;
     private final AudioManager audioManager;
-    private final Texture backgroundTexture;
     private final Texture vignetteTexture;
     private final Image vignetteImage;
     private final Texture scrollbarTrackTexture;
@@ -41,10 +40,6 @@ public class AchievementsScreen implements Screen {
 
         Viewport viewport = new FitViewport(1920, 1080);
         stage = new Stage(viewport, game.getSpriteBatch()); // Create a stage for UI elements
-        backgroundTexture = new Texture(Gdx.files.internal("trohpyRoom.png")); // placeholder image
-        Image backgroundImage = new Image(backgroundTexture);
-        backgroundImage.setFillParent(true);
-        stage.addActor(backgroundImage);
         vignetteTexture = UiUtils.buildVignetteTexture(512, 512, 0.9f);
         vignetteImage = new Image(vignetteTexture);
         vignetteImage.setFillParent(true);
@@ -137,7 +132,9 @@ public class AchievementsScreen implements Screen {
 
     @Override
     public void render(float delta) {
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT); // Clear the screen
+        if (!game.shouldRenderMenuBackground()) {
+            Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT); // Clear the screen
+        }
         Gdx.gl.glEnable(GL20.GL_BLEND);
         Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
         stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f)); // Update the stage
@@ -153,7 +150,6 @@ public class AchievementsScreen implements Screen {
     public void dispose() {
         // Dispose of the stage when the screen is disposed
         stage.dispose();
-        backgroundTexture.dispose();
         vignetteTexture.dispose();
         scrollbarTrackTexture.dispose();
         scrollbarKnobTexture.dispose();
