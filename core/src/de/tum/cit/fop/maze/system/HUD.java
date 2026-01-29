@@ -5,7 +5,6 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
@@ -35,10 +34,12 @@ public class HUD {
     private Label keyLabel;
     private Label levelLabel;
     private Label deliveryTimerLabel;
+    private Label timerValueLabel;
     private TextButton shopButton;
     private final ConfigManager configManager;
     private Table pauseTable;
     private final Table topTable;
+    private final Table timerTable;
     private final Table hudBox;
     private final Texture hudBoxTexture;
     private Image regenImage;
@@ -59,9 +60,6 @@ public class HUD {
         this.configManager = game.getConfigManager();
         viewport = new ExtendViewport(1920, 1080);
         stage = new Stage(viewport);
-        TextureAtlas textureAtlas = new TextureAtlas("assets/craft/craftacular-ui.atlas");
-        heart_texture = textureAtlas.findRegion("heart");
-
         scoreLabel = new Label("Score: ", game.getSkin());
         scoreLabel.setFontScale(2.0f);
 
@@ -72,11 +70,16 @@ public class HUD {
         keyLabel.setFontScale(2.0f);
         levelLabel = new Label("Level: 1", game.getSkin());
         levelLabel.setFontScale(2.0f);
+        timerValueLabel = new Label("", game.getSkin());
+        timerValueLabel.setFontScale(2.0f);
+        timerValueLabel.setColor(1f, 0f, 0f, 1f);
+        timerValueLabel.setVisible(false);
         deliveryTimerLabel = new Label("", game.getSkin());
         deliveryTimerLabel.setFontScale(2.0f);
         deliveryTimerLabel.setVisible(false);
 
         regenTexture = new Texture(Gdx.files.internal("objects.png"));
+        heart_texture = new TextureRegion(regenTexture, 0, 64, 16, 16);
         Array<TextureRegion> regenFrames = new Array<>(TextureRegion.class);
         for (int col = 0; col < 5; col++) {
             regenFrames.add(new TextureRegion(regenTexture, 128 - col * 16, 0, 16, 16));
@@ -97,13 +100,16 @@ public class HUD {
         keyPreviewImage.setVisible(false);
 
 
-        hudBoxTexture = buildBoxTexture(0f, 0f, 0f, 0.7f);
+        hudBoxTexture = buildBoxTexture(0f, 0f, 0f, 1f);
         topTable = new Table();
         topTable.top().left();
         healthTable = new Table();
         healthTable.add(healthLabel).left();
+        timerTable = new Table();
+        timerTable.add(levelLabel).left();
+        timerTable.add(timerValueLabel).left().padLeft(10);
 
-        topTable.add(levelLabel).left().expandX().pad(10);
+        topTable.add(timerTable).left().expandX().pad(10);
         topTable.add(healthTable).left().expandX().pad(10);
         topTable.add(regenImage).left().size(64).pad(10);
         topTable.add(scoreLabel).center().expandX().pad(10);
@@ -113,9 +119,8 @@ public class HUD {
 
         hudBox = new Table();
         hudBox.setBackground(new Image(hudBoxTexture).getDrawable());
-        hudBox.add(topTable).pad(6);
-        hudBox.pack();
-        updateHudBoxPosition();
+        hudBox.add(topTable).expand().fill().pad(6);
+        updateHudBoxLayout();
         updateKeyPreviewPosition();
 
         pauseTable = new Table();
@@ -195,6 +200,8 @@ public class HUD {
         healthTable.clear();
         levelLabel.setText("Level: " + levelNumber);
         levelLabel.setVisible(showLevel);
+        levelLabel.setColor(1f, 1f, 1f, 1f);
+        timerValueLabel.setVisible(false);
         scoreLabel.setText("Score: " + score);
         healthTable.center();
         healthTable.add(healthLabel);
@@ -211,8 +218,11 @@ public class HUD {
         }
 
         if (deliveryTimerSeconds >= 0f) {
-            deliveryTimerLabel.setVisible(true);
-            deliveryTimerLabel.setText(String.format("Delivery: %.1fs", deliveryTimerSeconds));
+            levelLabel.setText("Timer:");
+            levelLabel.setVisible(true);
+            timerValueLabel.setText(String.format("%.1fs", deliveryTimerSeconds));
+            timerValueLabel.setVisible(true);
+            deliveryTimerLabel.setVisible(false);
         } else {
             deliveryTimerLabel.setVisible(false);
         }
@@ -262,7 +272,7 @@ public class HUD {
 
     public void resize(int width, int height) {
         viewport.update(width, height, true);
-        updateHudBoxPosition();
+        updateHudBoxLayout();
         updateKeyPreviewPosition();
     }
 
@@ -295,17 +305,15 @@ public class HUD {
         keyPreviewImage.setPosition(x, y);
     }
 
-    private void updateHudBoxPosition() {
-        float x = 10f;
-        float y = viewport.getWorldHeight() - hudBox.getHeight() - 10f;
-        hudBox.setPosition(x, y);
+    private void updateHudBoxLayout() {
+        float barHeight = viewport.getWorldHeight() * 0.1f;
+        hudBox.setSize(viewport.getWorldWidth(), barHeight);
+        hudBox.setPosition(0f, viewport.getWorldHeight() - barHeight);
     }
 
     private void updateArrowPosition() {
-        float keyX = keyPreviewImage.getX();
-        float keyY = keyPreviewImage.getY();
-        float x = keyX + keyPreviewWidth + arrowSpacing;
-        float y = keyY + (keyPreviewHeight / 2f) - (arrowImage.getHeight() / 2f);
+        float x = (viewport.getWorldWidth() / 2f) - (arrowImage.getWidth() / 2f);
+        float y = viewport.getWorldHeight() * 0.1f;
         arrowImage.setPosition(x, y);
     }
 

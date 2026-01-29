@@ -48,6 +48,7 @@ public class SecondCutsceneScreen implements Screen {
     private float textTimer = 0f;
     private float buttonTimer = 0f;
     private CutsceneState state = CutsceneState.SHOW_SLIDES;
+    private final boolean useRollingText;
 
     private enum CutsceneState {
         SHOW_SLIDES,
@@ -58,6 +59,7 @@ public class SecondCutsceneScreen implements Screen {
     public SecondCutsceneScreen(MazeRunnerGame game, int targetLevel) {
         this.game = game;
         this.targetLevel = targetLevel;
+        this.useRollingText = !(targetLevel == 3 || targetLevel == 4 || targetLevel == 5);
 
         Viewport viewport = new FitViewport(1920, 1080);
         stage = new Stage(viewport, game.getSpriteBatch());
@@ -102,6 +104,9 @@ public class SecondCutsceneScreen implements Screen {
         stage.addActor(textBox);
 
         acceptButton = new TextButton("Accept delivery", game.getSkin());
+        if (!useRollingText) {
+            acceptButton.setText(String.format("Start your %d delivery", targetLevel));
+        }
         acceptButton.setVisible(false);
         acceptButton.addListener(new ChangeListener() {
             @Override
@@ -118,6 +123,49 @@ public class SecondCutsceneScreen implements Screen {
     }
 
     private List<FileHandle> loadSlideFiles() {
+        if (targetLevel == 2) {
+            return List.of(
+                Gdx.files.internal("Comic-Level2-0.png"),
+                Gdx.files.internal("Comic-Level2-1.png"),
+                Gdx.files.internal("Comic-Level2-2.png"),
+                Gdx.files.internal("Comic-Level2-3.png"),
+                Gdx.files.internal("Comic-Level2-4.png")
+            );
+        }
+        if (targetLevel == 3) {
+            return List.of(
+                Gdx.files.internal("Comic-Level3-0.png"),
+                Gdx.files.internal("Comic-Level3-1.png"),
+                Gdx.files.internal("Comic-Level3-2.png"),
+                Gdx.files.internal("Comic-Level3-3.png"),
+                Gdx.files.internal("Comic-Level3-4.png"),
+                Gdx.files.internal("Comic-Level3-5.png"),
+                Gdx.files.internal("Comic-Level3-6.png")
+            );
+        }
+        if (targetLevel == 4) {
+            return List.of(
+                Gdx.files.internal("Comic-Level4-0.png"),
+                Gdx.files.internal("Comic-Level4-1.png"),
+                Gdx.files.internal("Comic-Level4-2.png"),
+                Gdx.files.internal("Comic-Level4-3.png"),
+                Gdx.files.internal("Comic-Level4-4.png"),
+                Gdx.files.internal("Comic-Level4-5.png")
+            );
+        }
+        if (targetLevel == 5) {
+            return List.of(
+                Gdx.files.internal("Comic-Level5-0.png"),
+                Gdx.files.internal("Comic-Level5-1.png"),
+                Gdx.files.internal("Comic-Level5-2.png"),
+                Gdx.files.internal("Comic-Level5-3.png"),
+                Gdx.files.internal("Comic-Level5-4.png"),
+                Gdx.files.internal("Comic-Level5-5.png"),
+                Gdx.files.internal("Comic-Level5-6.png"),
+                Gdx.files.internal("Comic-Level5-7.png"),
+                Gdx.files.internal("Comic-Level5-8.png")
+            );
+        }
         List<FileHandle> slideFiles = new ArrayList<>();
         for (int i = 1; i <= 99; i++) {
             FileHandle jpg = Gdx.files.internal("finished/" + i + ".jpg");
@@ -151,7 +199,12 @@ public class SecondCutsceneScreen implements Screen {
             case SHOW_SLIDES -> {
                 elapsed += delta;
                 if (images.length == 0) {
-                    state = CutsceneState.FADE_TO_BLACK;
+                    if (useRollingText) {
+                        state = CutsceneState.FADE_TO_BLACK;
+                    } else {
+                        acceptButton.setVisible(true);
+                        buttonTable.getColor().a = 1f;
+                    }
                 } else {
                     int activeIndex = (int) (elapsed / SLIDE_DURATION);
                     if (activeIndex < images.length) {
@@ -170,11 +223,19 @@ public class SecondCutsceneScreen implements Screen {
                         for (Image image : images) {
                             image.getColor().a = 1f;
                         }
-                        state = CutsceneState.FADE_TO_BLACK;
+                        if (useRollingText) {
+                            state = CutsceneState.FADE_TO_BLACK;
+                        } else {
+                            acceptButton.setVisible(true);
+                            buttonTable.getColor().a = 1f;
+                        }
                     }
                 }
             }
             case FADE_TO_BLACK -> {
+                if (!useRollingText) {
+                    return;
+                }
                 blackTimer += delta;
                 float t = Math.min(1f, blackTimer / FADE_TO_BLACK_SECONDS);
                 blackOverlay.getColor().a = t;
@@ -183,6 +244,9 @@ public class SecondCutsceneScreen implements Screen {
                 }
             }
             case SHOW_TEXT -> {
+                if (!useRollingText) {
+                    return;
+                }
                 textTimer += delta;
                 float boxAlpha = Math.min(1f, textTimer / BOX_FADE_SECONDS);
                 textBox.getColor().a = boxAlpha;

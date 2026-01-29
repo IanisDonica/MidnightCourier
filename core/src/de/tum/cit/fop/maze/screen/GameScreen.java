@@ -17,10 +17,10 @@ import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
+import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.*;
 import de.tum.cit.fop.maze.system.HUD;
@@ -114,7 +114,10 @@ public class GameScreen implements Screen {
         generateFBO();
         roadLayer = mapLoader.buildRoadLayerFromProperties(map, this.propertiesPath);
         de.tum.cit.fop.maze.entity.obstacle.BmwEnemy.setRoadLayer(roadLayer);
-        player = new Player(collisionLayer, 78,46, game::goToGameOverScreen);
+        GridPoint2 spawnPoint = mapLoader.findPlayerSpawnFromProperties(this.propertiesPath);
+        float spawnX = spawnPoint != null ? spawnPoint.x : 78f; // 78 x 46 is the default spawn if there is no spawn place in the map
+        float spawnY = spawnPoint != null ? spawnPoint.y : 46f;
+        player = new Player(collisionLayer, spawnX, spawnY, game::goToGameOverScreen);
         player.setDeathOverListener(game::goToDeathOverScreen);
         player.setWorldBounds(WORLD_WIDTH, WORLD_HEIGHT);
         applyUpgrades();
@@ -153,7 +156,10 @@ public class GameScreen implements Screen {
         generateFBO();
         roadLayer = mapLoader.buildRoadLayerFromProperties(map, this.propertiesPath);
         de.tum.cit.fop.maze.entity.obstacle.BmwEnemy.setRoadLayer(roadLayer);
-        player = new Player(collisionLayer, 78,46, game::goToGameOverScreen);
+        GridPoint2 spawnPoint = mapLoader.findPlayerSpawnFromProperties(this.propertiesPath);
+        float spawnX = spawnPoint != null ? spawnPoint.x : 78f;
+        float spawnY = spawnPoint != null ? spawnPoint.y : 46f;
+        player = new Player(collisionLayer, spawnX, spawnY, game::goToGameOverScreen);
         player.setDeathOverListener(game::goToDeathOverScreen);
         player.setWorldBounds(WORLD_WIDTH, WORLD_HEIGHT);
         applyUpgrades();

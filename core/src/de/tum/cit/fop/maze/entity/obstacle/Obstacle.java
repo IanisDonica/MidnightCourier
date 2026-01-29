@@ -23,7 +23,7 @@ public class Obstacle extends MapObject {
         initAnimation();
     }
 
-    private void initAnimation() {
+    protected void initAnimation() {
         //This is kinda duplicate, but it will later be useful
         if (!textureInitialized) {
             textureInitialized = true;

@@ -3,6 +3,7 @@ package de.tum.cit.fop.maze.map;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
+import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import de.tum.cit.fop.maze.entity.collectible.Collectible;
 import de.tum.cit.fop.maze.entity.collectible.EnergyDrink;
@@ -136,6 +137,16 @@ public class MapLoader {
             }
         }
         refreshBmwRoadTiles();
+    }
+
+    public GridPoint2 findPlayerSpawnFromProperties(String propertiesPath) {
+        for (long[] entry : readPropertyEntries(propertiesPath)) {
+            long value = entry[2];
+            if (value == 1) {
+                return new GridPoint2((int) entry[0], (int) entry[1]);
+            }
+        }
+        return null;
     }
 
     public void refreshBmwRoadTiles() {
