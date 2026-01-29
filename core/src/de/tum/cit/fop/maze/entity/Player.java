@@ -202,45 +202,53 @@ public class Player extends Entity {
         super.act(delta);
 
         if (!stunned) {
+            // Update controller with current input
+            // Controller now handles smooth rotation toward input direction
             driftyMovementController.update(delta, moveUp, moveDown, moveLeft, moveRight, sprinting);
 
+            // Get velocity and apply delta scaling ONLY ONCE
             Vector2 vel = driftyMovementController.getVelocity();
             speedX = vel.x * delta * speedMultiplier;
             speedY = vel.y * delta * speedMultiplier;
 
+            // Apply movement with collision checking
             float nextX = getX() + speedX;
             float nextY = getY() + speedY;
 
-            if (speedX > 0) {
+            if (speedX > 0) { // Moving right
                 if (collisionHandler.checkCollision(this, 'r')) {
                     setX(nextX);
                 } else {
                     driftyMovementController.velocity.x = 0;
+                    driftyMovementController.velocity.y /= 2;
                 }
-            } else if (speedX < 0) {
+            } else if (speedX < 0) { // Moving left
                 if (collisionHandler.checkCollision(this, 'l')) {
                     setX(nextX);
                 } else {
                     driftyMovementController.velocity.x = 0;
+                    driftyMovementController.velocity.y /= 2;
                 }
             }
 
-            if (speedY > 0) {
+            if (speedY > 0) { // Moving up
                 if (collisionHandler.checkCollision(this, 'u')) {
                     setY(nextY);
                 } else {
                     driftyMovementController.velocity.y = 0;
+                    driftyMovementController.velocity.x /= 2;
                 }
-            } else if (speedY < 0) {
+            } else if (speedY < 0) { // Moving down
                 if (collisionHandler.checkCollision(this, 'd')) {
                     setY(nextY);
                 } else {
                     driftyMovementController.velocity.y = 0;
+                    driftyMovementController.velocity.x /= 2;
                 }
             }
 
         } else {
-            // Handle stunned state (knockback)
+            // Handle knockback
             float speed = 2.5f * delta * speedMultiplier;
             float deltaX = 0, deltaY = 0;
             switch (lastInputDirection) {
@@ -265,7 +273,6 @@ public class Player extends Entity {
             }
         }
 
-        // Update animation
         animationTime += delta;
 
         // Handle speed-up buff
@@ -273,7 +280,6 @@ public class Player extends Entity {
             speedUpTimer -= delta;
         }
 
-        // Update facing direction based on drifty controller orientation
         float orientation = driftyMovementController.getOrientation();
         if (orientation >= 315 || orientation < 45) {
             facingDirection = 'r'; // Right (0°)
@@ -290,13 +296,9 @@ public class Player extends Entity {
         this.getStage().getCamera().update();
     }
 
-    // Add getter for movement controller
     public DriftyMovementController getMovementController() {
         return driftyMovementController;
     }
-
-
-
 
     public void drinkEnergyDrink() {
         //This method seems useless, but it its mostly for later in order to handle sounds / screen effects etc.
