@@ -42,6 +42,7 @@ public class SurvivalScreen implements Screen {
     private final ShaderProgram grayScaleShader;
     private final ShaderProgram combinedShader;
     private final OrthographicCamera uiCamera;
+    private final DriftParticleSystem driftParticleSystem;
     private float fogIntensity = 7f;
     private boolean glassesApplied = false;
     private boolean noireMode = false;
@@ -106,7 +107,8 @@ public class SurvivalScreen implements Screen {
 
         player.setWorldBounds(WORLD_WIDTH, WORLD_HEIGHT);
         applyUpgrades();
-
+        this.driftParticleSystem = new DriftParticleSystem(player);
+        stage.addActor(driftParticleSystem);
         devConsole.setPlayer(player);
         devConsole.setSpawnLayers(collisionLayer, roadLayer);
         devConsole.addToStage(hud.getStage());
@@ -155,6 +157,8 @@ public class SurvivalScreen implements Screen {
             pointManager = new PointManager(this.level);
         }
         this.player.setHp(gameState.getPlayerLives());
+        this.driftParticleSystem = new DriftParticleSystem(player);
+        stage.addActor(driftParticleSystem);
         ((OrthographicCamera) stage.getCamera()).zoom = MathUtils.clamp(gameState.getCameraZoom(), MIN_ZOOM, MAX_ZOOM);
     }
 
