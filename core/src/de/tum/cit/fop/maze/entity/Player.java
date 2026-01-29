@@ -36,7 +36,9 @@ public class Player extends Entity {
     private boolean potholeImmune = false;
     private float worldWidth = 0f;
     private float worldHeight = 0f;
+    private float debugSpeedMultiplier = 1f;
     private boolean godMode = false;
+    private final DriftyMovementController driftyMovementController;
     /// private final GameOverListener trapOverListener;
 
     //Initialize the player on a specific coordinate point
@@ -104,10 +106,6 @@ public class Player extends Entity {
 
     public int getMaxHp() {
         return maxHp;
-    }
-
-    public void setMaxHp(int maxHp) {
-        this.maxHp = maxHp;
     }
 
     public void setDrinkDurationMultiplier(float drinkDurationMultiplier) {
@@ -350,14 +348,6 @@ public class Player extends Entity {
 
     public boolean isPotholeImmune() {
         return potholeImmune;
-    }
-
-    public void setPotholeImmune(boolean potholeImmune) {
-        this.potholeImmune = potholeImmune;
-    }
-
-    public boolean isGodMode() {
-        return godMode;
     }
 
     public void setGodMode(boolean godMode) {
