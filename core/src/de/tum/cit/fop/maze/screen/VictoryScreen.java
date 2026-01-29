@@ -50,7 +50,7 @@ public class VictoryScreen implements Screen {
 
         Viewport viewport = new FitViewport(1920, 1080);
         stage = new Stage(viewport, game.getSpriteBatch()); // Create a stage for UI elements
-        backgroundTexture = new Texture(Gdx.files.internal("Assets_Map/delivery.png"));
+        backgroundTexture = new Texture(Gdx.files.internal("VictoryScreen.jpg"));
         backgroundImage = new Image(backgroundTexture);
         backgroundImage.setFillParent(true);
         backgroundImage.setColor(1f, 1f, 1f, 0f);
@@ -75,7 +75,7 @@ public class VictoryScreen implements Screen {
         int totalSeconds = Math.max(0, (int) survivedSeconds);
         int minutes = totalSeconds / 60;
         int seconds = totalSeconds % 60;
-        Label survivedLabel = new Label("YOu have completed the deliver in " + String.format("%d:%02d", minutes, seconds), game.getSkin());
+        Label survivedLabel = new Label("You have completed the deliver in " + String.format("%d:%02d", minutes, seconds), game.getSkin());
         Label pointsLabel = new Label("You have the completed the level with " + finalPoints + " score", game.getSkin());
         statsTable.add(survivedLabel).pad(10).row();
         statsTable.add(pointsLabel).pad(10);
