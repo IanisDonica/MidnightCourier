@@ -2,6 +2,7 @@ package de.tum.cit.fop.maze.system;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
@@ -33,14 +34,25 @@ public class HUD {
 
     private Label keyLabel;
     private Label levelLabel;
+    private Label deliveryTimerLabel;
     private TextButton shopButton;
     private final ConfigManager configManager;
     private Table pauseTable;
+    private final Table topTable;
+    private final Table hudBox;
+    private final Texture hudBoxTexture;
     private Image regenImage;
     private Animation<TextureRegion> regenAnimation;
     private final Texture regenTexture;
     private final Texture arrowTexture;
     private final Image arrowImage;
+    private final Image keyPreviewImage;
+    private final float keyPreviewWidth = 400f;
+    private final float keyPreviewHeight = 200f;
+    private final float keyPreviewMargin = 20f;
+    private final float keyPreviewHudGap = 10f;
+    private final float arrowSpacing = 16f;
+    private boolean showLevel = true;
 
     public HUD(MazeRunnerGame game){
         //this.game = game;
@@ -53,13 +65,16 @@ public class HUD {
         scoreLabel = new Label("Score: ", game.getSkin());
         scoreLabel.setFontScale(2.0f);
 
-        healthLabel = new Label("Health: ", game.getSkin());
+        healthLabel = new Label("Money: ", game.getSkin());
         healthLabel.setFontScale(2.0f);
 
         keyLabel = new Label("Key: no", game.getSkin());
         keyLabel.setFontScale(2.0f);
         levelLabel = new Label("Level: 1", game.getSkin());
         levelLabel.setFontScale(2.0f);
+        deliveryTimerLabel = new Label("", game.getSkin());
+        deliveryTimerLabel.setFontScale(2.0f);
+        deliveryTimerLabel.setVisible(false);
 
         regenTexture = new Texture(Gdx.files.internal("objects.png"));
         Array<TextureRegion> regenFrames = new Array<>(TextureRegion.class);
@@ -77,9 +92,14 @@ public class HUD {
         arrowImage.setOrigin(Align.center);
         arrowImage.setVisible(true);
 
-        Table topTable = new Table();
-        topTable.setFillParent(true);
-        topTable.top();
+        keyPreviewImage = new Image();
+        keyPreviewImage.setSize(keyPreviewWidth, keyPreviewHeight);
+        keyPreviewImage.setVisible(false);
+
+
+        hudBoxTexture = buildBoxTexture(0f, 0f, 0f, 0.7f);
+        topTable = new Table();
+        topTable.top().left();
         healthTable = new Table();
         healthTable.add(healthLabel).left();
 
@@ -88,6 +108,15 @@ public class HUD {
         topTable.add(regenImage).left().size(64).pad(10);
         topTable.add(scoreLabel).center().expandX().pad(10);
         topTable.add(keyLabel).right().expandX().pad(10);
+        topTable.add(deliveryTimerLabel).right().expandX().pad(10);
+        topTable.pack();
+
+        hudBox = new Table();
+        hudBox.setBackground(new Image(hudBoxTexture).getDrawable());
+        hudBox.add(topTable).pad(6);
+        hudBox.pack();
+        updateHudBoxPosition();
+        updateKeyPreviewPosition();
 
         pauseTable = new Table();
         pauseTable.setFillParent(true);
@@ -152,17 +181,20 @@ public class HUD {
         bottomTable.add(shopButton).padBottom(30);
 
         stage.addActor(arrowImage);
-        stage.addActor(topTable);
+        stage.addActor(hudBox);
         stage.addActor(pauseTable);
         stage.addActor(bottomTable);
+        stage.addActor(keyPreviewImage);
     }
 
     public void update(int levelNumber, int hp, int score, boolean hasKey, boolean hasRegen,
                        float regenTimerSeconds, float regenIntervalSeconds,
+                       float deliveryTimerSeconds,
                        float playerX, float playerY,
                        float keyX, float keyY, float exitX, float exitY) {
         healthTable.clear();
         levelLabel.setText("Level: " + levelNumber);
+        levelLabel.setVisible(showLevel);
         scoreLabel.setText("Score: " + score);
         healthTable.center();
         healthTable.add(healthLabel);
@@ -176,6 +208,13 @@ public class HUD {
             keyLabel.setText("Has key");
         }else{
             keyLabel.setText("No key");
+        }
+
+        if (deliveryTimerSeconds >= 0f) {
+            deliveryTimerLabel.setVisible(true);
+            deliveryTimerLabel.setText(String.format("Delivery: %.1fs", deliveryTimerSeconds));
+        } else {
+            deliveryTimerLabel.setVisible(false);
         }
 
         regenImage.setVisible(hasRegen);
@@ -193,10 +232,26 @@ public class HUD {
         float angle = MathUtils.atan2(dy, dx) * MathUtils.radiansToDegrees;
         arrowImage.setRotation(angle);
         arrowImage.setSize(64f, 64f);
-        arrowImage.setPosition(10f, 10f);
         arrowImage.setVisible(true);
+        updateArrowPosition();
     }
-    
+
+    public void showKeyPreview(TextureRegion region, boolean visible) {
+        if (region != null) {
+            keyPreviewImage.setDrawable(new TextureRegionDrawable(region));
+        }
+        keyPreviewImage.setVisible(visible);
+        if (visible) {
+            updateKeyPreviewPosition();
+            keyPreviewImage.toFront();
+        }
+    }
+
+    public void setShowLevel(boolean show) {
+        this.showLevel = show;
+        levelLabel.setVisible(show);
+    }
+
     public Stage getStage(){
         return stage;
     }
@@ -207,12 +262,15 @@ public class HUD {
 
     public void resize(int width, int height) {
         viewport.update(width, height, true);
+        updateHudBoxPosition();
+        updateKeyPreviewPosition();
     }
 
     public void dispose() {
         stage.dispose();
         regenTexture.dispose();
         arrowTexture.dispose();
+        hudBoxTexture.dispose();
     }
 
     public void setShopButtonVisible(boolean visible) {
@@ -231,4 +289,32 @@ public class HUD {
         return shopButton.isVisible();
     }
 
+    private void updateKeyPreviewPosition() {
+        float x = keyPreviewMargin;
+        float y = keyPreviewMargin;
+        keyPreviewImage.setPosition(x, y);
+    }
+
+    private void updateHudBoxPosition() {
+        float x = 10f;
+        float y = viewport.getWorldHeight() - hudBox.getHeight() - 10f;
+        hudBox.setPosition(x, y);
+    }
+
+    private void updateArrowPosition() {
+        float keyX = keyPreviewImage.getX();
+        float keyY = keyPreviewImage.getY();
+        float x = keyX + keyPreviewWidth + arrowSpacing;
+        float y = keyY + (keyPreviewHeight / 2f) - (arrowImage.getHeight() / 2f);
+        arrowImage.setPosition(x, y);
+    }
+
+    private Texture buildBoxTexture(float r, float g, float b, float a) {
+        Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
+        pixmap.setColor(r, g, b, a);
+        pixmap.fill();
+        Texture texture = new Texture(pixmap);
+        pixmap.dispose();
+        return texture;
+    }
 }
