@@ -64,6 +64,7 @@ public abstract class BaseEndScreen implements Screen {
      */
     protected BaseEndScreen(MazeRunnerGame game, String backgroundPath) {
         this.game = game;
+        // Derive end-of-run stats from the active game/survival screen if available
         if (game.getGameScreen() != null && game.getGameScreen().pointManager != null) {
             survivedSeconds = game.getGameScreen().pointManager.getElapsedTime();
             finalPoints = game.getGameScreen().pointManager.getPoints();
@@ -81,12 +82,14 @@ public abstract class BaseEndScreen implements Screen {
         backgroundTexture = new Texture(Gdx.files.internal(backgroundPath));
         backgroundImage = new Image(backgroundTexture);
         backgroundImage.setFillParent(true);
+        // Start fully transparent, fade-in will be handled in render()
         backgroundImage.setColor(1f, 1f, 1f, 0f);
         if (!isBackgroundTouchable()) {
             backgroundImage.setTouchable(Touchable.disabled);
         }
         stage.addActor(backgroundImage);
 
+        // Build the UI layout: title, optional subtitle, stats, optional saved text, and buttons
         Table table = new Table();
         table.setFillParent(true);
         table.top();
@@ -138,9 +141,11 @@ public abstract class BaseEndScreen implements Screen {
         buttonGroup = new WidgetGroup();
         buttonGroup.setFillParent(true);
         buttonGroup.addActor(table);
+        // buttons fade in separately after the background is visible
         buttonGroup.getColor().a = 0f;
         stage.addActor(buttonGroup);
 
+        // make a 1x1 black texture used as a full-screen fade overlay
         Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
         pixmap.setColor(Color.BLACK);
         pixmap.fill();
@@ -368,12 +373,14 @@ public abstract class BaseEndScreen implements Screen {
         stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
         fadeTimer += delta;
         if (getFadeStyle() == FadeStyle.LINEAR) {
+            // Linear fade: background alpha goes 0->1, overlay alpha goes 1->0.
             float alpha = Math.min(1f, fadeTimer / FADE_DURATION);
             backgroundImage.setColor(1f, 1f, 1f, alpha);
             float buttonAlpha = Math.min(1f, fadeTimer / BUTTON_FADE_DURATION);
             buttonGroup.getColor().a = buttonAlpha;
             fadeOverlay.setColor(0f, 0f, 0f, 1f - alpha);
         } else {
+            // log fade quicker reveal early, smoother at the end
             float t = fadeTimer / FADE_DURATION;
             if (t > 1f) {
                 t = 1f;
@@ -387,6 +394,7 @@ public abstract class BaseEndScreen implements Screen {
             if (overlayAlpha <= 0f) {
                 fadeOverlay.setVisible(false);
             }
+            // buttons start fading in after the main fade completes
             float buttonAlpha = (fadeTimer - FADE_DURATION) / BUTTON_FADE_DURATION;
             if (buttonAlpha < 0f) {
                 buttonAlpha = 0f;
