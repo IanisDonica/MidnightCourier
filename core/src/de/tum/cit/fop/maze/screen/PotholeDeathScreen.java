@@ -1,234 +1,76 @@
 package de.tum.cit.fop.maze.screen;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.Pixmap;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Image;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
-import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
-import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup;
-import com.badlogic.gdx.scenes.scene2d.Touchable;
-import com.badlogic.gdx.utils.viewport.FitViewport;
-import com.badlogic.gdx.utils.viewport.Viewport;
 import de.tum.cit.fop.maze.MazeRunnerGame;
-import de.tum.cit.fop.maze.system.AudioManager;
 
 /**
  * Game over screen shown after a pothole death.
  */
-public class PotholeDeathScreen implements Screen {
-    /** Game instance for navigation and resources. */
-    private final MazeRunnerGame game;
-    /** Stage hosting UI elements. */
-    private final Stage stage;
-    /** Audio manager for UI sounds. */
-    private final AudioManager audioManager;
-    /** Overlay image used for fade in. */
-    private final Image fadeOverlay;
-    /** Texture used by the fade overlay. */
-    private final Texture fadeTexture;
-    /** Background texture. */
-    private final Texture backgroundTexture;
-    /** Background image. */
-    private final Image backgroundImage;
-    /** Group containing buttons for fade-in control. */
-    private final WidgetGroup buttonGroup;
-    /** Survival time at game over. */
-    private final float survivedSeconds;
-    /** Final points at game over. */
-    private final int finalPoints;
-    /** Timer used for fade effects. */
-    private float fadeTimer = 0f;
-    /** Fade duration for overlay. */
-    private static final float FADE_DURATION = 2f;
-    /** Fade duration for button group. */
-    private static final float BUTTON_FADE_DURATION = 1.0f;
-
+public class PotholeDeathScreen extends BaseEndScreen {
     /**
      * Creates a pothole death screen.
      *
      * @param game game instance
      */
     public PotholeDeathScreen(MazeRunnerGame game) {
-        this.game = game;
-        if (game.getGameScreen() != null && game.getGameScreen().pointManager != null) {
-            survivedSeconds = game.getGameScreen().pointManager.getElapsedTime();
-            finalPoints = game.getGameScreen().pointManager.getPoints();
-        } else {
-            survivedSeconds = 0f;
-            finalPoints = 0;
-        }
-        var camera = new OrthographicCamera();
-        camera.zoom = 1.5f;
-        audioManager = game.getAudioManager();
+        super(game, "Sewers.jpg");
+    }
 
-        Viewport viewport = new FitViewport(1920, 1080);
-        stage = new Stage(viewport, game.getSpriteBatch());
-        backgroundTexture = new Texture(Gdx.files.internal("Sewers.jpg"));
-        backgroundImage = new Image(backgroundTexture);
-        backgroundImage.setFillParent(true);
-        backgroundImage.setColor(1f, 1f, 1f, 0f);
-        backgroundImage.setTouchable(Touchable.disabled);
-        stage.addActor(backgroundImage);
-        Table table = new Table();
-        table.setFillParent(true);
-        table.top();
-        Table content = new Table();
-        content.defaults().center();
+    @Override
+    protected String getTitleText() {
+        return "You died!";
+    }
 
-        Label titleLabel = new Label("You died!", game.getSkin(), "title");
-        titleLabel.setAlignment(com.badlogic.gdx.utils.Align.center);
-        content.add(titleLabel).center().padBottom(10).row();
+    @Override
+    protected String getSubtitleText() {
+        return "GlovoDriver 2004-2026";
+    }
 
-        Label subtitleLabel = new Label("GlovoDriver 2004-2026", game.getSkin());
-        subtitleLabel.setFontScale(1.2f);
-        subtitleLabel.setAlignment(com.badlogic.gdx.utils.Align.center);
-        content.add(subtitleLabel).center().padBottom(20).row();
+    @Override
+    protected String getSavedText() {
+        return "(This score has not been saved)";
+    }
 
-        Table statsTable = new Table();
-        statsTable.setBackground(game.getSkin().getDrawable("cell"));
-        int totalSeconds = Math.max(0, (int) survivedSeconds);
-        int minutes = totalSeconds / 60;
-        int seconds = totalSeconds % 60;
-        Label survivedLabel = new Label("You survived for: " + String.format("%d:%02d", minutes, seconds), game.getSkin());
-        Label pointsLabel = new Label("You had a score of " + finalPoints + " points", game.getSkin());
-        statsTable.add(survivedLabel).pad(10).row();
-        statsTable.add(pointsLabel).pad(10);
-        content.add(statsTable).width(700).center().padBottom(12).row();
+    @Override
+    protected String getStatsLine1(int minutes, int seconds) {
+        return "You survived for: " + String.format("%d:%02d", minutes, seconds);
+    }
 
-        Label unsavedLabel = new Label("(This score has not been saved)", game.getSkin());
-        unsavedLabel.setFontScale(0.9f);
-        unsavedLabel.setAlignment(com.badlogic.gdx.utils.Align.center);
-        content.add(unsavedLabel).center().padBottom(40).row();
+    @Override
+    protected String getStatsLine2() {
+        return "You had a score of " + finalPoints + " points";
+    }
 
-        Table contentBox = new Table();
-        contentBox.setBackground(game.getSkin().getDrawable("cell"));
-        contentBox.pad(30);
-        contentBox.add(content).width(820);
-        table.add(contentBox).width(900).center().padTop(50).row();
-        TextButton mainMenuButton = new TextButton("Main Menu", game.getSkin());
-        mainMenuButton.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent changeEvent, Actor actor) {
-                audioManager.playSound("Click.wav", 1);
-                game.goToMenu();
+    @Override
+    protected void buildButtons(Table buttons) {
+        TextButton retryButton = createButton("Reincarnate", () -> {
+            if (game.getCurrentLevelNumber() != 0) {
+                game.goToGame(game.getCurrentLevelNumber());
+            } else {
+                game.goToEndless();
             }
         });
+        TextButton mainMenuButton = createButton("Main Menu", game::goToMenu);
+        TextButton rageQuitButton = createButton("Rage quit", () -> com.badlogic.gdx.Gdx.app.exit());
 
-        TextButton retryButton = new TextButton("Reincarnate", game.getSkin());
-        retryButton.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent changeEvent, Actor actor) {
-                audioManager.playSound("Click.wav", 1);
-                if (game.getCurrentLevelNumber() != 0) {
-                    game.goToGame(game.getCurrentLevelNumber());
-                } else {
-                    System.out.print("S");
-                    game.goToEndless();
-                }
-            }
-        });
-
-        TextButton rageQuitButton = new TextButton("Rage quit", game.getSkin());
-        rageQuitButton.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent changeEvent, Actor actor) {
-                Gdx.app.exit();
-            }
-        });
-
-        Table buttons = new Table();
-        buttons.defaults().center();
         buttons.add(retryButton).padRight(20);
         buttons.add(mainMenuButton).padRight(20);
         buttons.add(rageQuitButton);
-        content.add(buttons).center().padTop(10).row();
-
-        buttonGroup = new WidgetGroup();
-        buttonGroup.setFillParent(true);
-        buttonGroup.addActor(table);
-        buttonGroup.getColor().a = 0f;
-        stage.addActor(buttonGroup);
-
-        Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
-        pixmap.setColor(Color.BLACK);
-        pixmap.fill();
-        fadeTexture = new Texture(pixmap);
-        pixmap.dispose();
-        fadeOverlay = new Image(fadeTexture);
-        fadeOverlay.setFillParent(true);
-        fadeOverlay.setColor(0f, 0f, 0f, 1f);
-        fadeOverlay.setTouchable(Touchable.disabled);
-        stage.addActor(fadeOverlay);
-    }
-
-    /**
-     * Renders the death screen with fade effects.
-     *
-     * @param delta frame delta time
-     */
-    @Override
-    public void render(float delta) {
-        if (!game.shouldRenderMenuBackground()) {
-            Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-        }
-        fadeTimer += delta;
-        float alpha = Math.min(1f, fadeTimer / FADE_DURATION);
-        backgroundImage.setColor(1f, 1f, 1f, alpha);
-        float buttonAlpha = Math.min(1f, fadeTimer / BUTTON_FADE_DURATION);
-        buttonGroup.getColor().a = buttonAlpha;
-        fadeOverlay.setColor(0f, 0f, 0f, 1f - alpha);
-        stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
-        stage.draw();
-    }
-
-    /**
-     * Updates viewport on resize.
-     *
-     * @param width new width
-     * @param height new height
-     */
-    @Override
-    public void resize(int width, int height) {
-        stage.getViewport().update(width, height, true);
-    }
-
-    /**
-     * Disposes stage and textures.
-     */
-    @Override
-    public void dispose() {
-        stage.dispose();
-        backgroundTexture.dispose();
-        fadeTexture.dispose();
-    }
-
-    /**
-     * Sets input processing for the screen.
-     */
-    @Override
-    public void show() {
-        Gdx.input.setInputProcessor(stage);
-        stage.addListener(game.getKeyHandler());
     }
 
     @Override
-    public void pause() {
+    protected boolean isBackgroundTouchable() {
+        return false;
     }
 
     @Override
-    public void resume() {
+    protected FadeStyle getFadeStyle() {
+        return FadeStyle.LINEAR;
     }
 
     @Override
-    public void hide() {
+    protected boolean allowMenuBackground() {
+        return false;
     }
 }

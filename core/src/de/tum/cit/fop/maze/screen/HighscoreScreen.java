@@ -175,7 +175,7 @@ public class HighscoreScreen implements Screen {
             totalScores++;
             int level = entry.getInt("level", -1);
             int score = entry.getInt("score", 0);
-            if (level >= 1 && level <= 5 && score > bestScoreByLevel[level]) {
+            if (level >= 0 && level <= 5 && score > bestScoreByLevel[level]) {
                 bestScoreByLevel[level] = score;
                 JsonValue dateValue = entry.get("dateTime");
                 if (dateValue != null && !dateValue.isNull()) {
@@ -204,14 +204,15 @@ public class HighscoreScreen implements Screen {
         }
 
         Table scoresTable = new Table();
-        for (int i = 1; i <= 5; i++) {
+        for (int i = 0; i <= 5; i++) {
             String scoreText = bestScoreByLevel[i] < 0 ? "N/A" : String.valueOf(bestScoreByLevel[i]);
             String completedText = bestDateByLevel[i];
             String finishedText = bestHpByLevel[i] >= 0 ? bestHpByLevel[i] + " HP left" : "N/A";
 
             Table scoreBox = new Table();
             scoreBox.setBackground(game.getSkin().getDrawable("whiteBlack"));
-            Label levelLabel = new Label("Level " + i, game.getSkin());
+            String levelName = (i == 0) ? "Endless mode" : ("Level " + i);
+            Label levelLabel = new Label(levelName, game.getSkin());
             Label scoreLabel = new Label(scoreText, game.getSkin());
             scoreBox.add(levelLabel).padTop(10).row();
             scoreBox.add(scoreLabel).padTop(6).padBottom(10).row();
@@ -223,16 +224,24 @@ public class HighscoreScreen implements Screen {
             completedBox.add(completedLabel).padTop(10).row();
             completedBox.add(completedValueLabel).padTop(6).padBottom(10).row();
 
-            Table finishedBox = new Table();
-            finishedBox.setBackground(game.getSkin().getDrawable("whiteBlack"));
-            Label finishedLabel = new Label("Finished with", game.getSkin());
-            Label finishedValueLabel = new Label(finishedText, game.getSkin());
-            finishedBox.add(finishedLabel).padTop(10).row();
-            finishedBox.add(finishedValueLabel).padTop(6).padBottom(10).row();
-
-            scoresTable.add(scoreBox).width(260).height(140).pad(10);
-            scoresTable.add(completedBox).width(360).height(140).pad(10);
-            scoresTable.add(finishedBox).width(260).height(140).pad(10);
+            scoresTable.add(scoreBox).width(240).height(95).pad(10);
+            if (i == 0) {
+                scoresTable.add(completedBox).width(400).height(95).pad(10);
+            } else {
+                scoresTable.add(completedBox).width(400).height(95).pad(10);
+            }
+            if (i == 0) {
+                Table spacerBox = new Table();
+                scoresTable.add(spacerBox).width(0).height(95).pad(0);
+            } else {
+                Table finishedBox = new Table();
+                finishedBox.setBackground(game.getSkin().getDrawable("whiteBlack"));
+                Label finishedLabel = new Label("Finished with", game.getSkin());
+                Label finishedValueLabel = new Label(finishedText, game.getSkin());
+                finishedBox.add(finishedLabel).padTop(10).row();
+                finishedBox.add(finishedValueLabel).padTop(6).padBottom(10).row();
+                scoresTable.add(finishedBox).width(260).height(95).pad(10);
+            }
             scoresTable.row();
         }
 
@@ -250,7 +259,7 @@ public class HighscoreScreen implements Screen {
                 Gdx.net.openURI("https://transprut.solutions");
             }
         });
-        globalBox.add(globalLabel).width(360).padTop(40).padLeft(20).padRight(20).center().row();
+        globalBox.add(globalLabel).width(360).padTop(10).padLeft(20).padRight(20).center().row();
         globalBox.add(globalButton).padTop(10).padBottom(20).center().row();
 
         Table datesBox = new Table();
@@ -265,18 +274,18 @@ public class HighscoreScreen implements Screen {
         datesBox.add(lastDateValueLabel).padTop(6).padBottom(20).center().row();
 
         Table contentRow = new Table();
-        contentRow.add(scoresTable).left().padLeft(100);
+        contentRow.add(scoresTable).left().padLeft(50);
         Table rightColumn = new Table();
-        rightColumn.add(globalBox).width(420).height(255).padBottom(20).padTop(60).row();
+        rightColumn.add(globalBox).width(420).height(255).padBottom(20).padTop(0).row();
         rightColumn.add(datesBox).width(420).height(200).row();
         Table totalsBox = new Table();
         totalsBox.setBackground(game.getSkin().getDrawable("whiteBlack"));
         Label totalsLabel = new Label("Scores logged:", game.getSkin());
         Label totalsValueLabel = new Label(String.valueOf(totalScores), game.getSkin());
-        totalsBox.add(totalsLabel).padTop(12).padLeft(16).padRight(16).center().row();
+        totalsBox.add(totalsLabel).padTop(12).padLeft(0).padRight(16).center().row();
         totalsBox.add(totalsValueLabel).padTop(6).padBottom(12).center().row();
         rightColumn.add(totalsBox).width(420).height(140).padTop(20).row();
-        contentRow.add(rightColumn).padLeft(40).top().padTop(20);
+        contentRow.add(rightColumn).padLeft(20).top().padTop(20);
         table.add(contentRow).expandX().fillX().padBottom(30).row();
 
     }
