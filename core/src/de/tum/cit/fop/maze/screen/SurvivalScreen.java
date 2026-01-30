@@ -330,6 +330,7 @@ public class SurvivalScreen implements Screen {
         player.setDrinkDurationMultiplier(drinkMultiplier);
 
         player.setPotholeImmune(progressionManager.hasUpgrade("pothol_imunity"));
+        player.setDetectionRangeMultiplier(progressionManager.hasUpgrade("stealth") ? 0.75f : 1f);
 
         if (progressionManager.hasUpgrade("new_glasses") && !glassesApplied) {
             fogIntensity += 2f;
@@ -730,8 +731,8 @@ public class SurvivalScreen implements Screen {
         hud.showKeyPreview(null, false);
         keyPreviewVisible = false;
         deliveryTimerActive = false;
+        deliveryTimeLimit = computeNextDeliveryTimeLimit();
         deliveryTimer = 0f;
-        deliveryTimeLimit = Math.max(DELIVERY_TIME_MIN_SECONDS, deliveryTimeLimit - DELIVERY_TIME_DECREASE_SECONDS);
         player.clearKey();
         for (de.tum.cit.fop.maze.entity.collectible.Collectible collectible : collectibles) {
             if (collectible instanceof de.tum.cit.fop.maze.entity.collectible.ExitDoor
@@ -740,6 +741,20 @@ public class SurvivalScreen implements Screen {
             }
         }
         ensureKeyAndExit();
+    }
+
+    /**
+     * Computes the next delivery time limit based on how fast the previous delivery was completed.
+     *
+     * @return next delivery time limit in seconds
+     */
+    private float computeNextDeliveryTimeLimit() {
+        if (deliveryTimeLimit <= 0f) {
+            return DELIVERY_TIME_MIN_SECONDS;
+        }
+        float speedRatio = MathUtils.clamp(deliveryTimer / deliveryTimeLimit, 0f, 1f);
+        float reduction = DELIVERY_TIME_DECREASE_SECONDS * (0.5f + (1.5f * speedRatio));
+        return Math.max(DELIVERY_TIME_MIN_SECONDS, deliveryTimeLimit - reduction);
     }
 
     /**

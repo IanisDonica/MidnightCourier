@@ -12,7 +12,6 @@ public class RootUpgrade extends BaseUpgrade {
                 "root",
                 "Root",
                 "Base unlock for the progression tree.",
-                "assets/ui/upgrades/root.png",
                 0,
                 new String[0]
         );

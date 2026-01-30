@@ -12,7 +12,6 @@ public class DrinkSpeedIUpgrade extends BaseUpgrade {
                 "drink_speed_1",
                 "Drink Speed I",
                 "Energy drinks give a small speed boost.",
-                "assets/ui/upgrades/drink_speed_1.png",
                 200,
                 new String[] {"speed_2"}
         );

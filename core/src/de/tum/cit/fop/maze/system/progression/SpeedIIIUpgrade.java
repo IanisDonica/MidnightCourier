@@ -12,7 +12,6 @@ public class SpeedIIIUpgrade extends BaseUpgrade {
                 "speed_3",
                 "Speed III",
                 "Maximizes movement speed.",
-                "assets/ui/upgrades/speed_3.png",
                 300,
                 new String[] {"speed_2"}
         );

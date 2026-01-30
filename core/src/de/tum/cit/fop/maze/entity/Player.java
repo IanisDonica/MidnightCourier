@@ -58,6 +58,8 @@ public class Player extends Entity {
     private float speedX, speedY;
     /** Whether pothole damage is ignored. */
     private boolean potholeImmune = false;
+    /** Multiplier for enemy detection radius. */
+    private float detectionRangeMultiplier = 1f;
     /** World bounds width. */
     private float worldWidth = 0f;
     /** World bounds height. */
@@ -181,6 +183,24 @@ public class Player extends Entity {
      */
     public void setPotholeImmune(boolean potholeImmune) {
         this.potholeImmune = potholeImmune;
+    }
+
+    /**
+     * Sets the enemy detection radius multiplier.
+     *
+     * @param detectionRangeMultiplier multiplier for enemy vision range
+     */
+    public void setDetectionRangeMultiplier(float detectionRangeMultiplier) {
+        this.detectionRangeMultiplier = detectionRangeMultiplier;
+    }
+
+    /**
+     * Returns the enemy detection radius multiplier.
+     *
+     * @return detection range multiplier
+     */
+    public float getDetectionRangeMultiplier() {
+        return detectionRangeMultiplier;
     }
 
     /**

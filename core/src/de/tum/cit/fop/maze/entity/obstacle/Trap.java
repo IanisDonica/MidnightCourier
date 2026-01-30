@@ -31,7 +31,7 @@ public class Trap extends Obstacle {
             return;
         }
         if (!player.isStunned()) {
-            player.damage(1, DeathCause.POTHOLE);
+            player.damage(999, DeathCause.POTHOLE);
         }
     }
 

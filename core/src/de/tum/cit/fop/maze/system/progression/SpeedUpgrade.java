@@ -12,7 +12,6 @@ public class SpeedUpgrade extends BaseUpgrade {
                 "speed",
                 "Speed Boost",
                 "Increases player movement speed.",
-                "assets/ui/upgrades/speed.png",
                 150,
                 new String[] {"root"}
         );

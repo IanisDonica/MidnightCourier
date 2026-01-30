@@ -292,6 +292,7 @@ public class GameScreen implements Screen {
         player.setDrinkDurationMultiplier(drinkMultiplier);
 
         player.setPotholeImmune(progressionManager.hasUpgrade("pothol_imunity"));
+        player.setDetectionRangeMultiplier(progressionManager.hasUpgrade("stealth") ? 0.75f : 1f);
 
         if (progressionManager.hasUpgrade("new_glasses") && !glassesApplied) {
             fogIntensity += 10f;

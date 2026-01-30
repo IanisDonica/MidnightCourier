@@ -591,7 +591,8 @@ public class Enemy extends Obstacle {
         int goalX = clampTileX(player.getX() + player.getWidth() / 2f);
         int goalY = clampTileY(player.getY() + player.getHeight() / 2f);
 
-        if (Math.abs(goalX - startX) > VISION_RANGE_TILES || Math.abs(goalY - startY) > VISION_RANGE_TILES) {
+        int visionRange = Math.max(1, Math.round(VISION_RANGE_TILES * player.getDetectionRangeMultiplier()));
+        if (Math.abs(goalX - startX) > visionRange || Math.abs(goalY - startY) > visionRange) {
             return false;
         }
 

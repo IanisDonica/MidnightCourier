@@ -12,7 +12,6 @@ public class HealthUpgrade extends BaseUpgrade {
                 "health",
                 "Extra Health",
                 "Gives the player additional HP.",
-                "assets/ui/upgrades/health.png",
                 200,
                 new String[] {"root"}
         );

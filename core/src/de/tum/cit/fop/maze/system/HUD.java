@@ -25,7 +25,6 @@ import com.badlogic.gdx.math.MathUtils;
  * Heads-up display for gameplay information and quick actions.
  */
 public class HUD {
-    //private MazeRunnerGame game;
     /** Stage that hosts HUD actors. */
     private Stage stage;
     /** Viewport used for HUD layout. */

@@ -12,7 +12,6 @@ public class RegenUpgrade extends BaseUpgrade {
                 "regen",
                 "Regeneration",
                 "Slowly regenerates HP over time.",
-                "assets/ui/upgrades/regen.png",
                 280,
                 new String[] {"health_2"}
         );

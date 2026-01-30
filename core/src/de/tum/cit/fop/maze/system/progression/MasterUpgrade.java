@@ -12,7 +12,6 @@ public class MasterUpgrade extends BaseUpgrade {
                 "master",
                 "Mastery",
                 "Unlocks the final tier of upgrades.",
-                "assets/ui/upgrades/master.png",
                 400,
                 new String[] {"speed_3", "health_3"}
         );
