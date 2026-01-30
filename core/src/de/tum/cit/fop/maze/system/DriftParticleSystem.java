@@ -88,6 +88,7 @@ public class DriftParticleSystem extends Actor {
             } else {
                 audioManager.stopSound("tires_loop.wav");
                 if (isPlayingDrift) {
+                    // Play tire screech sound (with fade out) once so the cutoff isn't sudden
                     audioManager.playSound("tires.wav", speedBasedVolume, 0.7f, 0);
                 }
                 isPlayingDrift = false;
