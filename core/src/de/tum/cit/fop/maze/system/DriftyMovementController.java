@@ -7,20 +7,35 @@ import com.badlogic.gdx.math.Vector2;
  * Movement controller with inertia and smooth orientation changes.
  */
 public class DriftyMovementController {
-    /** Current velocity vector. */
+    /**
+     * Current velocity vector.
+     */
     public Vector2 velocity = new Vector2();
-    /** Acceleration strength applied to movement inputs. */
+    /**
+     * Acceleration strength applied to movement inputs.
+     */
     private float acceleration = 2f;
-    /** Maximum movement speed. */
+    /**
+     * Maximum movement speed.
+     */
     private float maxSpeed = 3f;
-    /** Friction multiplier applied per frame. */
-    private float friction = 0.999f; // 0 means maximum friction, 1 is no friction
-    /** Degrees per second for smooth rotation to input direction. */
+    /**
+     * Friction multiplier applied per frame.
+     */
+    private float friction = 0.997f; // 0 means maximum friction, 1 is no friction
+    /**
+     * Degrees per second for smooth rotation to input direction.
+     */
     private float rotationSpeed = 200f;     // Degrees per second for smooth rotation to input direction
-    /** Current orientation in degrees. */
+    /**
+     * Current orientation in degrees.
+     */
     private float orientation = 90f;
-    /** Target orientation in degrees based on input. */
+    /**
+     * Target orientation in degrees based on input.
+     */
     private float targetOrientation = 90f;
+    private boolean decelarating = false;
 
     /**
      * Creates a movement controller with default parameters.
@@ -38,9 +53,9 @@ public class DriftyMovementController {
      * Updates movement, orientation, and friction for the current frame.
      *
      * @param deltaTime frame delta time in seconds
-     * @param moveUp whether moving up
-     * @param moveDown whether moving down
-     * @param moveLeft whether moving left
+     * @param moveUp    whether moving up
+     * @param moveDown  whether moving down
+     * @param moveLeft  whether moving left
      * @param moveRight whether moving right
      * @param sprinting whether sprinting is active
      */
@@ -54,9 +69,9 @@ public class DriftyMovementController {
     /**
      * Updates the target orientation based on input state.
      *
-     * @param moveUp whether moving up
-     * @param moveDown whether moving down
-     * @param moveLeft whether moving left
+     * @param moveUp    whether moving up
+     * @param moveDown  whether moving down
+     * @param moveLeft  whether moving left
      * @param moveRight whether moving right
      */
     private void updateTargetOrientation(boolean moveUp, boolean moveDown, boolean moveLeft, boolean moveRight) {
@@ -73,6 +88,10 @@ public class DriftyMovementController {
                 targetOrientation = new Vector2(inputX, inputY).angleDeg();
             }
         }
+    }
+
+    public boolean isDecelerating() {
+        return decelarating && velocity.len() != 0;
     }
 
     /**
@@ -101,9 +120,9 @@ public class DriftyMovementController {
      * Applies movement forces based on input.
      *
      * @param deltaTime frame delta time in seconds
-     * @param moveUp whether moving up
-     * @param moveDown whether moving down
-     * @param moveLeft whether moving left
+     * @param moveUp    whether moving up
+     * @param moveDown  whether moving down
+     * @param moveLeft  whether moving left
      * @param moveRight whether moving right
      * @param sprinting whether sprinting is active
      */
@@ -126,6 +145,7 @@ public class DriftyMovementController {
             velocity.x -= forceStrength * deltaTime;  // Force left (-X)
         }
 
+        decelarating = !moveUp && !moveDown && !moveLeft && !moveRight;
         // Cap speed at maxSpeed
         float maxSpeedActual = maxSpeed;
         if (sprinting) {
@@ -140,7 +160,7 @@ public class DriftyMovementController {
      * Applies friction to the velocity.
      */
     private void applyFriction() {
-        if (velocity.len() < 0.01f) {
+        if (velocity.len() < 0.5f && decelarating) {
             velocity.setZero();  // Stop if speed is negligible
         } else {
             velocity.scl(friction);  // Apply friction decay - very high friction = extreme drift
