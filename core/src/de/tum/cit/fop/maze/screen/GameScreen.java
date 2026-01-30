@@ -149,7 +149,7 @@ public class GameScreen implements Screen {
         player.setWorldBounds(WORLD_WIDTH, WORLD_HEIGHT);
         applyUpgrades();
         applyEarlyLevelFog();
-        this.driftParticleSystem = new DriftParticleSystem(player);
+        this.driftParticleSystem = new DriftParticleSystem(player, game.getAudioManager());
         stage.addActor(driftParticleSystem);
         devConsole.setPlayer(player);
         devConsole.setSpawnLayers(collisionLayer, roadLayer);
@@ -210,7 +210,7 @@ public class GameScreen implements Screen {
             pointManager = new PointManager(this.level);
         }
         this.player.setHp(gameState.getPlayerLives());
-        this.driftParticleSystem = new DriftParticleSystem(player);
+        this.driftParticleSystem = new DriftParticleSystem(player, game.getAudioManager());
         stage.addActor(driftParticleSystem);
         ((OrthographicCamera) stage.getCamera()).zoom = MathUtils.clamp(gameState.getCameraZoom(), MIN_ZOOM, MAX_ZOOM);
     }

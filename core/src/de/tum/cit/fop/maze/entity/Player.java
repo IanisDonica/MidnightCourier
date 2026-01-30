@@ -234,7 +234,6 @@ public class Player extends Entity {
      * Initializes player animation frames.
      */
     private void initialiseAnimations() {
-        Texture walkSheet = new Texture(Gdx.files.internal("character.png"));
         Texture walkSheetDownUp = new Texture(Gdx.files.internal("CharacterUpDown.png"));
         Texture walkSheetRight = new Texture(Gdx.files.internal("Character_Right.png"));
         Texture walkSheetLeft = new Texture(Gdx.files.internal("Character_Left.png"));
