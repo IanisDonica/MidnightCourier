@@ -6,17 +6,18 @@ horible and unpredictible (BMW) drivers that will do nothing to avoid killing yo
 your paycheck as a bribe. The player cannot directly kill the enemies (but can get them to kill themselves), this is left for the player to figure out.
 
 ## Story
-The story is delivered through high quality, oscal worthy cutscenes, play and find out (no spoilers).
+The story is delivered through high quality, oscar worthy cutscenes, play and find out (no spoilers).
 
 
 ## Rules
 The game has 2 modes, Endless and Campain, in general the player must pick up a delivery (key), the arrow will point to it if not picked up, and take it to a drop off point (exit), to wich the arrow will also point to if the delivery has been picked up. 
 However policeman, bad infastructure (potholes) and BMW drivers try to kill or bancrupt the player, Potholes and BMW driver collisions result in an instant death, explostions will knock the player back and policemen will arrest the player if he runs out of bride money (HP).
-In Endless mode, dificualty scales over time: spawns accelerate the longer you survive, so the map gradually fills with more threats. The delivery timer adapts to player skill — finishing a delivery quickly reduces the next time limit more, while slower completions reduce it less.
+In Endless mode, dificualty scales over time: spawns accelerate the longer you survive, so the map gradually fills with more threats. The delivery timer adapts to player skill, finishing a delivery quickly reduces the next time limit more, while slower completions reduce it less.
 
 ## Code Organization
 - `MazeRunnerGame.java`: Central entry point and screen router; owns shared managers (audio, config, graphics, progression).
 - `maze/screen/`: One class per game state (menu, settings, gameplay, cutscenes, victory/game over).
+- `maze/screen/BaseEndScreen.java`: Shared parent for all victory/death screens (common background, fade, stats, and button layout).
 - `entity`: Powerups, obstacles, players, enemies; They all share common collision code, common rendering code, and common protected atributes, this way each entity can be made with only a few lines of code that declare how its different from the others. For example the HealthPickup only states what it's animations frames are and that it should give the player HP and poitns upon pickup.
 - `core/src/de/tum/cit/fop/maze/ai/`: A* alogorithm implementation (that is used by BMW drivers and Poliemen (enemies)), Also contains the state logic for the enemies. We decide to make each state an entity so that in the future it would be easier to implement different enemies who differences in their state change logic, but otherwise use the same states
 - `core/src/de/tum/cit/fop/maze/system/`: HUD, input handling, save/load, achievements, audio, points, dev console, progression
@@ -53,7 +54,7 @@ Notes:
 // TODO make a build of the game
 
 ## Developer Console
-Press the grave key (`~`) during gameplay to open the console. Useful commands:
+Press tilda (`~`) during gameplay to open the console. Useful commands:
 - `help` (list commands)
 - `tp x y` (teleport)
 - `speed <multiplier>`
@@ -66,7 +67,7 @@ Press the grave key (`~`) during gameplay to open the console. Useful commands:
 ## Key Bindings
 Input is routed through `KeyHandler`, which reads bindings from a JSON file at startup and maps actions (move, sprint, pause, zoom, console, etc.) to key codes.
 The bindings file is located in `config/keybindings.json`.
-You can remap controls in the Settings → Controls menu, which updates this file and persists across runs.
+You can remap controls in the Settings -> Controls menu, which updates this file and persists across runs.
 
 ## Policemen and BMW Drivers
 - Policemen (guards) are grid-based enemies that move only on walkable tiles. They use A* pathfinding to avoid walls and switch between patrol, chase, and retreat states depending on player proximity and global events.

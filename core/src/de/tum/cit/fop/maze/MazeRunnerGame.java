@@ -96,6 +96,7 @@ public class MazeRunnerGame extends Game {
         goToMenu(); // Navigate to the menu screen
     }
 
+
     /**
      * Switches to the menu screen.
      */
@@ -422,6 +423,17 @@ public class MazeRunnerGame extends Game {
     }
 
     /**
+     * Switches to the timeout (fired) death screen.
+     */
+    public void goToFiredScreen() {
+        this.setScreen(new FiredScreen(this));
+        if (settingsScreen != null) {
+            settingsScreen.dispose();
+            settingsScreen = null;
+        }
+    }
+
+    /**
      * Switches to the victory screen and awards progression points.
      */
     public void goToVictoryScreen() {
@@ -447,7 +459,8 @@ public class MazeRunnerGame extends Game {
             case BMW -> goToDeathOverScreen();
             case BMW_EXPLOSION -> goToBmwExplosionDeathScreen();
             case POTHOLE -> goToPotholeDeathScreen();
-            case TIMEOUT, ARRESTED -> goToGameOverScreen();
+            case TIMEOUT -> goToFiredScreen();
+            case ARRESTED -> goToGameOverScreen();
         }
     }
 

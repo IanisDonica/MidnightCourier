@@ -5,26 +5,26 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import de.tum.cit.fop.maze.MazeRunnerGame;
 
 /**
- * Game over screen shown when the player dies to a BMW.
+ * Game over screen shown when the player runs out of time.
  */
-public class DeathOverScreen extends BaseEndScreen {
+public class FiredScreen extends BaseEndScreen {
     /**
-     * Creates a new death over screen.
+     * Creates a new fired screen.
      *
      * @param game game instance
      */
-    public DeathOverScreen(MazeRunnerGame game) {
-        super(game, "BmwScreen.jpg");
+    public FiredScreen(MazeRunnerGame game) {
+        super(game, "fired.png");
     }
 
     @Override
     protected String getTitleText() {
-        return "You died!";
+        return "Fired";
     }
 
     @Override
     protected String getSubtitleText() {
-        return "GlovoDriver 2004-2026";
+        return "Be faster next time";
     }
 
     @Override
@@ -44,7 +44,7 @@ public class DeathOverScreen extends BaseEndScreen {
 
     @Override
     protected void buildButtons(Table buttons) {
-        TextButton retryButton = createButton("Reincarnate", () -> {
+        TextButton retryButton = createButton("Try again", () -> {
             if (game.getCurrentLevelNumber() != 0) {
                 game.goToGame(game.getCurrentLevelNumber());
             } else {
