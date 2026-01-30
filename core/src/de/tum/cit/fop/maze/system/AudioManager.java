@@ -16,19 +16,35 @@ import java.util.concurrent.TimeUnit;
  * Manages sound effects and music playback with caching and volume controls.
  */
 public class AudioManager {
-    /** Configuration manager providing persisted volume settings. */
+    /**
+     * Configuration manager providing persisted volume settings.
+     */
     private final ConfigManager configManager;
-    /** Executor for asynchronous audio loading/playback. */
+    /**
+     * Executor for asynchronous audio loading/playback.
+     */
     private final ExecutorService executor;
-    /** Cache of loaded sound effects. */
+    /**
+     * Cache of loaded sound effects.
+     */
     private final Map<String, Sound> soundCache;
-    /** Cache of loaded music tracks. */
+    /**
+     * Cache of loaded music tracks.
+     */
     private final Map<String, Music> musicCache;
-    /** Currently playing music track. */
+    /**
+     * Currently playing music track.
+     */
     private Music currentMusic;
-    /** Base volume for the currently playing music. */
+    private Map<String, Sound> currentSounds;
+    private Map<String, Long> currentSoundIDs;
+    /**
+     * Base volume for the currently playing music.
+     */
     private float currentMusicVolume;
-    /** Global volume controls. */
+    /**
+     * Global volume controls.
+     */
     private float masterVolume, soundEffectsVolume, musicVolume;
 
 
@@ -42,6 +58,8 @@ public class AudioManager {
         executor = Executors.newFixedThreadPool(2);
         soundCache = new HashMap<>();
         musicCache = new HashMap<>();
+        currentSounds = new HashMap<>();
+        currentSoundIDs = new HashMap<>();
     }
 
     /**
@@ -55,35 +73,41 @@ public class AudioManager {
     }
 
     // Play sound effect asynchronously
+
     /**
      * Plays a sound effect asynchronously.
      *
      * @param soundPath path relative to the sound folder
-     * @param volume base volume multiplier
+     * @param volume    base volume multiplier
      */
     public void playSound(String soundPath, float volume) {
         executor.submit(() -> {
             Sound sound = getOrLoadSound(soundPath);
             if (sound != null) {
-                sound.play(volume * soundEffectsVolume * masterVolume);
+                long id = sound.play(volume * soundEffectsVolume * masterVolume);
+                currentSounds.put(soundPath, sound);
+                currentSoundIDs.put(soundPath, id);
             }
         });
     }
 
     // Play sound with pitch and pan control
+
     /**
      * Plays a sound effect with pitch and pan controls asynchronously.
      *
      * @param soundPath path relative to the sound folder
-     * @param volume base volume multiplier
-     * @param pitch pitch multiplier
-     * @param pan stereo pan (-1 left to 1 right)
+     * @param volume    base volume multiplier
+     * @param pitch     pitch multiplier
+     * @param pan       stereo pan (-1 left to 1 right)
      */
     public void playSound(String soundPath, float volume, float pitch, float pan) {
         executor.submit(() -> {
             Sound sound = getOrLoadSound(soundPath);
             if (sound != null) {
                 long id = sound.play(volume * soundEffectsVolume * masterVolume);
+                currentSounds.put(soundPath, sound);
+                currentSoundIDs.put(soundPath, id);
                 sound.setPitch(id, pitch);
                 sound.setPan(id, pan, volume * soundEffectsVolume * masterVolume);
             }
@@ -91,29 +115,65 @@ public class AudioManager {
     }
 
     // Play looping sound (e.g., ambient effects)
+
     /**
      * Plays a looping sound effect asynchronously.
      *
      * @param soundPath path relative to the sound folder
-     * @param volume base volume multiplier
+     * @param volume    base volume multiplier
      */
     public void playSoundLooping(String soundPath, float volume) {
         executor.submit(() -> {
             Sound sound = getOrLoadSound(soundPath);
             if (sound != null) {
-                long id = sound.play(volume * soundEffectsVolume * masterVolume);
-                sound.setLooping(id, true);
+                long soundID = sound.play(volume * soundEffectsVolume * masterVolume);
+                sound.setLooping(soundID, true);
+                currentSounds.put(soundPath, sound);
+                currentSoundIDs.put(soundPath, soundID);
             }
         });
     }
 
+    public void playSoundLooping(String soundPath, float volume, float pitch, float pan) {
+        executor.submit(() -> {
+            Sound sound = getOrLoadSound(soundPath);
+            if (sound != null) {
+                long soundID = sound.play(volume * soundEffectsVolume * masterVolume);
+                currentSounds.put(soundPath, sound);
+                currentSoundIDs.put(soundPath, soundID);
+                sound.setPitch(soundID, pitch);
+                sound.setPan(soundID, pan, volume * soundEffectsVolume * masterVolume);
+                sound.setLooping(soundID, true);
+            }
+        });
+    }
+
+    public void stopSound(String soundPath) {
+        executor.submit(() -> {
+            if (currentSounds.containsKey(soundPath)) {
+                Sound sound = currentSounds.get(soundPath);
+                Long soundID = currentSoundIDs.get(soundPath);
+                if (sound != null && soundID != null) {
+                    sound.stop(soundID);
+                }
+                currentSounds.remove(soundPath);
+                currentSoundIDs.remove(soundPath);
+            } else {
+                Sound sound = getOrLoadSound(soundPath);
+                if (sound != null) {
+                    sound.stop();
+                }
+            }
+        });
+    }
     // Play music track with optional looping
+
     /**
      * Plays a music track asynchronously.
      *
      * @param musicPath path relative to the music folder
-     * @param volume base volume multiplier
-     * @param loop whether the music should loop
+     * @param volume    base volume multiplier
+     * @param loop      whether the music should loop
      */
     public void playMusic(String musicPath, float volume, boolean loop) {
         executor.submit(() -> {
@@ -163,6 +223,7 @@ public class AudioManager {
     }
 
     // Load sound into cache if not already loaded
+
     /**
      * Gets a cached sound or loads it if missing.
      *
@@ -181,6 +242,7 @@ public class AudioManager {
     }
 
     // Load music into cache if not already loaded
+
     /**
      * Gets a cached music track or loads it if missing.
      *
@@ -199,6 +261,7 @@ public class AudioManager {
     }
 
     // Preload sounds on a background thread (useful for startup)
+
     /**
      * Preloads multiple sound effects asynchronously.
      *
@@ -213,6 +276,7 @@ public class AudioManager {
     }
 
     // Clear all cached audio and dispose of resources
+
     /**
      * Disposes cached audio resources and shuts down the executor.
      */
@@ -297,6 +361,16 @@ public class AudioManager {
         this.musicVolume = MathUtils.clamp(volume, 0f, 1f);
         configManager.setVolume("musicVolume", musicVolume);
         handleActiveMusic();
+    }
+
+    public void setActiveSoundVolume(String soundPath, float volume) {
+        executor.submit(() -> {
+            Sound sound = currentSounds.get(soundPath);
+            Long soundID = currentSoundIDs.get(soundPath);
+            if (sound != null && soundID != null) {
+                sound.setVolume(soundID, volume * soundEffectsVolume * masterVolume);
+            }
+        });
     }
 
     /**
