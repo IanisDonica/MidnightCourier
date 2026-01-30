@@ -17,22 +17,42 @@ import java.util.Queue;
 // Ive decided to make it a seperate screen so that achivmets can appear on any screen (and during screen transition)
 // Originally I added it in HUD, but the issue is that it wouldn't show up when the player would go into the victoryScreen for example
 // instead of writing code to manage all screens and posible combinations, its easier to just another screen just for the pop up
+/**
+ * Overlay screen that shows queued achievement popups.
+ */
 public class AchievementPopupScreen {
+    /** Popup rise animation duration. */
     private static final float POPUP_RISE_DURATION = 0.6f;
+    /** Time a popup stays visible. */
     private static final float POPUP_HOLD_DURATION = 5.0f;
+    /** Popup fade-out duration. */
     private static final float POPUP_FADE_OUT_DURATION = 0.4f;
+    /** Popup fade-in duration. */
     private static final float POPUP_FADE_IN_DURATION = 0.2f;
+    /** Margin to screen edge. */
     private static final float POPUP_MARGIN = 20f;
+    /** Target Y position for popup. */
     private static final float POPUP_END_Y = 40f;
 
+    /** Game instance providing skin. */
     private final MazeRunnerGame game;
+    /** Stage for popup rendering. */
     private final Stage stage;
+    /** Viewport for screen-aligned overlay. */
     private final Viewport viewport;
+    /** Batch used by the stage. */
     private final SpriteBatch batch;
     // Queue lets us show multiple unlocks one after another without overlap
+    /** Pending achievement names to display. */
     private final Queue<String> pending = new ArrayDeque<>();
+    /** Whether a popup is currently being shown. */
     private boolean showing = false;
 
+    /**
+     * Creates an achievement popup overlay.
+     *
+     * @param game game instance
+     */
     public AchievementPopupScreen(MazeRunnerGame game) {
         this.game = game;
         // ScreenViewport makes the overlay pixel-aligned to the window, independent of game camera zoom.
@@ -42,23 +62,45 @@ public class AchievementPopupScreen {
         this.viewport.update(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
     }
 
+    /**
+     * Advances popup animations.
+     *
+     * @param delta frame delta time
+     */
     public void act(float delta) {
         stage.act(delta);
     }
 
+    /**
+     * Draws the popup stage.
+     */
     public void draw() {
         stage.draw();
     }
 
+    /**
+     * Updates viewport on resize.
+     *
+     * @param width new width
+     * @param height new height
+     */
     public void resize(int width, int height) {
         viewport.update(width, height, true);
     }
 
+    /**
+     * Disposes stage and batch resources.
+     */
     public void dispose() {
         stage.dispose();
         batch.dispose();
     }
 
+    /**
+     * Enqueues an achievement popup.
+     *
+     * @param achievementName achievement name to display
+     */
     public void showPopup(String achievementName) {
         if (achievementName == null || achievementName.isEmpty()) {
             return;
@@ -70,6 +112,9 @@ public class AchievementPopupScreen {
         }
     }
 
+    /**
+     * Displays the next pending popup, if any.
+     */
     private void showNext() {
         String name = pending.poll();
         if (name == null) {

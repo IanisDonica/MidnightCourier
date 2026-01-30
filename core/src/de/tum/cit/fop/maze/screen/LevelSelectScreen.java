@@ -19,12 +19,24 @@ import de.tum.cit.fop.maze.MazeRunnerGame;
 import de.tum.cit.fop.maze.system.AudioManager;
 import de.tum.cit.fop.maze.system.UiUtils;
 
+/**
+ * Screen for selecting a campaign level.
+ */
 public class LevelSelectScreen implements Screen {
+    /** Game instance for navigation and resources. */
     private final MazeRunnerGame game;
+    /** Stage hosting UI elements. */
     private final Stage stage;
+    /** Audio manager for UI sounds. */
     private final AudioManager audioManager;
+    /** Vignette texture overlay. */
     private final Texture vignetteTexture;
 
+    /**
+     * Creates the level select screen.
+     *
+     * @param game game instance
+     */
     public LevelSelectScreen(MazeRunnerGame game) {
         this.game = game;
         var camera = new OrthographicCamera();
@@ -71,6 +83,11 @@ public class LevelSelectScreen implements Screen {
         });
     }
 
+    /**
+     * Renders the screen.
+     *
+     * @param delta frame delta time
+     */
     @Override
     public void render(float delta) {
         if (!game.shouldRenderMenuBackground()) {
@@ -80,17 +97,29 @@ public class LevelSelectScreen implements Screen {
         stage.draw();
     }
 
+    /**
+     * Updates viewport on resize.
+     *
+     * @param width new width
+     * @param height new height
+     */
     @Override
     public void resize(int width, int height) {
         stage.getViewport().update(width, height, true);
     }
 
+    /**
+     * Disposes stage and textures.
+     */
     @Override
     public void dispose() {
         stage.dispose();
         vignetteTexture.dispose();
     }
 
+    /**
+     * Sets input processing for the screen.
+     */
     @Override
     public void show() {
         Gdx.input.setInputProcessor(stage);

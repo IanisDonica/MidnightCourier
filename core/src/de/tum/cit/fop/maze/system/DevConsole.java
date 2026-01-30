@@ -13,19 +13,38 @@ import de.tum.cit.fop.maze.MazeRunnerGame;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * In-game developer console for debugging and spawning entities.
+ */
 public class DevConsole {
+    /** Root table containing console UI elements. */
     private final Table root;
+    /** Input field for console commands. */
     private final TextField inputField;
+    /** Output label showing command history. */
     private final Label outputLabel;
+    /** Scroll container for output text. */
     private final ScrollPane scrollPane;
+    /** Lines of output displayed in the console. */
     private final List<String> outputLines = new ArrayList<>();
+    /** Game instance for navigation and managers. */
     private final MazeRunnerGame game;
+    /** Whether the console is currently visible. */
     private boolean visible = false;
+    /** Player instance for commands that affect the player. */
     private de.tum.cit.fop.maze.entity.Player player;
+    /** Collision layer used for enemy spawning. */
     private com.badlogic.gdx.maps.tiled.TiledMapTileLayer collisionLayer;
+    /** Road layer used for BMW enemy spawning. */
     private com.badlogic.gdx.maps.tiled.TiledMapTileLayer roadLayer;
+    /** Whether the next typed character should be ignored. */
     private boolean ignoreNextTyped = false;
 
+    /**
+     * Creates a new developer console.
+     *
+     * @param game game instance used for UI skin and navigation
+     */
     public DevConsole(MazeRunnerGame game) {
         this.game = game;
         root = new Table();
@@ -84,20 +103,41 @@ public class DevConsole {
         root.add(inputField).width(800).padTop(10);
     }
 
+    /**
+     * Sets the player used for player-related commands.
+     *
+     * @param player player instance
+     */
     public void setPlayer(de.tum.cit.fop.maze.entity.Player player) {
         this.player = player;
     }
 
+    /**
+     * Sets layers used for spawning entities.
+     *
+     * @param collisionLayer collision layer for enemy spawns
+     * @param roadLayer road layer for BMW spawns
+     */
     public void setSpawnLayers(com.badlogic.gdx.maps.tiled.TiledMapTileLayer collisionLayer,
                                com.badlogic.gdx.maps.tiled.TiledMapTileLayer roadLayer) {
         this.collisionLayer = collisionLayer;
         this.roadLayer = roadLayer;
     }
 
+    /**
+     * Adds the console UI to the stage.
+     *
+     * @param stage stage to attach to
+     */
     public void addToStage(Stage stage) {
         stage.addActor(root);
     }
 
+    /**
+     * Toggles console visibility.
+     *
+     * @param stage stage to manage focus on
+     */
     public void toggle(Stage stage) {
         if (visible) {
             hide(stage);
@@ -106,6 +146,11 @@ public class DevConsole {
         }
     }
 
+    /**
+     * Shows the console and focuses the input field.
+     *
+     * @param stage stage to manage focus on
+     */
     public void show(Stage stage) {
         visible = true;
         root.setVisible(true);
@@ -114,16 +159,31 @@ public class DevConsole {
         stage.setKeyboardFocus(inputField);
     }
 
+    /**
+     * Hides the console and clears focus.
+     *
+     * @param stage stage to manage focus on
+     */
     public void hide(Stage stage) {
         visible = false;
         root.setVisible(false);
         stage.setKeyboardFocus(null);
     }
 
+    /**
+     * Returns whether the console is currently visible.
+     *
+     * @return {@code true} if visible
+     */
     public boolean isVisible() {
         return visible;
     }
 
+    /**
+     * Executes a console command string.
+     *
+     * @param raw raw command input
+     */
     private void execute(String raw) {
         String command = raw == null ? "" : raw.trim();
         if (command.isEmpty()) {
@@ -267,6 +327,11 @@ public class DevConsole {
         scrollPane.setScrollPercentY(1f);
     }
 
+    /**
+     * Appends a line to the console output.
+     *
+     * @param line text to append
+     */
     private void appendLine(String line) {
         outputLines.add(line);
         if (outputLines.size() > 100) {
@@ -280,6 +345,13 @@ public class DevConsole {
         outputLabel.setText(sb.toString());
     }
 
+    /**
+     * Spawns an entity of the given type at the provided coordinates.
+     *
+     * @param type entity type string
+     * @param x world x position
+     * @param y world y position
+     */
     private void spawnEntity(String type, float x, float y) {
         if (player == null || player.getStage() == null) {
             appendLine("No stage available.");
@@ -316,6 +388,11 @@ public class DevConsole {
         }
     }
 
+    /**
+     * Spawns a number of BMW enemies at random road positions.
+     *
+     * @param amount number of BMW enemies to spawn
+     */
     private void spawnBmws(int amount) {
         if (player == null || player.getStage() == null) {
             appendLine("No stage available.");
@@ -329,6 +406,11 @@ public class DevConsole {
         appendLine("spawned " + amount + " bmws");
     }
 
+    /**
+     * Spawns a number of standard enemies at random positions.
+     *
+     * @param amount number of enemies to spawn
+     */
     private void spawnEnemies(int amount) {
         if (player == null || player.getStage() == null) {
             appendLine("No stage available.");

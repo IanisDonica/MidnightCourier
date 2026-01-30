@@ -21,7 +21,13 @@ import java.util.ArrayList;
 import java.util.List;
 import com.badlogic.gdx.utils.Array;
 
+/**
+ * Enemy obstacle that uses pathfinding and AI behaviors.
+ */
 public class Enemy extends Obstacle {
+    /**
+     * Internal state for enemy behavior.
+     */
     private enum EnemyState {
         CHASING,
         PATROLLING,
@@ -30,40 +36,80 @@ public class Enemy extends Obstacle {
         RETREAT_WAIT
     }
 
+    /** Path recalculation interval in seconds. */
     private static final float PATH_RECALC_INTERVAL = 0.5f;
+    /** Target distance threshold for path steps. */
     private static final float TARGET_EPS = 0.05f;
+    /** Centering threshold for tile alignment. */
     private static final float CENTER_EPS = 0.02f;
+    /** Speed scale when patrolling or retreating. */
     private static final float PATROL_SPEED_SCALE = 0.5f;
+    /** Vision range in tiles. */
     private static final int VISION_RANGE_TILES = 20;
+    /** Maximum retreat duration in seconds. */
     private static final float MAX_RETREAT_DURATION_SECONDS = 4f;
+    /** Duration for running state in seconds. */
     private static final float RUN_DURATION_SECONDS = 10f;
+    /** Speed multiplier while running. */
     private static final float RUN_SPEED_MULTIPLIER = 2f;
+    /** Collision layer for movement checks. */
     private final TiledMapTileLayer collisionLayer;
+    /** Map width in tiles. */
     private final int mapWidth;
+    /** Map height in tiles. */
     private final int mapHeight;
+    /** Base movement speed. */
     private final float speed;
+    /** Pathfinder for tile navigation. */
     private final Pathfinder pathfinder;
+    /** Behavior controller for chasing. */
     private final ChaseBehavior chaseBehavior;
+    /** Behavior controller for retreating. */
     private final RetreatBehavior retreatBehavior;
+    /** Behavior controller for patrolling. */
     private final PatrolBehaviour patrolBehavior;
+    /** Global token to force all enemies to retreat. */
     private static int globalRetreatToken = 0;
+    /** Current path of tile points. */
     private ArrayList<GridPoint2> path = new ArrayList<>();
+    /** Current index in the path. */
     private int pathIndex = 0;
+    /** Timer for path recalculation. */
     private float pathRecalcTimer = 0f;
+    /** Timer for retreat duration. */
     private float retreatTimer = 0f;
+    /** Timer for running duration. */
     private float runTimer = 0f;
+    /** Whether running is active. */
     private boolean running = false;
+    /** Last path goal x coordinate. */
     private int lastGoalX = Integer.MIN_VALUE; // TODO Remove this
+    /** Last path goal y coordinate. */
     private int lastGoalY = Integer.MIN_VALUE;
+    /** Last applied global retreat token. */
     private int lastRetreatToken = 0;
+    /** Current behavior state. */
     private EnemyState state = EnemyState.CHASING; // Initial state
+    /** Facing direction for animation. */
     private char facingDirection = 'd';
+    /** Walk animation for north movement. */
     private static Animation<TextureRegion> walkNorthAnimation;
+    /** Walk animation for south movement. */
     private static Animation<TextureRegion> walkSouthAnimation;
+    /** Walk animation for east movement. */
     private static Animation<TextureRegion> walkEastAnimation;
+    /** Walk animation for west movement. */
     private static Animation<TextureRegion> walkWestAnimation;
+    /** Whether animations were initialized. */
     private static boolean animationsInitialized = false;
 
+    /**
+     * Creates an enemy at a given position.
+     *
+     * @param collisionLayer collision layer for movement checks
+     * @param x spawn x position
+     * @param y spawn y position
+     */
     public Enemy(TiledMapTileLayer collisionLayer, float x, float y) {
         super(x, y, 1,1, 0,0,3);
         this.collisionLayer = collisionLayer;
@@ -77,10 +123,18 @@ public class Enemy extends Obstacle {
         initWalkAnimations();
     }
 
+    /**
+     * Returns the collision layer used by this enemy.
+     *
+     * @return collision layer
+     */
     public TiledMapTileLayer getCollisionLayer() {
         return collisionLayer;
     }
 
+    /**
+     * Initializes behavior once added to stage.
+     */
     @Override
     protected void onAddedToStage() {
         super.onAddedToStage();
@@ -94,6 +148,11 @@ public class Enemy extends Obstacle {
         ensureAboveCollectibles();
     }
 
+    /**
+     * Updates the enemy AI and movement.
+     *
+     * @param delta frame delta time
+     */
     @Override
     public void act(float delta) {
         //TODO remove duplicate code
@@ -181,6 +240,11 @@ public class Enemy extends Obstacle {
         followPath(delta);
     }
 
+    /**
+     * Moves the enemy along the current path.
+     *
+     * @param delta frame delta time
+     */
     private void followPath(float delta) {
         if (running) {
             runTimer += delta;
@@ -216,6 +280,11 @@ public class Enemy extends Obstacle {
         setPosition(getX() + (dx / dist) * step, getY() + (dy / dist) * step);
     }
 
+    /**
+     * Moves the enemy toward the center of the current tile.
+     *
+     * @param delta frame delta time
+     */
     private void moveToTileCenter(float delta) {
         float centerX = getX() + getWidth() / 2f;
         float centerY = getY() + getHeight() / 2f;
@@ -233,6 +302,12 @@ public class Enemy extends Obstacle {
         setPosition(getX() + (dx / dist) * step, getY() + (dy / dist) * step);
     }
 
+    /**
+     * Updates facing direction based on movement vector.
+     *
+     * @param dx delta x
+     * @param dy delta y
+     */
     private void updateFacingDirection(float dx, float dy) {
         if (Math.abs(dx) >= Math.abs(dy)) {
             facingDirection = dx >= 0f ? 'r' : 'l';
@@ -241,6 +316,9 @@ public class Enemy extends Obstacle {
         }
     }
 
+    /**
+     * Initializes walking animations once.
+     */
     private void initWalkAnimations() {
         if (animationsInitialized) {
             return;
@@ -273,6 +351,12 @@ public class Enemy extends Obstacle {
         walkWestAnimation = new Animation<>(0.15f, westFrames);
     }
 
+    /**
+     * Draws the enemy using the current facing animation.
+     *
+     * @param batch sprite batch
+     * @param parentAlpha parent alpha
+     */
     @Override
     public void draw(Batch batch, float parentAlpha) {
         TextureRegion currentFrame = switch (facingDirection) {
@@ -284,10 +368,28 @@ public class Enemy extends Obstacle {
         batch.draw(currentFrame, getX(), getY(), getWidth(), getHeight());
     }
 
+    /**
+     * Spawns random enemies in the world.
+     *
+     * @param player player used for distance checks
+     * @param stage stage to add enemies to
+     * @param collisionLayer collision layer to use
+     * @param amount number to spawn
+     */
     public static void spawnRandomEnemies(Player player, Stage stage, TiledMapTileLayer collisionLayer, int amount) {
         spawnRandomEnemies(player, stage, collisionLayer, amount, null, null);
     }
 
+    /**
+     * Spawns random enemies with optional camera constraints and output list.
+     *
+     * @param player player used for distance checks
+     * @param stage stage to add enemies to
+     * @param collisionLayer collision layer to use
+     * @param amount number to spawn
+     * @param cameraView camera view bounds to avoid
+     * @param outEnemies list to collect spawned enemies
+     */
     public static void spawnRandomEnemies(Player player,
                                           Stage stage,
                                           TiledMapTileLayer collisionLayer,
@@ -326,6 +428,12 @@ public class Enemy extends Obstacle {
         }
     }
 
+    /**
+     * Collects all walkable tiles from the collision layer.
+     *
+     * @param collisionLayer collision layer to scan
+     * @return list of walkable tiles
+     */
     private static List<GridPoint2> collectWalkableTiles(TiledMapTileLayer collisionLayer) {
         List<GridPoint2> tiles = new ArrayList<>();
         int width = collisionLayer.getWidth();
@@ -340,6 +448,15 @@ public class Enemy extends Obstacle {
         return tiles;
     }
 
+    /**
+     * Filters spawn candidates by distance from the player.
+     *
+     * @param tiles candidate tiles
+     * @param player player reference
+     * @param distance minimum distance in tiles
+     * @param collisionLayer collision layer for bounds
+     * @return filtered candidate list
+     */
     private static List<GridPoint2> getSpawnCandidates(List<GridPoint2> tiles, Player player, int distance, TiledMapTileLayer collisionLayer) {
         int playerTileX = clampTileCoord(player.getX() + player.getWidth() / 2f, collisionLayer.getWidth());
         int playerTileY = clampTileCoord(player.getY() + player.getHeight() / 2f, collisionLayer.getHeight());
@@ -353,6 +470,13 @@ public class Enemy extends Obstacle {
         return candidates;
     }
 
+    /**
+     * Clamps a tile coordinate to map bounds.
+     *
+     * @param center center coordinate
+     * @param max max bound
+     * @return clamped tile coordinate
+     */
     private static int clampTileCoord(float center, int max) {
         int tile = MathUtils.floor(center);
         if (tile < 0) {
@@ -364,6 +488,14 @@ public class Enemy extends Obstacle {
         return tile;
     }
 
+    /**
+     * Checks whether spawning at a location would collide with actors.
+     *
+     * @param stage stage containing actors
+     * @param x spawn x
+     * @param y spawn y
+     * @return {@code true} if collision would occur
+     */
     private static boolean wouldCollideAt(Stage stage, float x, float y) {
         // It probably will never be null, but why not check
         if (stage == null) {
@@ -379,6 +511,9 @@ public class Enemy extends Obstacle {
         return false;
     }
 
+    /**
+     * Handles collision with the player and triggers retreat.
+     */
     @Override
     protected void collision() {
         if (!player.isStunned() && state != EnemyState.RETREATING && state != EnemyState.RETREAT_WAIT) {
@@ -396,6 +531,11 @@ public class Enemy extends Obstacle {
         }
     }
 
+    /**
+     * Computes current path coordinates based on state.
+     *
+     * @return start and goal tile coordinates
+     */
     private int[] computePathCoords() {
         int startX = clampTileX(getX() + getWidth() / 2f);
         int startY = clampTileY(getY() + getHeight() / 2f);
@@ -420,6 +560,11 @@ public class Enemy extends Obstacle {
         return new int[]{startX, startY, goalX, goalY};
     }
 
+    /**
+     * Checks if the enemy is centered on the current tile.
+     *
+     * @return {@code true} if centered
+     */
     private boolean isCenteredOnTile() {
         float centerX = getX() + getWidth() / 2f;
         float centerY = getY() + getHeight() / 2f;
@@ -435,6 +580,11 @@ public class Enemy extends Obstacle {
         return false;
     }
 
+    /**
+     * Determines if the enemy has line of sight to the player.
+     *
+     * @return {@code true} if the player is visible
+     */
     private boolean canSeePlayer() {
         int startX = clampTileX(getX() + getWidth() / 2f);
         int startY = clampTileY(getY() + getHeight() / 2f);
@@ -472,6 +622,13 @@ public class Enemy extends Obstacle {
         }
     }
 
+    /**
+     * Checks whether a tile is walkable.
+     *
+     * @param x tile x
+     * @param y tile y
+     * @return {@code true} if walkable
+     */
     private boolean isWalkable(int x, int y) {
         if (x < 0 || y < 0 || x >= mapWidth || y >= mapHeight) {
             return false;
@@ -479,14 +636,29 @@ public class Enemy extends Obstacle {
         return collisionLayer.getCell(x, y) == null;
     }
 
+    /**
+     * Clamps X coordinate to map bounds.
+     *
+     * @param centerX center coordinate
+     * @return clamped tile x
+     */
     private int clampTileX(float centerX) {
         return pathfinder.clampCoord(MathUtils.floor(centerX), mapWidth);
     }
 
+    /**
+     * Clamps Y coordinate to map bounds.
+     *
+     * @param centerY center coordinate
+     * @return clamped tile y
+     */
     private int clampTileY(float centerY) {
         return pathfinder.clampCoord(MathUtils.floor(centerY), mapHeight);
     }
 
+    /**
+     * Transitions to the retreating state.
+     */
     private void enterRetreating() {
         state = EnemyState.RETREATING;
         patrolBehavior.clear();
@@ -498,6 +670,9 @@ public class Enemy extends Obstacle {
         chaseBehavior.reset();
     }
 
+    /**
+     * Transitions to the patrolling state.
+     */
     private void enterPatrolling() {
         state = EnemyState.PATROLLING;
         patrolBehavior.startPatrol();
@@ -507,6 +682,9 @@ public class Enemy extends Obstacle {
         resetPathing();
     }
 
+    /**
+     * Transitions to the patrol waiting state.
+     */
     private void enterPatrolWait() {
         state = EnemyState.PATROL_WAIT;
         patrolBehavior.startWaiting();
@@ -516,6 +694,9 @@ public class Enemy extends Obstacle {
         pathRecalcTimer = 0f;
     }
 
+    /**
+     * Transitions to the retreat waiting state.
+     */
     private void enterRetreatWait() {
         state = EnemyState.RETREAT_WAIT;
         retreatBehavior.startWaiting();
@@ -524,6 +705,9 @@ public class Enemy extends Obstacle {
         pathRecalcTimer = 0f;
     }
 
+    /**
+     * Transitions to the chasing state.
+     */
     private void enterChasing() {
         state = EnemyState.CHASING;
         patrolBehavior.clear();
@@ -532,6 +716,9 @@ public class Enemy extends Obstacle {
         chaseBehavior.reset();
     }
 
+    /**
+     * Resets pathing state and timers.
+     */
     private void resetPathing() {
         path.clear();
         pathIndex = 0;
@@ -541,6 +728,9 @@ public class Enemy extends Obstacle {
     }
 
     //TODO see if this is needed
+    /**
+     * Ensures the enemy is drawn above collectibles.
+     */
     private void ensureAboveCollectibles() {
         if (getStage() == null) {
             return;

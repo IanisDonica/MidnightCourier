@@ -14,13 +14,23 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Manages achievements persistence, progress, and popup notifications.
+ */
 public final class AchievementManager {
+    /** Local path to the achievements JSON file. */
     private static final String FILE_PATH = "assets/data/achievements.json";
+    /** Loaded achievements keyed by their identifier. */
     private static final Map<String, Achievement> ACHIEVEMENTS = new LinkedHashMap<>();
+    /** Whether the manager has been initialized. */
     private static boolean initialized = false;
+    /** Popup screen for achievement notifications. */
     private static AchievementPopupScreen popupScreen;
 
     // The AchievementManager isnt tied to a game or a screen, its initialized upon the start of the gamea and always the same one
+    /**
+     * Initializes the manager and loads achievements if needed.
+     */
     public static void init() {
 
         // In theory shouldn't happen, but just in case
@@ -35,16 +45,33 @@ public final class AchievementManager {
         }
     }
 
+    /**
+     * Returns all achievements as a new list.
+     *
+     * @return list of achievements
+     */
     public static List<Achievement> getAchievements() {
         init();
         return new ArrayList<>(ACHIEVEMENTS.values());
     }
 
+    /**
+     * Looks up an achievement by id.
+     *
+     * @param id achievement id
+     * @return achievement, or {@code null} if not found
+     */
     public static Achievement getAchievement(String id) {
         init();
         return ACHIEVEMENTS.get(id);
     }
 
+    /**
+     * Increments the progress of a specific achievement.
+     *
+     * @param id achievement id
+     * @param amount amount to add to the progress
+     */
     public static void incrementProgress(String id, int amount) {
         init();
         Achievement achievement = ACHIEVEMENTS.get(id);
@@ -59,6 +86,9 @@ public final class AchievementManager {
         save();
     }
 
+    /**
+     * Resets progress and unlock status for all achievements.
+     */
     public static void resetAll() {
         init();
         for (Achievement achievement : ACHIEVEMENTS.values()) {
@@ -68,10 +98,20 @@ public final class AchievementManager {
         save();
     }
 
+    /**
+     * Sets the popup screen used to display achievement notifications.
+     *
+     * @param screen popup screen instance
+     */
     public static void setPopupScreen(AchievementPopupScreen screen) {
         popupScreen = screen;
     }
 
+    /**
+     * Shows a popup notification for an unlocked achievement.
+     *
+     * @param achievement unlocked achievement
+     */
     private static void showPopup(Achievement achievement) {
         if (popupScreen != null) {
             popupScreen.showPopup(achievement.getName());
@@ -80,6 +120,9 @@ public final class AchievementManager {
 
 
     // Reads the JSON file and loads it's content in the Manager class
+    /**
+     * Loads achievements from the JSON file into memory.
+     */
     private static void load() {
         try {
             FileHandle file = Gdx.files.local(FILE_PATH);
@@ -101,6 +144,12 @@ public final class AchievementManager {
         }
     }
 
+    /**
+     * Parses a JSON value into an achievement instance.
+     *
+     * @param value JSON value containing achievement fields
+     * @return parsed achievement, or {@code null} if value is null
+     */
     private static Achievement parseAchievement(JsonValue value) {
         if (value == null) {
             return null;
@@ -115,6 +164,9 @@ public final class AchievementManager {
         return achievement;
     }
 
+    /**
+     * Saves the current achievements state to disk.
+     */
     private static void save() {
         try {
             Json json = new Json();
@@ -128,6 +180,9 @@ public final class AchievementManager {
         }
     }
 
+    /**
+     * Seeds the default achievements for first-time runs.
+     */
     private static void seedDefaults() {
         Achievement deliveries = new Achievement(
                 "complete_100_deliveries",

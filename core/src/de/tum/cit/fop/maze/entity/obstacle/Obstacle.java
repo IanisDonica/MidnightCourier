@@ -8,12 +8,30 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import de.tum.cit.fop.maze.entity.MapObject;
 import com.badlogic.gdx.utils.Array;
 
+/**
+ * Base class for obstacles with animated sprites.
+ */
 public class Obstacle extends MapObject {
+    /** Animation used for rendering. */
     Animation<TextureRegion> animation;
+    /** Sprite sheet offsets and frame count. */
     int textureOffsetX, textureOffsetY, animationFrames;
+    /** Shared sprite sheet texture. */
     private static Texture sharedTextureSheet;
+    /** Whether the shared texture is initialized. */
     private static boolean textureInitialized = false;
 
+    /**
+     * Creates an obstacle with given sprite offsets and size.
+     *
+     * @param x x position
+     * @param y y position
+     * @param w width in tiles
+     * @param h height in tiles
+     * @param textureOffsetX x offset in sprite sheet
+     * @param textureOffsetY y offset in sprite sheet
+     * @param animationFrames number of animation frames
+     */
     public Obstacle(float x, float y, int w, int h, int textureOffsetX, int textureOffsetY, int animationFrames) {
         setPosition(x, y);
         setSize(w, h);
@@ -23,6 +41,9 @@ public class Obstacle extends MapObject {
         initAnimation();
     }
 
+    /**
+     * Initializes the animation frames from the shared sprite sheet.
+     */
     protected void initAnimation() {
         //This is kinda duplicate, but it will later be useful
         if (!textureInitialized) {
@@ -38,6 +59,12 @@ public class Obstacle extends MapObject {
         animation = new Animation<>(0.25f, frames);
     }
 
+    /**
+     * Draws the obstacle's animation frame.
+     *
+     * @param batch sprite batch
+     * @param parentAlpha parent alpha
+     */
     @Override
     public void draw(Batch batch, float parentAlpha) {
         batch.draw(animation.getKeyFrame(animationTime, true), getX(), getY(), getWidth(), getHeight());

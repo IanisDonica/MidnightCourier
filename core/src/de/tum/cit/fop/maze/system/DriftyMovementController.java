@@ -3,15 +3,28 @@ package de.tum.cit.fop.maze.system;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 
+/**
+ * Movement controller with inertia and smooth orientation changes.
+ */
 public class DriftyMovementController {
+    /** Current velocity vector. */
     public Vector2 velocity = new Vector2();
+    /** Acceleration strength applied to movement inputs. */
     private float acceleration = 2f;
+    /** Maximum movement speed. */
     private float maxSpeed = 3f;
+    /** Friction multiplier applied per frame. */
     private float friction = 0.999f; // 0 means maximum friction, 1 is no friction
+    /** Degrees per second for smooth rotation to input direction. */
     private float rotationSpeed = 200f;     // Degrees per second for smooth rotation to input direction
+    /** Current orientation in degrees. */
     private float orientation = 90f;
+    /** Target orientation in degrees based on input. */
     private float targetOrientation = 90f;
 
+    /**
+     * Creates a movement controller with default parameters.
+     */
     public DriftyMovementController() {
         this.velocity.setZero();
         this.orientation = 90f;
@@ -21,6 +34,16 @@ public class DriftyMovementController {
     /**
      * Update movement each frame
      */
+    /**
+     * Updates movement, orientation, and friction for the current frame.
+     *
+     * @param deltaTime frame delta time in seconds
+     * @param moveUp whether moving up
+     * @param moveDown whether moving down
+     * @param moveLeft whether moving left
+     * @param moveRight whether moving right
+     * @param sprinting whether sprinting is active
+     */
     public void update(float deltaTime, boolean moveUp, boolean moveDown, boolean moveLeft, boolean moveRight, boolean sprinting) {
         applyForces(deltaTime, moveUp, moveDown, moveLeft, moveRight, sprinting);
         updateTargetOrientation(moveUp, moveDown, moveLeft, moveRight);
@@ -28,6 +51,14 @@ public class DriftyMovementController {
         applyFriction();
     }
 
+    /**
+     * Updates the target orientation based on input state.
+     *
+     * @param moveUp whether moving up
+     * @param moveDown whether moving down
+     * @param moveLeft whether moving left
+     * @param moveRight whether moving right
+     */
     private void updateTargetOrientation(boolean moveUp, boolean moveDown, boolean moveLeft, boolean moveRight) {
         if (moveUp || moveDown || moveLeft || moveRight) {
             float inputX = 0;
@@ -44,6 +75,11 @@ public class DriftyMovementController {
         }
     }
 
+    /**
+     * Gradually rotates the orientation toward the target orientation.
+     *
+     * @param deltaTime frame delta time in seconds
+     */
     private void updateOrientation(float deltaTime) {
         float rotationAmount = rotationSpeed * deltaTime;
 
@@ -61,6 +97,16 @@ public class DriftyMovementController {
         orientation = orientation % 360f;
     }
 
+    /**
+     * Applies movement forces based on input.
+     *
+     * @param deltaTime frame delta time in seconds
+     * @param moveUp whether moving up
+     * @param moveDown whether moving down
+     * @param moveLeft whether moving left
+     * @param moveRight whether moving right
+     * @param sprinting whether sprinting is active
+     */
     private void applyForces(float deltaTime, boolean moveUp, boolean moveDown, boolean moveLeft, boolean moveRight, boolean sprinting) {
         float forceStrength = acceleration;
         if (sprinting) {
@@ -90,6 +136,9 @@ public class DriftyMovementController {
         }
     }
 
+    /**
+     * Applies friction to the velocity.
+     */
     private void applyFriction() {
         if (velocity.len() < 0.01f) {
             velocity.setZero();  // Stop if speed is negligible
@@ -99,43 +148,91 @@ public class DriftyMovementController {
     }
 
 
+    /**
+     * Computes the forward direction vector from the current orientation.
+     *
+     * @return unit direction vector
+     */
     private Vector2 getDirectionVector() {
         float radians = orientation * MathUtils.degreesToRadians;
         return new Vector2(MathUtils.cos(radians), MathUtils.sin(radians));
     }
 
+    /**
+     * Returns a copy of the current velocity.
+     *
+     * @return velocity copy
+     */
     public Vector2 getVelocity() {
         return velocity.cpy();
     }
 
+    /**
+     * Returns the current orientation in degrees.
+     *
+     * @return orientation angle
+     */
     public float getOrientation() {
         return orientation;
     }
 
+    /**
+     * Returns the target input orientation in degrees.
+     *
+     * @return target orientation
+     */
     public float getInputAngle() {
         return targetOrientation;
     }
 
+    /**
+     * Returns the current speed magnitude.
+     *
+     * @return speed value
+     */
     public float getSpeed() {
         return velocity.len();
     }
 
+    /**
+     * Sets the acceleration strength.
+     *
+     * @param acceleration new acceleration
+     */
     public void setAcceleration(float acceleration) {
         this.acceleration = acceleration;
     }
 
+    /**
+     * Sets the maximum speed.
+     *
+     * @param maxSpeed new max speed
+     */
     public void setMaxSpeed(float maxSpeed) {
         this.maxSpeed = maxSpeed;
     }
 
+    /**
+     * Sets the friction multiplier.
+     *
+     * @param friction new friction value
+     */
     public void setFriction(float friction) {
         this.friction = friction;
     }
 
+    /**
+     * Sets the rotation speed in degrees per second.
+     *
+     * @param rotationSpeed new rotation speed
+     */
     public void setRotationSpeed(float rotationSpeed) {
         this.rotationSpeed = rotationSpeed;
     }
 
+    /**
+     * Resets velocity and orientation to defaults.
+     */
     public void reset() {
         velocity.setZero();
         orientation = 90f;

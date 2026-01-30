@@ -32,57 +32,111 @@ import java.util.ArrayList;
 import java.util.List;
 import de.tum.cit.fop.maze.entity.obstacle.BmwEnemy;
 
+/**
+ * Endless survival game screen with dynamic spawns and timers.
+ */
 public class SurvivalScreen implements Screen {
+    /** World width in tiles. */
     public static final int WORLD_WIDTH = 225;
+    /** World height in tiles. */
     public static final int WORLD_HEIGHT = 250;
+    /** Game instance for navigation and resources. */
     private final MazeRunnerGame game;
+    /** Loaded tiled map. */
     private final TiledMap map;
+    /** Collision layer for movement. */
     private final TiledMapTileLayer  collisionLayer;
+    /** Road layer for BMW movement. */
     private final TiledMapTileLayer roadLayer;
+    /** Map renderer for tiled map. */
     private final OrthogonalTiledMapRenderer mapRenderer;
+    /** Stage for world actors. */
     private final Stage stage;
+    /** Grayscale shader for effects. */
     private final ShaderProgram grayScaleShader;
+    /** Combined shader for fog and effects. */
     private final ShaderProgram combinedShader;
+    /** UI camera for HUD overlay. */
     private final OrthographicCamera uiCamera;
+    /** Particle system for drifting. */
     private final DriftParticleSystem driftParticleSystem;
+    /** Fog radius intensity. */
     private float fogIntensity = 7f;
+    /** Whether glasses upgrade has been applied. */
     private boolean glassesApplied = false;
+    /** Whether noire mode is enabled. */
     private boolean noireMode = false;
+    /** Framebuffer for world rendering. */
     private FrameBuffer fbo;
+    /** Region of the framebuffer texture. */
     private TextureRegion fboRegion;
+    /** Framebuffer for key preview. */
     private FrameBuffer keyPreviewFbo;
+    /** Region for key preview framebuffer. */
     private TextureRegion keyPreviewRegion;
+    /** Camera for key preview rendering. */
     private OrthographicCamera keyPreviewCamera;
+    /** Marker texture for key preview. */
     private Texture keyPreviewMarker;
+    /** Whether key preview is visible. */
     private boolean keyPreviewVisible = false;
+    /** Key preview center x. */
     private float keyPreviewCenterX = 0f;
+    /** Key preview center y. */
     private float keyPreviewCenterY = 0f;
+    /** Player actor. */
     private final Player player;
+    /** Point manager for scoring. */
     public PointManager pointManager;
+    /** Map loader for generating layers and entities. */
     private final MapLoader mapLoader = new MapLoader();
+    /** Base map path. */
     private String mapPath = "Assets_Map/THE_MAP.tmx";
+    /** Level number (0 for survival). */
     private int level;
+    /** Properties file path for the level. */
     private String propertiesPath;
+    /** HUD overlay. */
     private final HUD hud;
+    /** Developer console overlay. */
     private final DevConsole devConsole;
+    /** Active enemies. */
     private final List<de.tum.cit.fop.maze.entity.obstacle.Enemy> enemies = new ArrayList<>();
+    /** Active collectibles. */
     private final List<de.tum.cit.fop.maze.entity.collectible.Collectible> collectibles = new ArrayList<>();
+    /** Current saved game state. */
     private GameState gameState;
+    /** Whether the game is paused. */
     private boolean paused = false;
+    /** Regen interval seconds. */
     private static final float REGEN_INTERVAL_SECONDS = 10f;
+    /** Points awarded when regen triggers at full health. */
     private static final int REGEN_POINTS_ON_FULL = 100;
+    /** Regen timer accumulator. */
     private float regenTimer = 0f;
+    /** BMW spawn interval seconds. */
     private static final float BMW_SPAWN_INTERVAL_SECONDS = 8f;
+    /** BMW spawn timer accumulator. */
     private float bmwSpawnTimer = 0f;
+    /** Initial delivery time limit. */
     private static final float DELIVERY_TIME_START_SECONDS = 90f;
+    /** Minimum delivery time limit. */
     private static final float DELIVERY_TIME_MIN_SECONDS = 30f;
+    /** Amount to decrease delivery time after completion. */
     private static final float DELIVERY_TIME_DECREASE_SECONDS = 2f;
+    /** Current delivery time limit. */
     private float deliveryTimeLimit = DELIVERY_TIME_START_SECONDS;
+    /** Current delivery timer value. */
     private float deliveryTimer = 0f;
+    /** Whether the delivery timer is active. */
     private boolean deliveryTimerActive = false;
+    /** Minimum camera zoom. */
     private static final float MIN_ZOOM = 0.03f;
+    /** Maximum camera zoom. */
     private static final float MAX_ZOOM = 0.3f;
+    /** Spawn timing counter. */
     private int Delta = 0;
+    /** Spawn timing multiplier. */
     private float Adder = 1;
 
     /**
@@ -94,6 +148,11 @@ public class SurvivalScreen implements Screen {
         ///this(game, 1);
     ///}
 
+    /**
+     * Creates a new survival screen with a fresh state.
+     *
+     * @param game game instance
+     */
     public SurvivalScreen(MazeRunnerGame game) {
         this.game = game;
         this.hud = new HUD(game);
@@ -140,6 +199,12 @@ public class SurvivalScreen implements Screen {
         devConsole.addToStage(hud.getStage());
     }
 
+    /**
+     * Creates a survival screen from a saved game state.
+     *
+     * @param game game instance
+     * @param gameState saved state to load
+     */
     public SurvivalScreen(MazeRunnerGame game, GameState gameState) {
         this.game = game;
         this.gameState = gameState;
@@ -197,28 +262,52 @@ public class SurvivalScreen implements Screen {
         ((OrthographicCamera) stage.getCamera()).zoom = MathUtils.clamp(gameState.getCameraZoom(), MIN_ZOOM, MAX_ZOOM);
     }
 
+    /**
+     * Adjusts camera zoom by the given amount.
+     *
+     * @param amount zoom delta
+     */
     public void adjustZoom(float amount) {
         OrthographicCamera camera = (OrthographicCamera) stage.getCamera();
         camera.zoom = MathUtils.clamp(camera.zoom + amount, MIN_ZOOM, MAX_ZOOM);
         camera.update();
     }
 
+    /**
+     * Generates a TMX file for the level based on properties.
+     *
+     * @param templateMapPath TMX template path
+     * @param propertiesPath properties path for tiles
+     * @param level level number
+     * @return output TMX path
+     */
     private String buildGeneratedTmx(String templateMapPath, String propertiesPath, int level) {
         String outputPath = String.format("assets/Assets_Map/generated-survival-level-%d.tmx", level);
         mapLoader.buildTmxFromProperties(propertiesPath, templateMapPath, outputPath);
         return outputPath;
     }
 
+    /**
+     * Adjusts fog intensity by an amount.
+     *
+     * @param amount delta to apply
+     */
     public void adjustFog(float amount) {
         fogIntensity += amount;
     }
 
+    /**
+     * Toggles noire mode.
+     */
     public void toggleNoireMode() {
         noireMode = !noireMode;
     }
 
     // If I have more time ill make it, so this isn't polled every frame (the original idea was to make it fired in the upgrade classes),
     // But for now this also works
+    /**
+     * Applies upgrade effects to the player each frame.
+     */
     private void applyUpgrades() {
         ProgressionManager progressionManager = game.getProgressionManager();
         int speedUpgrades = 0;
@@ -248,6 +337,11 @@ public class SurvivalScreen implements Screen {
         }
     }
 
+    /**
+     * Renders and updates the survival game.
+     *
+     * @param delta frame delta time
+     */
     @Override
     public void render(float delta) {
         Adder *= 1.0003;
@@ -405,6 +499,12 @@ public class SurvivalScreen implements Screen {
         SaveManager.saveGame(gameState);
     }
 
+    /**
+     * Resizes viewports and framebuffers.
+     *
+     * @param width new width
+     * @param height new height
+     */
     @Override
     public void resize(int width, int height) {
         stage.getViewport().update(width, height, false);
@@ -420,6 +520,9 @@ public class SurvivalScreen implements Screen {
         fboRegion.flip(false, true);
     }
 
+    /**
+     * Toggles pause state and pause menu visibility.
+     */
     @Override
     public void pause() {
         if (paused) {
@@ -430,12 +533,18 @@ public class SurvivalScreen implements Screen {
         }
     }
 
+    /**
+     * Resumes gameplay and hides pause menu.
+     */
     @Override
     public void resume() {
         paused = false;
         hud.setPauseMenuVisible(false);
     }
 
+    /**
+     * Sets input processing and initializes actors on show.
+     */
     @Override
     public void show() {
         Gdx.input.setInputProcessor(new InputMultiplexer(hud.getStage(), stage));
@@ -480,9 +589,11 @@ public class SurvivalScreen implements Screen {
 
     @Override
     public void hide() {
-        // implement hide
     }
 
+    /**
+     * Disposes all resources associated with the screen.
+     */
     @Override
     public void dispose() {
         stage.dispose();
@@ -496,26 +607,55 @@ public class SurvivalScreen implements Screen {
         mapRenderer.dispose();
     }
 
+    /**
+     * Returns whether the game is paused.
+     *
+     * @return {@code true} if paused
+     */
     public boolean isPaused() {
         return paused;
     }
 
+    /**
+     * Returns the HUD instance.
+     *
+     * @return HUD
+     */
     public HUD getHud() {
         return hud;
     }
 
+    /**
+     * Toggles the developer console.
+     */
     public void toggleDevConsole() {
         devConsole.toggle(hud.getStage());
     }
 
+    /**
+     * Returns whether the developer console is visible.
+     *
+     * @return {@code true} if visible
+     */
     public boolean isDevConsoleVisible() {
         return devConsole.isVisible();
     }
 
+    /**
+     * Builds a properties path for a level.
+     *
+     * @param levelNumber level number
+     * @return properties file path
+     */
     private static String toPropertiesPath(int levelNumber) {
         return String.format("maps/level-%d.properties", levelNumber);
     }
 
+    /**
+     * Applies regeneration over time if the upgrade is owned.
+     *
+     * @param delta frame delta time
+     */
     private void handleRegen(float delta) {
         if (!game.getProgressionManager().hasUpgrade("regen")) {
             regenTimer = 0f;
@@ -533,6 +673,11 @@ public class SurvivalScreen implements Screen {
         }
     }
 
+    /**
+     * Spawns BMW enemies at intervals.
+     *
+     * @param delta frame delta time
+     */
     private void handleBmwSpawns(float delta) {
         bmwSpawnTimer += delta;
         if (bmwSpawnTimer >= BMW_SPAWN_INTERVAL_SECONDS) {
@@ -541,6 +686,11 @@ public class SurvivalScreen implements Screen {
         }
     }
 
+    /**
+     * Updates delivery timer and handles timeout death.
+     *
+     * @param delta frame delta time
+     */
     private void handleDeliveryTimer(float delta) {
         if (player.hasKey()) {
             if (!deliveryTimerActive) {
@@ -559,6 +709,11 @@ public class SurvivalScreen implements Screen {
         }
     }
 
+    /**
+     * Returns the current camera view bounds.
+     *
+     * @return camera view rectangle
+     */
     private Rectangle getCameraViewBounds() {
         OrthographicCamera camera = (OrthographicCamera) stage.getCamera();
         float viewW = camera.viewportWidth * camera.zoom;
@@ -568,6 +723,9 @@ public class SurvivalScreen implements Screen {
         return new Rectangle(viewX, viewY, viewW, viewH);
     }
 
+    /**
+     * Handles completion of an endless delivery.
+     */
     private void handleEndlessVictory() {
         hud.showKeyPreview(null, false);
         keyPreviewVisible = false;
@@ -584,6 +742,9 @@ public class SurvivalScreen implements Screen {
         ensureKeyAndExit();
     }
 
+    /**
+     * Ensures that key and exit collectibles exist.
+     */
     private void ensureKeyAndExit() {
         collectibles.removeIf(collectible -> collectible.getPickedUp() && collectible.getStage() == null);
         boolean hasKeyActor = false;
@@ -607,6 +768,9 @@ public class SurvivalScreen implements Screen {
         }
     }
 
+    /**
+     * Spawns a key at a random walkable tile.
+     */
     private void spawnKeyAtRandomTile() {
         GridPoint2 tile = pickSpawnTile();
         if (tile == null) {
@@ -619,6 +783,9 @@ public class SurvivalScreen implements Screen {
         triggerKeyPreview(tile.x + 0.5f, tile.y + 0.5f);
     }
 
+    /**
+     * Spawns an exit at a random walkable tile.
+     */
     private void spawnExitAtRandomTile() {
         GridPoint2 tile = pickSpawnTile();
         if (tile == null) {
@@ -630,6 +797,11 @@ public class SurvivalScreen implements Screen {
         collectibles.add(exitDoor);
     }
 
+    /**
+     * Picks a random walkable tile that doesn't collide with actors.
+     *
+     * @return tile position or {@code null} if none found
+     */
     private GridPoint2 pickSpawnTile() {
         List<GridPoint2> walkableTiles = collectWalkableTiles(collisionLayer);
         if (walkableTiles.isEmpty()) {
@@ -646,6 +818,12 @@ public class SurvivalScreen implements Screen {
         return null;
     }
 
+    /**
+     * Collects all walkable tiles from the collision layer.
+     *
+     * @param collisionLayer collision layer to scan
+     * @return list of walkable tile coordinates
+     */
     private static List<GridPoint2> collectWalkableTiles(TiledMapTileLayer collisionLayer) {
         List<GridPoint2> tiles = new ArrayList<>();
         int width = collisionLayer.getWidth();
@@ -660,6 +838,14 @@ public class SurvivalScreen implements Screen {
         return tiles;
     }
 
+    /**
+     * Checks whether spawning at a tile would collide with existing actors.
+     *
+     * @param stage stage containing actors
+     * @param x spawn x
+     * @param y spawn y
+     * @return {@code true} if collision would occur
+     */
     private static boolean wouldCollideAt(Stage stage, float x, float y) {
         if (stage == null) {
             return true;
@@ -674,6 +860,12 @@ public class SurvivalScreen implements Screen {
         return false;
     }
 
+    /**
+     * Triggers the key preview overlay.
+     *
+     * @param centerX center x in world units
+     * @param centerY center y in world units
+     */
     private void triggerKeyPreview(float centerX, float centerY) {
         keyPreviewCenterX = centerX;
         keyPreviewCenterY = centerY;
@@ -684,6 +876,9 @@ public class SurvivalScreen implements Screen {
         keyPreviewVisible = true;
     }
 
+    /**
+     * Restores key preview if a key already exists.
+     */
     private void updateKeyPreviewFromExistingKey() {
         for (de.tum.cit.fop.maze.entity.collectible.Collectible collectible : collectibles) {
             if (collectible instanceof de.tum.cit.fop.maze.entity.collectible.Key && !collectible.getPickedUp()) {
@@ -693,6 +888,12 @@ public class SurvivalScreen implements Screen {
         }
     }
 
+    /**
+     * Renders the key preview framebuffer.
+     *
+     * @param keyCenterX key center x
+     * @param keyCenterY key center y
+     */
     private void renderKeyPreview(float keyCenterX, float keyCenterY) {
         keyPreviewFbo.begin();
         ScreenUtils.clear(0, 0, 0, 1);
@@ -706,6 +907,11 @@ public class SurvivalScreen implements Screen {
         keyPreviewFbo.end();
     }
 
+    /**
+     * Builds a simple marker texture for key preview.
+     *
+     * @return marker texture
+     */
     private Texture buildKeyPreviewMarker() {
         Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
         pixmap.setColor(1f, 0f, 0f, 1f);

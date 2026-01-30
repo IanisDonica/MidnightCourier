@@ -8,11 +8,23 @@ import com.badlogic.gdx.utils.Array;
 import de.tum.cit.fop.maze.entity.DeathCause;
 import de.tum.cit.fop.maze.system.PointManager;
 
+/**
+ * Trap obstacle that damages the player on contact.
+ */
 public class Trap extends Obstacle {
+    /**
+     * Creates a trap at the given position.
+     *
+     * @param x x position
+     * @param y y position
+     */
     public Trap(float x, float y) {
         super(x, y, 1, 1, 0, 0, 1);
     }
 
+    /**
+     * Handles collision by damaging the player if not immune.
+     */
     @Override
     public void collision() {
         if (player.isPotholeImmune()) {
@@ -23,6 +35,9 @@ public class Trap extends Obstacle {
         }
     }
 
+    /**
+     * Initializes the trap animation.
+     */
     @Override
     protected void initAnimation() {
         //This is kinda duplicate, but it will later be useful

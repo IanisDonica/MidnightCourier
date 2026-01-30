@@ -7,10 +7,22 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import de.tum.cit.fop.maze.system.HUD;
 import de.tum.cit.fop.maze.entity.MapObject;
 
+/**
+ * Shop obstacle that enables the shop button when nearby.
+ */
 public class Shop extends MapObject {
+    /** Texture region for the shop sprite. */
     private final TextureRegion textureRegion;
+    /** HUD used to show the shop button. */
     private final HUD hud;
 
+    /**
+     * Creates a shop at the given position.
+     *
+     * @param x x position
+     * @param y y position
+     * @param hud HUD for shop button visibility
+     */
     public Shop(float x, float y, HUD hud) {
         setPosition(x, y);
         setSize(4, 2);
@@ -19,6 +31,9 @@ public class Shop extends MapObject {
         this.textureRegion = new TextureRegion(textureSheet, 0, 0, frameWidth * 4, frameHeight * 2);
     }
 
+    /**
+     * Expands bounds to allow interaction at a distance.
+     */
     @Override
     protected void updateBounds() {
         // Since we want the game to actually show the open shop button even when the player isnt hugging it
@@ -26,6 +41,9 @@ public class Shop extends MapObject {
     }
 
 
+    /**
+     * Shows the shop button when the player collides.
+     */
     @Override
     protected void collision() {
         if (hud != null) {
@@ -33,6 +51,12 @@ public class Shop extends MapObject {
         }
     }
 
+    /**
+     * Draws the shop sprite.
+     *
+     * @param batch sprite batch
+     * @param parentAlpha parent alpha
+     */
     @Override
     public void draw(Batch batch, float parentAlpha) {
         batch.draw(textureRegion, getX(), getY(), getWidth(), getHeight());

@@ -21,16 +21,32 @@ import de.tum.cit.fop.maze.system.UiUtils;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Screen that allows rebinding control keys.
+ */
 public class SettingsControlsScreen implements Screen {
+    /** Game instance for navigation and resources. */
     private final MazeRunnerGame game;
+    /** Stage hosting UI elements. */
     private final Stage stage;
+    /** Configuration manager for key bindings. */
     private final ConfigManager configManager;
+    /** Mapping of action names to their button widgets. */
     private final Map<String, TextButton> actionButtons = new HashMap<>();
+    /** Audio manager for UI sounds. */
     private final AudioManager audioManager;
+    /** Vignette texture overlay. */
     private final Texture vignetteTexture;
+    /** Current action being rebound, if any. */
     private String rebindingAction = null;
+    /** Button currently awaiting rebinding input. */
     private TextButton rebindingButton = null;
 
+    /**
+     * Creates the controls settings screen.
+     *
+     * @param game game instance
+     */
     public SettingsControlsScreen(MazeRunnerGame game) {
         this.game = game;
         this.configManager = game.getConfigManager();
@@ -141,6 +157,11 @@ public class SettingsControlsScreen implements Screen {
         table.add(horizontalGroup).colspan(2);
     }
 
+    /**
+     * Unbinds a conflicting action and updates its button label.
+     *
+     * @param action action name to unbind
+     */
     private void unbindButton(String action) {
         configManager.setKeyBinding(action, com.badlogic.gdx.Input.Keys.UNKNOWN);
         TextButton conflictingButton = actionButtons.get(action);
@@ -149,6 +170,11 @@ public class SettingsControlsScreen implements Screen {
         }
     }
 
+    /**
+     * Renders the screen.
+     *
+     * @param delta frame delta time
+     */
     @Override
     public void render(float delta) {
         if (!game.shouldRenderMenuBackground()) {
@@ -158,11 +184,20 @@ public class SettingsControlsScreen implements Screen {
         stage.draw(); // Draw the stage
     }
 
+    /**
+     * Updates viewport on resize.
+     *
+     * @param width new width
+     * @param height new height
+     */
     @Override
     public void resize(int width, int height) {
         stage.getViewport().update(width, height, true); // Update the stage viewport on resize
     }
 
+    /**
+     * Disposes stage and textures.
+     */
     @Override
     public void dispose() {
         // Dispose of the stage when the screen is disposed
@@ -170,6 +205,9 @@ public class SettingsControlsScreen implements Screen {
         vignetteTexture.dispose();
     }
 
+    /**
+     * Sets input processing for the screen.
+     */
     @Override
     public void show() {
         // Set the input processor so the stage can receive input events
@@ -177,7 +215,6 @@ public class SettingsControlsScreen implements Screen {
         stage.addListener(game.getKeyHandler());
     }
 
-    //The following methods are part of the Screen interface but are not used in this screen.
     @Override
     public void pause() {
     }

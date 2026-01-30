@@ -12,16 +12,31 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Manages sound effects and music playback with caching and volume controls.
+ */
 public class AudioManager {
+    /** Configuration manager providing persisted volume settings. */
     private final ConfigManager configManager;
+    /** Executor for asynchronous audio loading/playback. */
     private final ExecutorService executor;
+    /** Cache of loaded sound effects. */
     private final Map<String, Sound> soundCache;
+    /** Cache of loaded music tracks. */
     private final Map<String, Music> musicCache;
+    /** Currently playing music track. */
     private Music currentMusic;
+    /** Base volume for the currently playing music. */
     private float currentMusicVolume;
+    /** Global volume controls. */
     private float masterVolume, soundEffectsVolume, musicVolume;
 
 
+    /**
+     * Creates an audio manager bound to the game's configuration.
+     *
+     * @param game game instance used to access configuration
+     */
     public AudioManager(MazeRunnerGame game) {
         this.configManager = game.getConfigManager();
         executor = Executors.newFixedThreadPool(2);
@@ -29,6 +44,9 @@ public class AudioManager {
         musicCache = new HashMap<>();
     }
 
+    /**
+     * Loads audio settings from configuration.
+     */
     public void loadSettings() {
         configManager.loadAudioSettings();
         masterVolume = configManager.getVolume("masterVolume");
@@ -37,6 +55,12 @@ public class AudioManager {
     }
 
     // Play sound effect asynchronously
+    /**
+     * Plays a sound effect asynchronously.
+     *
+     * @param soundPath path relative to the sound folder
+     * @param volume base volume multiplier
+     */
     public void playSound(String soundPath, float volume) {
         executor.submit(() -> {
             Sound sound = getOrLoadSound(soundPath);
@@ -47,6 +71,14 @@ public class AudioManager {
     }
 
     // Play sound with pitch and pan control
+    /**
+     * Plays a sound effect with pitch and pan controls asynchronously.
+     *
+     * @param soundPath path relative to the sound folder
+     * @param volume base volume multiplier
+     * @param pitch pitch multiplier
+     * @param pan stereo pan (-1 left to 1 right)
+     */
     public void playSound(String soundPath, float volume, float pitch, float pan) {
         executor.submit(() -> {
             Sound sound = getOrLoadSound(soundPath);
@@ -59,6 +91,12 @@ public class AudioManager {
     }
 
     // Play looping sound (e.g., ambient effects)
+    /**
+     * Plays a looping sound effect asynchronously.
+     *
+     * @param soundPath path relative to the sound folder
+     * @param volume base volume multiplier
+     */
     public void playSoundLooping(String soundPath, float volume) {
         executor.submit(() -> {
             Sound sound = getOrLoadSound(soundPath);
@@ -70,6 +108,13 @@ public class AudioManager {
     }
 
     // Play music track with optional looping
+    /**
+     * Plays a music track asynchronously.
+     *
+     * @param musicPath path relative to the music folder
+     * @param volume base volume multiplier
+     * @param loop whether the music should loop
+     */
     public void playMusic(String musicPath, float volume, boolean loop) {
         executor.submit(() -> {
             // Stop current music before starting new
@@ -88,6 +133,9 @@ public class AudioManager {
         });
     }
 
+    /**
+     * Stops the currently playing music asynchronously.
+     */
     public void stopMusic() {
         executor.submit(() -> {
             if (currentMusic != null && currentMusic.isPlaying()) {
@@ -97,6 +145,11 @@ public class AudioManager {
     }
 
 
+    /**
+     * Pauses or resumes the current music asynchronously.
+     *
+     * @param paused {@code true} to pause, {@code false} to resume
+     */
     public void pauseMusic(boolean paused) {
         executor.submit(() -> {
             if (currentMusic != null) {
@@ -110,6 +163,12 @@ public class AudioManager {
     }
 
     // Load sound into cache if not already loaded
+    /**
+     * Gets a cached sound or loads it if missing.
+     *
+     * @param path relative sound path
+     * @return loaded sound, or {@code null} if loading fails
+     */
     private Sound getOrLoadSound(String path) {
         return soundCache.computeIfAbsent(path, p -> {
             try {
@@ -122,6 +181,12 @@ public class AudioManager {
     }
 
     // Load music into cache if not already loaded
+    /**
+     * Gets a cached music track or loads it if missing.
+     *
+     * @param path relative music path
+     * @return loaded music, or {@code null} if loading fails
+     */
     private Music getOrLoadMusic(String path) {
         return musicCache.computeIfAbsent(path, p -> {
             try {
@@ -134,6 +199,11 @@ public class AudioManager {
     }
 
     // Preload sounds on a background thread (useful for startup)
+    /**
+     * Preloads multiple sound effects asynchronously.
+     *
+     * @param soundPaths sound paths to preload
+     */
     public void preloadSounds(String... soundPaths) {
         executor.submit(() -> {
             for (String path : soundPaths) {
@@ -143,6 +213,9 @@ public class AudioManager {
     }
 
     // Clear all cached audio and dispose of resources
+    /**
+     * Disposes cached audio resources and shuts down the executor.
+     */
     public void dispose() {
         executor.submit(() -> {
             if (currentMusic != null && currentMusic.isPlaying()) {
@@ -166,10 +239,20 @@ public class AudioManager {
         }
     }
 
+    /**
+     * Returns the master volume.
+     *
+     * @return master volume [0,1]
+     */
     public float getMasterVolume() {
         return masterVolume;
     }
 
+    /**
+     * Sets the master volume and persists it.
+     *
+     * @param volume new master volume
+     */
     public void setMasterVolume(float volume) {
         this.masterVolume = Math.max(0f, Math.min(1f, volume));
         configManager.setVolume("masterVolume", masterVolume);
@@ -177,25 +260,48 @@ public class AudioManager {
     }
 
 
+    /**
+     * Returns the sound effects volume.
+     *
+     * @return sound effects volume [0,1]
+     */
     public float getSoundEffectsVolume() {
         return soundEffectsVolume;
     }
 
+    /**
+     * Sets the sound effects volume and persists it.
+     *
+     * @param volume new sound effects volume
+     */
     public void setSoundEffectsVolume(float volume) {
         configManager.setVolume("soundEffectsVolume", soundEffectsVolume);
         this.soundEffectsVolume = MathUtils.clamp(volume, 0f, 1f);
     }
 
+    /**
+     * Returns the music volume.
+     *
+     * @return music volume [0,1]
+     */
     public float getMusicVolume() {
         return musicVolume;
     }
 
+    /**
+     * Sets the music volume and persists it.
+     *
+     * @param volume new music volume
+     */
     public void setMusicVolume(float volume) {
         this.musicVolume = MathUtils.clamp(volume, 0f, 1f);
         configManager.setVolume("musicVolume", musicVolume);
         handleActiveMusic();
     }
 
+    /**
+     * Applies volume changes to the currently playing music.
+     */
     public void handleActiveMusic() {
         executor.submit(() -> {
             if (currentMusic != null && currentMusic.isPlaying()) {
@@ -204,4 +310,3 @@ public class AudioManager {
         });
     }
 }
-

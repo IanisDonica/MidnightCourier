@@ -22,7 +22,18 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+/**
+ * Loads map data from properties files and builds TMX content, layers, and entities.
+ */
 public class MapLoader {
+    /**
+     * Builds a TMX file from a properties file and a TMX template.
+     *
+     * @param propertiesPath path to the properties file containing tile values
+     * @param templateTmxPath path to the TMX template file
+     * @param outputTmxPath path to write the generated TMX file to
+     * @return the output TMX path that was written
+     */
     public String buildTmxFromProperties(String propertiesPath, String templateTmxPath, String outputTmxPath) {
         List<long[]> entries = readPropertyEntries(propertiesPath);
         String templateTmx = readTextFile(templateTmxPath);
@@ -53,6 +64,13 @@ public class MapLoader {
         return outputTmxPath;
     }
 
+    /**
+     * Builds a collision layer from a properties file.
+     *
+     * @param map the tiled map supplying dimensions and tile sizes
+     * @param propertiesPath path to the properties file containing collision values
+     * @return a collision layer with blocking cells populated
+     */
     public TiledMapTileLayer buildCollisionLayerFromProperties(TiledMap map, String propertiesPath) {
         TiledMapTileLayer layer = createLayer(map);
         int width = layer.getWidth();
@@ -81,6 +99,13 @@ public class MapLoader {
         return layer;
     }
 
+    /**
+     * Builds a road layer from a properties file.
+     *
+     * @param map the tiled map supplying dimensions and tile sizes
+     * @param propertiesPath path to the properties file containing road values
+     * @return a road layer with drivable cells populated
+     */
     public TiledMapTileLayer buildRoadLayerFromProperties(TiledMap map, String propertiesPath) {
         TiledMapTileLayer layer = createLayer(map);
         for (long[] entry : readPropertyEntries(propertiesPath)) {
@@ -95,6 +120,19 @@ public class MapLoader {
         return layer;
     }
 
+    /**
+     * Spawns entities into the stage based on properties entries.
+     *
+     * @param stage stage to attach actors to
+     * @param pointManager point manager for score-related collectibles
+     * @param collisionLayer collision layer used for enemy movement
+     * @param roadLayer road layer used for BMW enemies
+     * @param propertiesPath path to the properties file containing entity values
+     * @param hud HUD instance for shop interactions
+     * @param enemies list to collect spawned enemies into
+     * @param collectibles list to collect spawned collectibles into
+     * @param victoryListener callback invoked when the exit door triggers victory
+     */
     public void spawnEntitiesFromProperties(Stage stage, PointManager pointManager, TiledMapTileLayer collisionLayer, TiledMapTileLayer roadLayer, String propertiesPath, HUD hud, List<Enemy> enemies, List<Collectible> collectibles, ExitDoor.VictoryListener victoryListener) {
         for (long[] entry : readPropertyEntries(propertiesPath)) {
             int x = (int) entry[0];
@@ -139,6 +177,12 @@ public class MapLoader {
         refreshBmwRoadTiles();
     }
 
+    /**
+     * Finds the player spawn position defined in the properties file.
+     *
+     * @param propertiesPath path to the properties file containing the spawn entry
+     * @return the player spawn position, or {@code null} if none exists
+     */
     public GridPoint2 findPlayerSpawnFromProperties(String propertiesPath) {
         for (long[] entry : readPropertyEntries(propertiesPath)) {
             long value = entry[2];
@@ -149,10 +193,19 @@ public class MapLoader {
         return null;
     }
 
+    /**
+     * Recomputes BMW road tiles after road layer updates.
+     */
     public void refreshBmwRoadTiles() {
         BmwEnemy.recomputeRoadTiles();
     }
 
+    /**
+     * Creates a tiled layer using dimensions from the map.
+     *
+     * @param map the source map for width/height/tile sizes
+     * @return a new tiled layer with the same dimensions as the map
+     */
     private TiledMapTileLayer createLayer(TiledMap map) {
         int width = map.getProperties().get("width", Integer.class);
         int height = map.getProperties().get("height", Integer.class);
@@ -161,6 +214,13 @@ public class MapLoader {
         return new TiledMapTileLayer(width, height, tileWidth, tileHeight);
     }
 
+    /**
+     * Reads properties entries into a list of {@code [x, y, value]} tuples.
+     *
+     * @param propertiesPath path to the properties file
+     * @return list of parsed entries
+     * @throws RuntimeException if the properties file cannot be opened
+     */
     private List<long[]> readPropertyEntries(String propertiesPath) {
         List<long[]> entries = new java.util.ArrayList<>();
         try (InputStream input = openProperties(propertiesPath);
@@ -196,14 +256,32 @@ public class MapLoader {
         return entries;
     }
 
+    /**
+     * Opens a properties file as an input stream.
+     *
+     * @param propertiesPath path to the properties file
+     * @return input stream for the properties file
+     */
     private InputStream openProperties(String propertiesPath) {
         return Gdx.files.local(propertiesPath).read();
     }
 
+    /**
+     * Reads a text file from local storage as UTF-8.
+     *
+     * @param path path to the file
+     * @return file contents as a string
+     */
     private String readTextFile(String path) {
         return Gdx.files.local(path).readString("UTF-8");
     }
 
+    /**
+     * Computes the map size from property entries.
+     *
+     * @param entries parsed entries containing x/y coordinates
+     * @return {@code [width, height]} inferred from the maximum coordinates
+     */
     private int[] readMapSizeFromProperties(List<long[]> entries) {
         int maxX = -1;
         int maxY = -1;
@@ -218,6 +296,14 @@ public class MapLoader {
         return new int[]{width, height};
     }
 
+    /**
+     * Builds a CSV tile data block from the tile array.
+     *
+     * @param tiles tile GIDs, indexed by row and column
+     * @param width map width
+     * @param height map height
+     * @return CSV string compatible with TMX tile layer data
+     */
     private String buildCsv(long[][] tiles, int width, int height) {
         StringBuilder csv = new StringBuilder();
         for (int row = 0; row < height; row++) {
@@ -231,6 +317,15 @@ public class MapLoader {
         return csv.toString();
     }
 
+    /**
+     * Builds a TMX document based on a template and CSV tile data.
+     *
+     * @param templateTmx TMX template contents
+     * @param width map width
+     * @param height map height
+     * @param csv CSV tile data block
+     * @return full TMX document content
+     */
     private String buildTmxDocument(String templateTmx, int width, int height, String csv) {
         String propertiesBlock = findFirstMatch(templateTmx, "<properties>.*?</properties>");
         if (propertiesBlock == null) {
@@ -267,6 +362,13 @@ public class MapLoader {
         return tmx.toString();
     }
 
+    /**
+     * Finds the first regex match in text.
+     *
+     * @param text source text
+     * @param pattern regex pattern to search for
+     * @return the matched text, or {@code null} if not found
+     */
     private String findFirstMatch(String text, String pattern) {
         java.util.regex.Pattern regex = java.util.regex.Pattern.compile(pattern, java.util.regex.Pattern.DOTALL);
         java.util.regex.Matcher matcher = regex.matcher(text);

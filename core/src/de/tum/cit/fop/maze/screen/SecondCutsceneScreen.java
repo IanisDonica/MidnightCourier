@@ -22,41 +22,79 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+/**
+ * Cutscene screen that shows slide sequences and optional rolling text.
+ */
 public class SecondCutsceneScreen implements Screen {
+    /** Fade-in duration for slides. */
     private static final float FADE_IN_SECONDS = 2.5f;
+    /** Duration per slide. */
     private static final float SLIDE_DURATION = 3.5f;
+    /** Duration for fade to black. */
     private static final float FADE_TO_BLACK_SECONDS = 1.5f;
+    /** Duration for text box fade-in. */
     private static final float BOX_FADE_SECONDS = 2f;
+    /** Seconds per character for rolling text. */
     private static final float TYPE_SECONDS_PER_CHAR = 0.06f;
+    /** Final text shown after slides. */
     private static final String FINAL_TEXT = "I have a delivery for you, it's a bit risky with all the cops around the street, but i'm willing to pay extra.";
 
+    /** Game instance for navigation and resources. */
     private final MazeRunnerGame game;
+    /** Stage hosting UI elements. */
     private final Stage stage;
+    /** Textures for slide images. */
     private final Texture[] textures;
+    /** Slide images. */
     private final Image[] images;
+    /** Target level after cutscene. */
     private final int targetLevel;
+    /** Black overlay for fade to black. */
     private final Image blackOverlay;
+    /** Texture for the black overlay. */
     private final Texture blackTexture;
+    /** Text box for rolling text. */
     private final Table textBox;
+    /** Label for rolling text. */
     private final Label textLabel;
+    /** Texture for the text box background. */
     private final Texture boxTexture;
+    /** Table containing the accept button. */
     private final Table buttonTable;
+    /** Button to accept and continue. */
     private final TextButton acceptButton;
+    /** Elapsed time since start. */
     private float elapsed = 0f;
+    /** Whether the cutscene has finished. */
     private boolean finished = false;
+    /** Timer for black overlay fade. */
     private float blackTimer = 0f;
+    /** Timer for rolling text. */
     private float textTimer = 0f;
+    /** Timer for button fade. */
     private float buttonTimer = 0f;
+    /** Current cutscene state. */
     private CutsceneState state = CutsceneState.SHOW_SLIDES;
+    /** Whether rolling text should be used. */
     private final boolean useRollingText;
+    /** Whether this is the ending cutscene. */
     private final boolean isEndCutscene;
 
+    /**
+     * Cutscene phases.
+     */
     private enum CutsceneState {
         SHOW_SLIDES,
         FADE_TO_BLACK,
         SHOW_TEXT
     }
 
+    /**
+     * Creates a cutscene screen for a target level.
+     *
+     * @param game game instance
+     * @param targetLevel level to start after the cutscene
+     */
     public SecondCutsceneScreen(MazeRunnerGame game, int targetLevel) {
         this.game = game;
         this.targetLevel = targetLevel;
@@ -128,6 +166,11 @@ public class SecondCutsceneScreen implements Screen {
         stage.addActor(buttonTable);
     }
 
+    /**
+     * Loads slide files for the current target level.
+     *
+     * @return list of slide file handles
+     */
     private List<FileHandle> loadSlideFiles() {
         if (targetLevel == 2) {
             return List.of(
@@ -203,12 +246,20 @@ public class SecondCutsceneScreen implements Screen {
         return slideFiles;
     }
 
+    /**
+     * Sets input processing for the screen.
+     */
     @Override
     public void show() {
         Gdx.input.setInputProcessor(stage);
         stage.addListener(game.getKeyHandler());
     }
 
+    /**
+     * Renders the cutscene and advances its state.
+     *
+     * @param delta frame delta time
+     */
     @Override
     public void render(float delta) {
         if (!game.shouldRenderMenuBackground()) {
@@ -284,6 +335,9 @@ public class SecondCutsceneScreen implements Screen {
         stage.draw();
     }
 
+    /**
+     * Finishes the cutscene and transitions to gameplay.
+     */
     private void finishCutscene() {
         if (finished) {
             return;
@@ -296,11 +350,20 @@ public class SecondCutsceneScreen implements Screen {
         }
     }
 
+    /**
+     * Updates viewport on resize.
+     *
+     * @param width new width
+     * @param height new height
+     */
     @Override
     public void resize(int width, int height) {
         stage.getViewport().update(width, height, true);
     }
 
+    /**
+     * Disposes stage and textures.
+     */
     @Override
     public void dispose() {
         stage.dispose();

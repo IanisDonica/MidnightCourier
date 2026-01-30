@@ -1,6 +1,12 @@
 package de.tum.cit.fop.maze.system.progression;
 
+/**
+ * Upgrade that further increases max health.
+ */
 public class HealthBoostIIUpgrade extends BaseUpgrade {
+    /**
+     * Creates the health boost II upgrade.
+     */
     public HealthBoostIIUpgrade() {
         super(
                 "health_2",

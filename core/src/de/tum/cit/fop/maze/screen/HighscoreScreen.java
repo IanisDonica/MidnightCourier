@@ -28,16 +28,32 @@ import java.time.format.TextStyle;
 import java.util.Arrays;
 import java.util.Locale;
 
+/**
+ * Screen that displays local highscores and summary stats.
+ */
 public class HighscoreScreen implements Screen {
+    /** Local highscore data path. */
     private static final String FILE_PATH = "assets/data/highscore.json";
+    /** Stage hosting UI elements. */
     private final Stage stage;
+    /** Game instance for navigation and resources. */
     private final MazeRunnerGame game;
+    /** Root table for layout. */
     private final Table table;
+    /** Back button to return to menu. */
     private final TextButton backButton;
+    /** Audio manager for UI sounds. */
     private final AudioManager audioManager;
+    /** Vignette texture overlay. */
     private final Texture vignetteTexture;
+    /** Background texture for the screen. */
     private final Texture backgroundTexture;
 
+    /**
+     * Creates a new highscore screen.
+     *
+     * @param game game instance
+     */
     public HighscoreScreen(MazeRunnerGame game) {
         this.game = game;
         Viewport viewport = new FitViewport(1920, 1080);
@@ -71,6 +87,11 @@ public class HighscoreScreen implements Screen {
         });
     }
 
+    /**
+     * Renders the highscore screen.
+     *
+     * @param delta frame delta time
+     */
     @Override
     public void render(float delta) {
         if (!game.shouldRenderMenuBackground()) {
@@ -80,17 +101,29 @@ public class HighscoreScreen implements Screen {
         stage.draw();
     }
 
+    /**
+     * Updates the viewport on resize.
+     *
+     * @param width new width
+     * @param height new height
+     */
     @Override
     public void resize(int width, int height) {
         stage.getViewport().update(width, height, true);
     }
 
+    /**
+     * Disposes stage and textures.
+     */
     @Override
     public void dispose() {
         stage.dispose();
         vignetteTexture.dispose();
     }
 
+    /**
+     * Sets input processing and rebuilds the table.
+     */
     @Override
     public void show() {
         Gdx.input.setInputProcessor(stage);
@@ -112,6 +145,9 @@ public class HighscoreScreen implements Screen {
 
 
     // Build only once, as opposed to doing it every frame.
+    /**
+     * Rebuilds the highscore table layout from saved data.
+     */
     private void rebuildTable() {
         table.clear();
 
@@ -245,6 +281,12 @@ public class HighscoreScreen implements Screen {
 
     }
 
+    /**
+     * Formats a raw ISO date-time string for display.
+     *
+     * @param rawDateTime raw date-time string
+     * @return formatted date string or "N/A"
+     */
     private String formatDateTime(String rawDateTime) {
         if (rawDateTime == null) {
             return "N/A";
@@ -266,6 +308,12 @@ public class HighscoreScreen implements Screen {
         }
     }
 
+    /**
+     * Returns the day-of-month suffix.
+     *
+     * @param day day of month
+     * @return suffix string
+     */
     private String daySuffix(int day) {
         if (day >= 11 && day <= 13) {
             return "th";
