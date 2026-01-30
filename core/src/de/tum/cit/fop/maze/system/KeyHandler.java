@@ -8,28 +8,64 @@ import de.tum.cit.fop.maze.MazeRunnerGame;
 import de.tum.cit.fop.maze.entity.Player;
 import de.tum.cit.fop.maze.screen.*;
 
+/**
+ * Handles key input and routes actions to the appropriate screens.
+ */
 public class KeyHandler extends InputListener {
+    /** Game instance used for screen navigation. */
     private final MazeRunnerGame game;
+    /** Configuration manager for key bindings. */
     private final ConfigManager configManager;
+    /** Audio manager for click sounds. */
     private final AudioManager audioManager;
+    /** Current player instance for movement input. */
     private Player player;
 
+    /**
+     * Creates a key handler for the given game.
+     *
+     * @param game game instance
+     */
     public KeyHandler(MazeRunnerGame game) {
         this.game = game;
         configManager = game.getConfigManager();
         audioManager = game.getAudioManager();
     }
 
+    /**
+     * Handles key-down events.
+     *
+     * @param event input event
+     * @param keycode key code
+     * @return {@code true} if the event was handled
+     */
     @Override
     public boolean keyDown(InputEvent event, int keycode) {
         return handleKey(keycode, true);
     }
 
+    /**
+     * Handles key-up events.
+     *
+     * @param event input event
+     * @param keycode key code
+     * @return {@code true} if the event was handled
+     */
     @Override
     public boolean keyUp(InputEvent event, int keycode) {
         return handleKey(keycode, false);
     }
 
+    /**
+     * Handles scroll events for zoom control.
+     *
+     * @param event input event
+     * @param x scroll x
+     * @param y scroll y
+     * @param amountX scroll amount x
+     * @param amountY scroll amount y
+     * @return {@code true} if the event was handled
+     */
     @Override
     public boolean scrolled(InputEvent event, float x, float y, float amountX, float amountY) {
         Screen s = game.getScreen();
@@ -47,6 +83,13 @@ public class KeyHandler extends InputListener {
         return true;
     }
 
+    /**
+     * Routes key input between movement and screen commands.
+     *
+     * @param keycode key code
+     * @param isDown whether the key is pressed
+     * @return {@code true} if handled
+     */
     private boolean handleKey(int keycode, boolean isDown) {
         // Player movement and sprint
         if (player != null && checkMovementKeys(keycode, isDown)) return true;
@@ -59,6 +102,13 @@ public class KeyHandler extends InputListener {
         return false;
     }
 
+    /**
+     * Handles movement and sprint keys for the player.
+     *
+     * @param keycode key code
+     * @param isDown whether the key is pressed
+     * @return {@code true} if handled
+     */
     private boolean checkMovementKeys(int keycode, boolean isDown) {
         if (keycode == configManager.getKeyBinding("up")) {
             player.setMoveUp(isDown);
@@ -83,6 +133,12 @@ public class KeyHandler extends InputListener {
         return false;
     }
 
+    /**
+     * Handles non-pause screen effects (dev console, shop, zoom, fog).
+     *
+     * @param keycode key code
+     * @return {@code true} if handled
+     */
     private boolean handleScreenEffects(int keycode) {
         Screen s = game.getScreen();
         GameScreen gameScreen = (s instanceof GameScreen) ? game.getGameScreen() : null;
@@ -154,6 +210,12 @@ public class KeyHandler extends InputListener {
         return false;
     }
 
+    /**
+     * Handles pause and navigation keys.
+     *
+     * @param keycode key code
+     * @return {@code true} if handled
+     */
     private boolean handlePauseKey(int keycode) {
         if (keycode == configManager.getKeyBinding("pause")) {
             audioManager.playSound("Click.wav", 1);
@@ -179,6 +241,11 @@ public class KeyHandler extends InputListener {
         return false;
     }
 
+    /**
+     * Sets the player used for movement input.
+     *
+     * @param player player instance
+     */
     public void setPlayer(Player player) {
         this.player = player;
     }

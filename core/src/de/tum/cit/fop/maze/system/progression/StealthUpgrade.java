@@ -1,6 +1,12 @@
 package de.tum.cit.fop.maze.system.progression;
 
+/**
+ * Upgrade that reduces enemy detection range.
+ */
 public class StealthUpgrade extends BaseUpgrade {
+    /**
+     * Creates the stealth upgrade.
+     */
     public StealthUpgrade() {
         super(
                 "stealth",

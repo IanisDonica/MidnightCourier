@@ -8,12 +8,25 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
 
+/**
+ * Utility for saving and loading game state to disk.
+ */
 public class SaveManager {
+    /** Directory for save files. */
     private static final String SAVE_DIR = "saves/";
 
+    /**
+     * Prevents instantiation of utility class.
+     */
     private SaveManager() {
     }
 
+    /**
+     * Saves a game state under the given filename.
+     *
+     * @param filename base filename without extension
+     * @param state game state to serialize
+     */
     public static void saveGame(String filename, GameState state) {
         java.io.File directory = new java.io.File(SAVE_DIR);
         if (!directory.exists()) {
@@ -27,6 +40,11 @@ public class SaveManager {
         }
     }
 
+    /**
+     * Saves a game state to the default autosave file.
+     *
+     * @param state game state to serialize
+     */
     public static void saveGame(GameState state) {
         java.io.File directory = new java.io.File(SAVE_DIR);
         if (!directory.exists()) {
@@ -40,6 +58,12 @@ public class SaveManager {
         }
     }
 
+    /**
+     * Loads a game state from the given filename.
+     *
+     * @param filename base filename without extension
+     * @return loaded game state, or {@code null} if loading fails
+     */
     public static GameState loadGame(String filename) {
         try (FileInputStream fis = new FileInputStream(SAVE_DIR + filename + ".sav"); ObjectInputStream ois = new ObjectInputStream(fis)) {
             return (GameState) ois.readObject();
@@ -49,4 +73,3 @@ public class SaveManager {
         }
     }
 }
-

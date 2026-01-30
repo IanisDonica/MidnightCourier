@@ -14,16 +14,26 @@ import java.util.Map;
  * Saves/loads from JSON file using libGDX's built-in JSON.
  */
 public class ConfigManager {
+    /** Path to the key bindings configuration file. */
     private static final String KEYBINDINGS_CONFIG_FILE = "config/keybindings.json";
+    /** Path to the audio settings configuration file. */
     private static final String AUDIO_CONFIG_FILE = "config/audio.json";
+    /** Map of action names to key codes. */
     private Map<String, Integer> keyBindings;
+    /** Map of audio setting names to volume values. */
     private Map<String, Float> audioSettings;
 
+    /**
+     * Creates a configuration manager with empty settings maps.
+     */
     public ConfigManager() {
         keyBindings = new HashMap<>();
         audioSettings = new HashMap<>();
     }
 
+    /**
+     * Initializes default key bindings.
+     */
     private void initializeDefaults() {
         keyBindings.put("up", Input.Keys.UP);
         keyBindings.put("down", Input.Keys.DOWN);
@@ -39,11 +49,18 @@ public class ConfigManager {
         keyBindings.put("noire", Input.Keys.NUMPAD_7);
     }
 
+    /**
+     * Initializes default audio settings.
+     */
     private void initializeAudioSettings(){
         audioSettings.put("masterVolume", 1f);
         audioSettings.put("soundEffectsVolume", 1f);
         audioSettings.put("musicVolume", 1f);
     }
+
+    /**
+     * Loads key bindings from disk, falling back to defaults on failure.
+     */
     public void loadKeyBindings() {
         try {
             FileHandle file = Gdx.files.local(KEYBINDINGS_CONFIG_FILE);
@@ -61,6 +78,9 @@ public class ConfigManager {
         }
     }
 
+    /**
+     * Saves current key bindings to disk.
+     */
     public void saveKeyBindings() {
         try {
             Json json = new Json();
@@ -73,10 +93,22 @@ public class ConfigManager {
         }
     }
 
+    /**
+     * Returns the key code for a given action.
+     *
+     * @param action action name
+     * @return key code or {@link Input.Keys#UNKNOWN}
+     */
     public int getKeyBinding(String action) {
         return keyBindings.getOrDefault(action, Input.Keys.UNKNOWN);
     }
 
+    /**
+     * Returns the action mapped to a specific key code.
+     *
+     * @param keyCode key code to look up
+     * @return action name or {@code null} if not found
+     */
     public String getActionForKey(int keyCode) {
         for (var entry : keyBindings.entrySet()) {
             if (entry.getValue() == keyCode) {
@@ -86,15 +118,30 @@ public class ConfigManager {
         return null;
     }
 
+    /**
+     * Returns the human-readable key name for an action.
+     *
+     * @param action action name
+     * @return key name string
+     */
     public String getKeyBindingName(String action) {
         return Input.Keys.toString(getKeyBinding(action));
     }
 
+    /**
+     * Sets a key binding and saves it immediately.
+     *
+     * @param action action name
+     * @param keyCode key code to bind
+     */
     public void setKeyBinding(String action, int keyCode) {
         keyBindings.put(action, keyCode);
         saveKeyBindings();
     }
 
+    /**
+     * Loads audio settings from disk, falling back to defaults on failure.
+     */
     public void loadAudioSettings() {
         try {
             FileHandle file = Gdx.files.local(AUDIO_CONFIG_FILE);
@@ -133,6 +180,9 @@ public class ConfigManager {
         }
     }
 
+    /**
+     * Saves current audio settings to disk.
+     */
     public void saveAudioSettings() {
         try {
             Json json = new Json();
@@ -145,10 +195,22 @@ public class ConfigManager {
         }
     }
 
+    /**
+     * Returns a volume setting by name.
+     *
+     * @param type setting name
+     * @return volume value, defaulting to 1.0
+     */
     public float getVolume(String type) {
         return audioSettings.getOrDefault(type, 1.0f);
     }
 
+    /**
+     * Sets a volume setting by name.
+     *
+     * @param type setting name
+     * @param volume volume value
+     */
     public void setVolume(String type, float volume) {
         audioSettings.put(type, volume);
     }

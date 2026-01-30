@@ -26,7 +26,11 @@ import de.tum.cit.fop.maze.system.progression.Upgrade;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Screen that displays the progression upgrade tree.
+ */
 public class ProgressionTreeScreen implements Screen {
+    /** Parent-child upgrade connections. */
     private static final String[][] CONNECTIONS = {
             {"root", "speed"},
             {"root", "health"},
@@ -44,18 +48,34 @@ public class ProgressionTreeScreen implements Screen {
             {"stealth", "pothol_imunity"}
     };
 
+    /** Game instance for navigation and resources. */
     private final MazeRunnerGame game;
+    /** Stage hosting UI elements. */
     private final Stage stage;
+    /** Root table for layout. */
     private final Table table;
+    /** Back button to return to previous screen. */
     private final TextButton backButton;
+    /** Renderer for drawing connection lines. */
     private final ShapeRenderer shapeRenderer;
+    /** Background texture. */
     private final Texture backgroundTexture;
+    /** Background image. */
     private final Image backgroundImage;
+    /** Mega logo texture. */
     private final Texture megaTexture;
+    /** Mega logo image. */
     private final Image megaImage;
+    /** Mapping of upgrade names to buttons. */
     private final Map<String, TextButton> buttonsByName = new HashMap<>();
+    /** Audio manager for UI sounds. */
     private final AudioManager audioManager;
 
+    /**
+     * Creates the progression tree screen.
+     *
+     * @param game game instance
+     */
     public ProgressionTreeScreen(MazeRunnerGame game) {
         this.game = game;
         audioManager = game.getAudioManager();
@@ -85,6 +105,9 @@ public class ProgressionTreeScreen implements Screen {
         });
     }
 
+    /**
+     * Sets input processing and rebuilds the tree.
+     */
     @Override
     public void show() {
         Gdx.input.setInputProcessor(stage);
@@ -92,6 +115,11 @@ public class ProgressionTreeScreen implements Screen {
         rebuildTable();
     }
 
+    /**
+     * Renders the screen and upgrade connections.
+     *
+     * @param delta frame delta time
+     */
     @Override
     public void render(float delta) {
         if (!game.shouldRenderMenuBackground()) {
@@ -102,11 +130,20 @@ public class ProgressionTreeScreen implements Screen {
         drawConnections();
     }
 
+    /**
+     * Updates viewport on resize.
+     *
+     * @param width new width
+     * @param height new height
+     */
     @Override
     public void resize(int width, int height) {
         stage.getViewport().update(width, height, true);
     }
 
+    /**
+     * Disposes stage, renderer, and textures.
+     */
     @Override
     public void dispose() {
         stage.dispose();
@@ -127,6 +164,9 @@ public class ProgressionTreeScreen implements Screen {
     public void hide() {
     }
 
+    /**
+     * Rebuilds the progression tree layout.
+     */
     private void rebuildTable() {
         table.clear();
         buttonsByName.clear();
@@ -196,6 +236,12 @@ public class ProgressionTreeScreen implements Screen {
         table.add(treeContainer).expand().left().padTop(-20).row();
     }
 
+    /**
+     * Creates a button for a given upgrade name.
+     *
+     * @param upgradeName upgrade identifier
+     * @return configured upgrade button
+     */
     private TextButton createUpgradeButton(String upgradeName) {
         ProgressionManager progressionManager = game.getProgressionManager();
         Upgrade upgrade = progressionManager.getUpgrade(upgradeName);
@@ -232,6 +278,9 @@ public class ProgressionTreeScreen implements Screen {
         return button;
     }
 
+    /**
+     * Draws lines between connected upgrade buttons.
+     */
     private void drawConnections() {
         shapeRenderer.setProjectionMatrix(stage.getCamera().combined);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);

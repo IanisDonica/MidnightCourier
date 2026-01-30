@@ -15,18 +15,35 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import de.tum.cit.fop.maze.MazeRunnerGame;
 import de.tum.cit.fop.maze.system.AudioManager;
 
+/**
+ * Intro cutscene screen with sliding comic images.
+ */
 public class CutsceneScreen implements Screen {
+    /** Fade-in duration for each slide. */
     private static final float FADE_IN_SECONDS = 1.5f;
+    /** Total duration for each slide. */
     private static final float SLIDE_DURATION = FADE_IN_SECONDS;
 
+    /** Game instance for navigation and resources. */
     private final MazeRunnerGame game;
+    /** Stage used to render the cutscene. */
     private final Stage stage;
+    /** Audio manager for click sounds. */
     private final AudioManager audioManager;
+    /** Cutscene textures. */
     private final Texture[] textures = new Texture[3];
+    /** Images for each cutscene slide. */
     private final Image[] images = new Image[3];
+    /** Button to start gameplay after cutscene. */
     private final TextButton startButton;
+    /** Elapsed time since cutscene start. */
     private float elapsed = 0f;
 
+    /**
+     * Creates the cutscene screen.
+     *
+     * @param game game instance
+     */
     public CutsceneScreen(MazeRunnerGame game) {
         this.game = game;
         this.audioManager = game.getAudioManager();
@@ -62,12 +79,20 @@ public class CutsceneScreen implements Screen {
         stage.addActor(buttonTable);
     }
 
+    /**
+     * Sets up input processing for the cutscene.
+     */
     @Override
     public void show() {
         Gdx.input.setInputProcessor(stage);
         stage.addListener(game.getKeyHandler());
     }
 
+    /**
+     * Renders the cutscene and handles slide transitions.
+     *
+     * @param delta frame delta time in seconds
+     */
     @Override
     public void render(float delta) {
         if (!game.shouldRenderMenuBackground()) {
@@ -99,11 +124,20 @@ public class CutsceneScreen implements Screen {
         stage.draw();
     }
 
+    /**
+     * Updates the viewport on resize.
+     *
+     * @param width new width
+     * @param height new height
+     */
     @Override
     public void resize(int width, int height) {
         stage.getViewport().update(width, height, true);
     }
 
+    /**
+     * Disposes stage and textures.
+     */
     @Override
     public void dispose() {
         stage.dispose();

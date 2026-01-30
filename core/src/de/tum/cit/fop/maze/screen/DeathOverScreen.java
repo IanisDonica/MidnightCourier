@@ -20,20 +20,40 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import de.tum.cit.fop.maze.MazeRunnerGame;
 import de.tum.cit.fop.maze.system.AudioManager;
 
+/**
+ * Game over screen shown when the player dies to a BMW.
+ */
 public class DeathOverScreen implements Screen {
+    /** Game instance for navigation and resources. */
     private final MazeRunnerGame game;
+    /** Stage hosting UI elements. */
     private final Stage stage;
+    /** Audio manager for UI sounds. */
     private final AudioManager audioManager;
+    /** Overlay image used for fade in. */
     private final Image fadeOverlay;
+    /** Background texture. */
     private final Texture backgroundTexture;
+    /** Background image. */
     private final Image backgroundImage;
+    /** Group containing buttons for fade-in control. */
     private final WidgetGroup buttonGroup;
+    /** Survival time at game over. */
     private final float survivedSeconds;
+    /** Final points at game over. */
     private final int finalPoints;
+    /** Timer used for fade effects. */
     private float fadeTimer = 0f;
+    /** Fade duration for overlay. */
     private static final float FADE_DURATION = 2f;
+    /** Fade duration for button group. */
     private static final float BUTTON_FADE_DURATION = 1.0f;
 
+    /**
+     * Creates a new death over screen.
+     *
+     * @param game game instance
+     */
     public DeathOverScreen(MazeRunnerGame game) {
         this.game = game;
         if (game.getGameScreen() != null && game.getGameScreen().pointManager != null) {
@@ -146,6 +166,11 @@ public class DeathOverScreen implements Screen {
         stage.addActor(fadeOverlay);
     }
 
+    /**
+     * Renders the death over screen with fade effects.
+     *
+     * @param delta frame delta time
+     */
     @Override
     public void render(float delta) {
         if (!game.shouldRenderMenuBackground()) {
@@ -176,17 +201,29 @@ public class DeathOverScreen implements Screen {
         stage.draw();
     }
 
+    /**
+     * Updates the viewport on resize.
+     *
+     * @param width new width
+     * @param height new height
+     */
     @Override
     public void resize(int width, int height) {
         stage.getViewport().update(width, height, true);
     }
 
+    /**
+     * Disposes stage and background resources.
+     */
     @Override
     public void dispose() {
         stage.dispose();
         backgroundTexture.dispose();
     }
 
+    /**
+     * Sets input processing for the screen.
+     */
     @Override
     public void show() {
         Gdx.input.setInputProcessor(stage);

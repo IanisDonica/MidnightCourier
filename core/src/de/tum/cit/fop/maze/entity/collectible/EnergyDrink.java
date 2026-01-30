@@ -7,12 +7,25 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Array;
 import de.tum.cit.fop.maze.system.PointManager;
 
+/**
+ * Collectible that grants a temporary speed boost.
+ */
 public class EnergyDrink extends Collectible {
+    /**
+     * Creates an energy drink collectible.
+     *
+     * @param x spawn x position
+     * @param y spawn y position
+     * @param pointManager point manager for scoring
+     */
     public EnergyDrink(float x, float y, PointManager pointManager) {
         super(x, y, 1, 1, pointManager);
         initEnergyDrinkAnimation();
     }
 
+    /**
+     * Initializes the animated sprite for the energy drink.
+     */
     private void initEnergyDrinkAnimation() {
         Texture textureSheet = new Texture(Gdx.files.internal("energy-cans/energy-blau-animation.png"));
         Array<TextureRegion> spinFrames = new Array<>(TextureRegion.class);
@@ -34,6 +47,9 @@ public class EnergyDrink extends Collectible {
         spinAnimation = new Animation<>(0.25f, spinFrames);
     }
 
+    /**
+     * Handles collision by applying the drink effect and awarding points.
+     */
     @Override
     protected void collision() {
         if (!this.getPickedUp()) {

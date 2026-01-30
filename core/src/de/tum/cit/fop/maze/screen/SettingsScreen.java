@@ -18,12 +18,24 @@ import de.tum.cit.fop.maze.MazeRunnerGame;
 import de.tum.cit.fop.maze.system.AudioManager;
 import de.tum.cit.fop.maze.system.UiUtils;
 
+/**
+ * Main settings screen that links to sub-settings screens.
+ */
 public class SettingsScreen implements Screen {
+    /** Game instance for navigation and resources. */
     private final MazeRunnerGame game;
+    /** Stage hosting UI elements. */
     private final Stage stage;
+    /** Audio manager for UI sounds. */
     private final AudioManager audioManager;
+    /** Vignette texture overlay. */
     private final Texture vignetteTexture;
 
+    /**
+     * Creates the settings screen.
+     *
+     * @param game game instance
+     */
     public SettingsScreen(MazeRunnerGame game) {
         this.game = game;
         audioManager = game.getAudioManager();
@@ -95,6 +107,11 @@ public class SettingsScreen implements Screen {
     }
 
 
+    /**
+     * Renders the screen.
+     *
+     * @param delta frame delta time
+     */
     @Override
     public void render(float delta) {
         if (!game.shouldRenderMenuBackground()) {
@@ -104,11 +121,20 @@ public class SettingsScreen implements Screen {
         stage.draw(); // Draw the stage
     }
 
+    /**
+     * Updates viewport on resize.
+     *
+     * @param width new width
+     * @param height new height
+     */
     @Override
     public void resize(int width, int height) {
         stage.getViewport().update(width, height, true); // Update the stage viewport on resize
     }
 
+    /**
+     * Disposes stage and textures.
+     */
     @Override
     public void dispose() {
         // Dispose of the stage when the screen is disposed
@@ -116,6 +142,9 @@ public class SettingsScreen implements Screen {
         vignetteTexture.dispose();
     }
 
+    /**
+     * Sets input processing for the screen.
+     */
     @Override
     public void show() {
         // Set the input processor so the stage can receive input events
@@ -123,7 +152,6 @@ public class SettingsScreen implements Screen {
         stage.addListener(game.getKeyHandler());
     }
 
-    //The following methods are part of the Screen interface but are not used in this screen.
     @Override
     public void pause() {
     }

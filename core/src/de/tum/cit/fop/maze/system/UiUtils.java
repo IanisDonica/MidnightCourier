@@ -3,7 +3,13 @@ package de.tum.cit.fop.maze.system;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 
+/**
+ * UI-related helper utilities.
+ */
 public final class UiUtils {
+    /**
+     * Prevents instantiation of utility class.
+     */
     private UiUtils() {
     }
 
@@ -11,6 +17,14 @@ public final class UiUtils {
 
     // This is actually more or the same as my fog of war openGL code (it's not a circle when height != width tho)
     // but on the CPU, however it only runs once so it is never going to be a real issue, its also easier to work with
+    /**
+     * Builds a vignette texture with a radial falloff to the edges.
+     *
+     * @param width texture width in pixels
+     * @param height texture height in pixels
+     * @param maxAlpha maximum alpha at the outer edge
+     * @return a texture containing the vignette mask
+     */
     public static Texture buildVignetteTexture(int width, int height, float maxAlpha) {
         Pixmap pixmap = new Pixmap(width, height, Pixmap.Format.RGBA8888);
         float cx = width / 2f, cy = height / 2f;  // center X/Y

@@ -19,14 +19,28 @@ import de.tum.cit.fop.maze.system.AudioManager;
 import de.tum.cit.fop.maze.system.GraphicsManager;
 import de.tum.cit.fop.maze.system.UiUtils;
 
+/**
+ * Settings screen for video and graphics options.
+ */
 public class SettingsVideoScreen implements Screen {
+    /** Game instance for navigation and resources. */
     private final MazeRunnerGame game;
+    /** Audio manager for UI sounds. */
     private final AudioManager audioManager;
+    /** Stage hosting UI elements. */
     private final Stage stage;
+    /** Vignette texture overlay. */
     private final Texture vignetteTexture;
+    /** Graphics settings manager. */
     private final GraphicsManager graphicsManager;
+    /** Dialog shown for restart-required changes. */
     private final RestartDialog restartDialog;
 
+    /**
+     * Creates the video settings screen.
+     *
+     * @param game game instance
+     */
     public SettingsVideoScreen(MazeRunnerGame game) {
         this.game = game;
         audioManager = game.getAudioManager();
@@ -117,12 +131,20 @@ public class SettingsVideoScreen implements Screen {
 
     }
 
+    /**
+     * Sets input processing for the screen.
+     */
     @Override
     public void show() {
         Gdx.input.setInputProcessor(stage);
         stage.addListener(game.getKeyHandler());
     }
 
+    /**
+     * Renders the screen.
+     *
+     * @param v frame delta time
+     */
     @Override
     public void render(float v) {
         if (!game.shouldRenderMenuBackground()) {
@@ -132,6 +154,12 @@ public class SettingsVideoScreen implements Screen {
         stage.draw();
     }
 
+    /**
+     * Updates viewport on resize.
+     *
+     * @param width new width
+     * @param height new height
+     */
     @Override
     public void resize(int width, int height) {
         stage.getViewport().update(width, height, true); // Update the stage viewport on resize
@@ -152,12 +180,20 @@ public class SettingsVideoScreen implements Screen {
 
     }
 
+    /**
+     * Disposes stage and textures.
+     */
     @Override
     public void dispose() {
         stage.dispose();
         vignetteTexture.dispose();
     }
 
+    /**
+     * Builds a select box style matching the UI skin.
+     *
+     * @return select box style
+     */
     private SelectBox.SelectBoxStyle buildSelectBoxStyle() {
         SelectBox.SelectBoxStyle style = new SelectBox.SelectBoxStyle();
         style.font = game.getSkin().getFont("font");

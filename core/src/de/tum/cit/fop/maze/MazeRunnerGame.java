@@ -11,28 +11,45 @@ import de.tum.cit.fop.maze.system.*;
 import de.tum.cit.fop.maze.screen.AchievementPopupScreen;
 import de.tum.cit.fop.maze.entity.DeathCause;
 import games.spooky.gdx.nativefilechooser.NativeFileChooser;
+
 /**
- * The MazeRunnerGame class represents the core of the Maze Runner game.
- * It manages the screens and global resources like SpriteBatch and Skin.
+ * Core game class that manages screens and shared resources.
  */
 
 public class MazeRunnerGame extends Game {
+    /** Manages configuration and key bindings. */
     private final ConfigManager configManager;
+    /** Tracks input bindings and key state. */
     private final KeyHandler keyHandler;
+    /** Handles audio playback and settings. */
     private final AudioManager audioManager;
+    /** Manages loaded graphics resources. */
     private final GraphicsManager graphicsManager;
+    /** Overlay popup screen for achievements. */
     private AchievementPopupScreen achievementPopupScreen;
+    /** Main menu screen. */
     private MenuScreen menuScreen;
+    /** Main game screen. */
     private GameScreen gameScreen;
+    /** Endless/survival mode screen. */
     private SurvivalScreen survivalScreen;
+    /** Settings root screen. */
     private SettingsScreen settingsScreen;
+    /** Level selection screen. */
     private LevelSelectScreen levelSelectScreen;
+    /** Highscore display screen. */
     private HighscoreScreen highscoreScreen;
+    /** Progression tree screen. */
     private ProgressionTreeScreen progressionTreeScreen;
+    /** Current level number for level-based gameplay. */
     private int currentLevelNumber = 1;
+    /** Sprite batch shared across screens. */
     private SpriteBatch spriteBatch;
+    /** UI skin shared across screens. */
     private Skin skin;
+    /** Progression manager tracking upgrades and points. */
     private ProgressionManager progressionManager;
+    /** Screen to return to after leaving settings. */
     private Screen settingsReturnScreen;
 
 
@@ -102,6 +119,10 @@ public class MazeRunnerGame extends Game {
         }
         this.setScreen(gameScreen);
     }
+
+    /**
+     * Switches to endless mode from the current screen.
+     */
     public void goToEndless() {
         if (gameScreen != null) {
             gameScreen.dispose();
@@ -115,6 +136,12 @@ public class MazeRunnerGame extends Game {
         currentLevelNumber = 0;
         this.setScreen(survivalScreen);
     }
+
+    /**
+     * Switches to endless mode while tracking a specific level number.
+     *
+     * @param levelNumber the level number to store for endless mode
+     */
     public void goToEndless(int levelNumber) {
         if (gameScreen != null) {
             gameScreen.dispose();
@@ -129,6 +156,9 @@ public class MazeRunnerGame extends Game {
         this.setScreen(survivalScreen);
     }
 
+    /**
+     * Switches to survival mode.
+     */
     public void goToSurvival() {
         if (survivalScreen == null) {
             survivalScreen = new SurvivalScreen(this);
@@ -140,6 +170,11 @@ public class MazeRunnerGame extends Game {
         this.setScreen(survivalScreen);
     }
 
+    /**
+     * Switches to the game screen for a specific level.
+     *
+     * @param levelNumber the level to load
+     */
     public void goToGame(int levelNumber) {
         // This will be the case after Try again/Next level
         // If this is not done, there will be a memory leak
@@ -156,6 +191,11 @@ public class MazeRunnerGame extends Game {
         this.setScreen(gameScreen);
     }
 
+    /**
+     * Switches to the game screen from a saved game state.
+     *
+     * @param gameState the saved game state to load
+     */
     public void goToGame(GameState gameState) {
         if (gameState == null) {
             goToMenu();
@@ -183,10 +223,18 @@ public class MazeRunnerGame extends Game {
         this.setScreen(new NewGameScreen(this)); // Set the current screen to GameScreen
     }
 
+    /**
+     * Switches to the first cutscene screen.
+     */
     public void goToCutsceneScreen() {
         this.setScreen(new CutsceneScreen(this));
     }
 
+    /**
+     * Switches to the second cutscene screen.
+     *
+     * @param targetLevel the level number used by the cutscene
+     */
     public void goToSecondCutsceneScreen(int targetLevel) {
         this.setScreen(new SecondCutsceneScreen(this, targetLevel));
     }
@@ -198,6 +246,9 @@ public class MazeRunnerGame extends Game {
         this.setScreen(new ContinueGameScreen(this)); // Set the current screen to GameScreen
     }
 
+    /**
+     * Switches to the level select screen.
+     */
     public void goToLevelSelectScreen() {
         if (levelSelectScreen == null) {
             levelSelectScreen = new LevelSelectScreen(this);
@@ -205,6 +256,9 @@ public class MazeRunnerGame extends Game {
         this.setScreen(levelSelectScreen);
     }
 
+    /**
+     * Switches to the settings screen and remembers the current screen.
+     */
     public void goToSettingsScreen() {
         Screen current = getScreen();
         if (!(current instanceof SettingsScreen
@@ -220,6 +274,9 @@ public class MazeRunnerGame extends Game {
         this.setScreen(settingsScreen);
     }
 
+    /**
+     * Returns from settings to the previously active screen.
+     */
     public void goBackFromSettings() {
         if (settingsReturnScreen instanceof SurvivalScreen && survivalScreen != null) {
             this.setScreen(survivalScreen);
@@ -236,6 +293,9 @@ public class MazeRunnerGame extends Game {
         goToMenu();
     }
 
+    /**
+     * Switches to the highscore screen.
+     */
     public void goToHighscoreScreen() {
         if (highscoreScreen == null) {
             highscoreScreen = new HighscoreScreen(this);
@@ -243,6 +303,9 @@ public class MazeRunnerGame extends Game {
         this.setScreen(highscoreScreen);
     }
 
+    /**
+     * Switches to the progression tree screen from gameplay.
+     */
     public void goToProgressionTreeScreenFromGame() {
         if (progressionTreeScreen == null) {
             progressionTreeScreen = new ProgressionTreeScreen(this);
@@ -250,6 +313,9 @@ public class MazeRunnerGame extends Game {
         this.setScreen(progressionTreeScreen);
     }
 
+    /**
+     * Returns from the progression tree to the previous game-related screen.
+     */
     public void goBackFromProgressionTree() {
         if (gameScreen != null) {
             this.setScreen(gameScreen);
@@ -260,6 +326,9 @@ public class MazeRunnerGame extends Game {
         }
     }
 
+    /**
+     * Switches to the settings controls screen.
+     */
     public void goToSettingsControlsScreen() {
         this.setScreen(new SettingsControlsScreen(this)); // Set the current screen to GameScreen
         if (settingsScreen != null) {
@@ -268,10 +337,16 @@ public class MazeRunnerGame extends Game {
         }
     }
 
+    /**
+     * Switches to the achievements screen.
+     */
     public void goToAchievementsScreen() {
         this.setScreen(new AchievementsScreen(this)); // Set the current screen to GameScreen
     }
 
+    /**
+     * Switches to the settings video screen.
+     */
     public void goToSettingsVideoScreen() {
         this.setScreen(new SettingsVideoScreen(this)); // Set the current screen to GameScreen
         if (settingsScreen != null) {
@@ -280,6 +355,9 @@ public class MazeRunnerGame extends Game {
         }
     }
 
+    /**
+     * Switches to the settings audio screen.
+     */
     public void goToSettingsAudioScreen() {
         this.setScreen(new SettingsAudioScreen(this)); // Set the current screen to GameScreen
         if (settingsScreen != null) {
@@ -288,6 +366,9 @@ public class MazeRunnerGame extends Game {
         }
     }
 
+    /**
+     * Switches to the settings game screen.
+     */
     public void goToSettingsGameScreen() {
         this.setScreen(new SettingsGameScreen(this)); // Set the current screen to GameScreen
         if (settingsScreen != null) {
@@ -296,6 +377,9 @@ public class MazeRunnerGame extends Game {
         }
     }
 
+    /**
+     * Switches to the generic game over screen.
+     */
     public void goToGameOverScreen() {
         this.setScreen(new GameOverScreen(this)); // Set the current screen to GameScreen
         if (settingsScreen != null) {
@@ -304,6 +388,9 @@ public class MazeRunnerGame extends Game {
         }
     }
 
+    /**
+     * Switches to the death-over screen for BMW-related death.
+     */
     public void goToDeathOverScreen() {
         this.setScreen(new DeathOverScreen(this));
         if (settingsScreen != null) {
@@ -312,6 +399,9 @@ public class MazeRunnerGame extends Game {
         }
     }
 
+    /**
+     * Switches to the pothole death screen.
+     */
     public void goToPotholeDeathScreen() {
         this.setScreen(new PotholeDeathScreen(this));
         if (settingsScreen != null) {
@@ -320,6 +410,9 @@ public class MazeRunnerGame extends Game {
         }
     }
 
+    /**
+     * Switches to the BMW explosion death screen.
+     */
     public void goToBmwExplosionDeathScreen() {
         this.setScreen(new BmwExplosionDeathScreen(this));
         if (settingsScreen != null) {
@@ -328,6 +421,9 @@ public class MazeRunnerGame extends Game {
         }
     }
 
+    /**
+     * Switches to the victory screen and awards progression points.
+     */
     public void goToVictoryScreen() {
         progressionManager.addPoints(500);
         this.setScreen(new VictoryScreen(this)); // Set the current screen to GameScreen
@@ -337,6 +433,11 @@ public class MazeRunnerGame extends Game {
         }
     }
 
+    /**
+     * Handles player death by switching to the appropriate screen.
+     *
+     * @param cause the cause of death, or {@code null} for a generic game over
+     */
     public void handlePlayerDeath(DeathCause cause) {
         if (cause == null) {
             goToGameOverScreen();
@@ -350,6 +451,9 @@ public class MazeRunnerGame extends Game {
         }
     }
 
+    /**
+     * Disposes all active screens and shared resources.
+     */
     @Override
     public void dispose() {
         getScreen().hide(); // Hide the current screen
@@ -362,6 +466,9 @@ public class MazeRunnerGame extends Game {
         }
     }
 
+    /**
+     * Renders the current screen and the achievement popup overlay.
+     */
     @Override
     public void render() {
         Screen current = getScreen();
@@ -380,6 +487,12 @@ public class MazeRunnerGame extends Game {
         }
     }
 
+    /**
+     * Resizes the game and the achievement popup overlay.
+     *
+     * @param width new width in pixels
+     * @param height new height in pixels
+     */
     @Override
     public void resize(int width, int height) {
         super.resize(width, height);
@@ -389,55 +502,118 @@ public class MazeRunnerGame extends Game {
     }
 
     // Getter methods
+    /**
+     * Returns the shared UI skin.
+     *
+     * @return UI skin
+     */
     public Skin getSkin() {
         return skin;
     }
 
+    /**
+     * Returns the shared sprite batch.
+     *
+     * @return sprite batch
+     */
     public SpriteBatch getSpriteBatch() {
         return spriteBatch;
     }
 
+    /**
+     * Returns the configuration manager.
+     *
+     * @return configuration manager
+     */
     public ConfigManager getConfigManager() {
         return configManager;
     }
 
+    /**
+     * Returns the key handler.
+     *
+     * @return key handler
+     */
     public KeyHandler getKeyHandler() {
         return keyHandler;
     }
 
+    /**
+     * Returns the current level number.
+     *
+     * @return current level number
+     */
     public int getCurrentLevelNumber() {
         return currentLevelNumber;
     }
 
+    /**
+     * Returns the progression manager.
+     *
+     * @return progression manager
+     */
     public ProgressionManager getProgressionManager() {
         return progressionManager;
     }
 
+    /**
+     * Starts a new progression run with default points.
+     */
     public void startNewGameProgression() {
         progressionManager = new ProgressionManager(2000);
     }
 
+    /**
+     * Returns the audio manager.
+     *
+     * @return audio manager
+     */
     public AudioManager getAudioManager() {
         return audioManager;
     }
 
+    /**
+     * Returns the current game screen.
+     *
+     * @return game screen, or {@code null} if not initialized
+     */
     public GameScreen getGameScreen() {
         return gameScreen;
     }
 
+    /**
+     * Returns the current survival screen.
+     *
+     * @return survival screen, or {@code null} if not initialized
+     */
     public SurvivalScreen getSurvivalScreen() {
         return survivalScreen;
     }
 
+    /**
+     * Returns the graphics manager.
+     *
+     * @return graphics manager
+     */
     public GraphicsManager getGraphicsManager() {
         return graphicsManager;
     }
 
+    /**
+     * Determines whether the menu background should be rendered behind other screens.
+     *
+     * @return {@code true} if the menu background should render
+     */
     public boolean shouldRenderMenuBackground() {
         Screen current = getScreen();
         return !(current instanceof GameScreen) && !(current instanceof SurvivalScreen);
     }
 
+    /**
+     * Loads progression data from a saved game state.
+     *
+     * @param gameState saved game state to read from
+     */
     private void loadProgressionFromGameState(GameState gameState) {
         int points = gameState.getProgressionPoints();
         if (gameState.getOwnedUpgrades() == null) {

@@ -21,13 +21,26 @@ import de.tum.cit.fop.maze.system.AudioManager;
 import de.tum.cit.fop.maze.system.ConfigManager;
 import de.tum.cit.fop.maze.system.UiUtils;
 
+/**
+ * Settings screen for audio volume controls.
+ */
 public class SettingsAudioScreen implements Screen {
+    /** Game instance for navigation and resources. */
     private final MazeRunnerGame game;
+    /** Stage hosting UI elements. */
     private final Stage stage;
+    /** Audio manager for volume control. */
     private final AudioManager audioManager;
+    /** Configuration manager for saving settings. */
     private final ConfigManager configManager;
+    /** Vignette texture overlay. */
     private final Texture vignetteTexture;
 
+    /**
+     * Creates the audio settings screen.
+     *
+     * @param game game instance
+     */
     public SettingsAudioScreen(MazeRunnerGame game) {
         this.game = game;
         configManager = game.getConfigManager();
@@ -96,12 +109,20 @@ public class SettingsAudioScreen implements Screen {
         });
     }
 
+    /**
+     * Sets input processing for the screen.
+     */
     @Override
     public void show() {
         Gdx.input.setInputProcessor(stage);
         stage.addListener(game.getKeyHandler());
     }
 
+    /**
+     * Renders the screen.
+     *
+     * @param v frame delta time
+     */
     @Override
     public void render(float v) {
         if (!game.shouldRenderMenuBackground()) {
@@ -111,6 +132,12 @@ public class SettingsAudioScreen implements Screen {
         stage.draw(); // Draw the stage
     }
 
+    /**
+     * Updates viewport on resize.
+     *
+     * @param width new width
+     * @param height new height
+     */
     @Override
     public void resize(int width, int height) {
         stage.getViewport().update(width, height, true); // Update the stage viewport on resize
@@ -131,6 +158,9 @@ public class SettingsAudioScreen implements Screen {
 
     }
 
+    /**
+     * Disposes stage and textures.
+     */
     @Override
     public void dispose() {
         stage.dispose();

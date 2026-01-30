@@ -21,43 +21,82 @@ import java.util.ArrayList;
 import java.util.List;
 import com.badlogic.gdx.utils.Array;
 
+/**
+ * BMW enemy that drives along road tiles and collides with actors.
+ */
 public class BmwEnemy extends Obstacle {
     // TODO merge common stuff
     // at the moment BMWEnemy is more or less enemy with some extra stuff, ill merge the code later
+    /** Target distance threshold for path steps. */
     private static final float TARGET_EPS = 0.05f;
+    /** Centering threshold for tile alignment. */
     private static final float CENTER_EPS = 0.02f;
+    /** Width of the BMW when horizontal. */
     private static final int BMW_WIDTH_HORIZONTAL = 2;
+    /** Height of the BMW when horizontal. */
     private static final int BMW_HEIGHT_HORIZONTAL = 1;
+    /** Width of the BMW when vertical. */
     private static final int BMW_WIDTH_VERTICAL = 1;
+    /** Height of the BMW when vertical. */
     private static final int BMW_HEIGHT_VERTICAL = 2;
+    /** Road layer used for pathfinding. */
     private static TiledMapTileLayer roadLayer;
+    /** Pathfinder for road movement. */
     private static RoadPathfinder pathfinder;
+    /** Map width in tiles. */
     private static int mapWidth;
+    /** Map height in tiles. */
     private static int mapHeight;
+    /** Base movement speed. */
     private final float speed = 6f;
+    /** Cached road tiles. */
     protected static final List<GridPoint2> roadTiles = new ArrayList<>();
+    /** Current path of tile points. */
     private ArrayList<GridPoint2> path = new ArrayList<>();
+    /** Current index in the path. */
     private int pathIndex = 0;
+    /** Current goal tile x. */
     private int goalX = Integer.MIN_VALUE;
+    /** Current goal tile y. */
     private int goalY = Integer.MIN_VALUE;
+    /** Whether removal is pending after collision. */
     private boolean pendingRemove = false;
+    /** Drive animation for north movement. */
     private static Animation<TextureRegion> driveNorthAnimation;
+    /** Drive animation for south movement. */
     private static Animation<TextureRegion> driveSouthAnimation;
+    /** Drive animation for east movement. */
     private static Animation<TextureRegion> driveEastAnimation;
+    /** Drive animation for west movement. */
     private static Animation<TextureRegion> driveWestAnimation;
+    /** Whether animations were initialized. */
     private static boolean animationsInitialized = false;
+    /** Current facing direction. */
     private Direction facingDirection = Direction.N;
 
+    /**
+     * Cardinal directions for BMW orientation.
+     */
     private enum Direction {
         N, S, E, W
     }
 
+    /**
+     * Creates a BMW enemy at a given position.
+     *
+     * @param roadLayer road layer for pathfinding
+     * @param x spawn x position
+     * @param y spawn y position
+     */
     public BmwEnemy(TiledMapTileLayer roadLayer, float x, float y) {
         super(x, y, BMW_WIDTH_HORIZONTAL, BMW_HEIGHT_HORIZONTAL, 0, 0, 1);
         setRoadLayer(roadLayer);
         initDriveAnimation();
     }
 
+    /**
+     * Initializes behavior once added to stage.
+     */
     @Override
     protected void onAddedToStage() {
         super.onAddedToStage();
@@ -65,6 +104,11 @@ public class BmwEnemy extends Obstacle {
         recalcPath();
     }
 
+    /**
+     * Updates BMW movement and handles collisions.
+     *
+     * @param delta frame delta time
+     */
     @Override
     public void act(float delta) {
         super.act(delta);
@@ -81,6 +125,9 @@ public class BmwEnemy extends Obstacle {
         followPath(delta);
     }
 
+    /**
+     * Handles collision with the player.
+     */
     @Override
     protected void collision() {
         if (!player.isStunned()) {
@@ -91,6 +138,11 @@ public class BmwEnemy extends Obstacle {
         }
     }
 
+    /**
+     * Checks for collisions with other BMWs or guards.
+     *
+     * @return {@code true} if a collision was handled
+     */
     private boolean checkBmwCollisions() {
         Stage stage = getStage();
         if (pendingRemove || stage == null) {
@@ -117,6 +169,11 @@ public class BmwEnemy extends Obstacle {
         return false;
     }
 
+    /**
+     * Handles collisions between two BMWs.
+     *
+     * @param other other BMW
+     */
     private void handleBmwCollision(BmwEnemy other) {
         pendingRemove = true;
         other.pendingRemove = true;
@@ -142,6 +199,11 @@ public class BmwEnemy extends Obstacle {
         other.remove();
     }
 
+    /**
+     * Handles collision with a guard enemy.
+     *
+     * @param guard guard enemy
+     */
     private void handleGuardCollision(Enemy guard) {
         Stage stage = getStage();
         if (stage == null) {
@@ -154,6 +216,9 @@ public class BmwEnemy extends Obstacle {
         guard.remove();
     }
 
+    /**
+     * Initializes drive animations once.
+     */
     private void initDriveAnimation() {
         if (animationsInitialized) {
             return;
@@ -181,6 +246,12 @@ public class BmwEnemy extends Obstacle {
         driveWestAnimation = new Animation<>(0.3f / 4f, westFrames);
     }
 
+    /**
+     * Draws the BMW using the current facing animation.
+     *
+     * @param batch sprite batch
+     * @param parentAlpha parent alpha
+     */
     @Override
     public void draw(Batch batch, float parentAlpha) {
         TextureRegion currentFrame = switch (facingDirection) {
@@ -192,14 +263,34 @@ public class BmwEnemy extends Obstacle {
         batch.draw(currentFrame, getX(), getY(), getWidth(), getHeight());
     }
 
+    /**
+     * Returns current bounding rectangle.
+     *
+     * @return bounds rectangle
+     */
     private Rectangle getBounds() {
         return new Rectangle(getX(), getY(), getWidth(), getHeight());
     }
 
+    /**
+     * Spawns random BMWs on road tiles.
+     *
+     * @param player player used for distance checks
+     * @param stage stage to add BMWs to
+     * @param amount number to spawn
+     */
     public static void spawnRandomBmws(Player player, Stage stage, int amount) {
         spawnRandomBmws(player, stage, amount, null);
     }
 
+    /**
+     * Spawns random BMWs on road tiles, avoiding camera view.
+     *
+     * @param player player used for distance checks
+     * @param stage stage to add BMWs to
+     * @param amount number to spawn
+     * @param cameraView camera bounds to avoid
+     */
     public static void spawnRandomBmws(Player player, Stage stage, int amount, Rectangle cameraView) {
         if (roadLayer == null || player == null || stage == null) {
             return;
@@ -228,6 +319,14 @@ public class BmwEnemy extends Obstacle {
         }
     }
 
+    /**
+     * Filters spawn candidates by distance from the player.
+     *
+     * @param roadTiles road tile list
+     * @param player player reference
+     * @param distance minimum distance in tiles
+     * @return candidate tiles
+     */
     private static List<GridPoint2> getSpawnCandidates(List<GridPoint2> roadTiles, Player player, int distance) {
         int playerTileX = clampTileCoord(player.getX() + player.getWidth() / 2f, roadLayer.getWidth());
         int playerTileY = clampTileCoord(player.getY() + player.getHeight() / 2f, roadLayer.getHeight());
@@ -241,6 +340,12 @@ public class BmwEnemy extends Obstacle {
         return candidates;
     }
 
+    /**
+     * Collects all road tiles from the road layer.
+     *
+     * @param roadLayer road layer to scan
+     * @return list of road tiles
+     */
     private static List<GridPoint2> collectRoadTiles(TiledMapTileLayer roadLayer) {
         List<GridPoint2> tiles = new ArrayList<>();
         int width = roadLayer.getWidth();
@@ -255,6 +360,13 @@ public class BmwEnemy extends Obstacle {
         return tiles;
     }
 
+    /**
+     * Clamps a tile coordinate to map bounds.
+     *
+     * @param center center coordinate
+     * @param max max bound
+     * @return clamped tile coordinate
+     */
     private static int clampTileCoord(float center, int max) {
         int tile = MathUtils.floor(center);
         if (tile < 0) {
@@ -266,6 +378,14 @@ public class BmwEnemy extends Obstacle {
         return tile;
     }
 
+    /**
+     * Checks whether spawning would collide with existing actors.
+     *
+     * @param stage stage containing actors
+     * @param centerX center x
+     * @param centerY center y
+     * @return {@code true} if collision would occur
+     */
     private static boolean wouldCollideAt(Stage stage, float centerX, float centerY) {
         if (stage == null) {
             return true;
@@ -300,6 +420,14 @@ public class BmwEnemy extends Obstacle {
         return false;
     }
 
+    /**
+     * Checks whether a spawn would overlap the camera view.
+     *
+     * @param centerX center x
+     * @param centerY center y
+     * @param cameraView camera bounds
+     * @return {@code true} if overlapping
+     */
     private static boolean wouldOverlapCamera(float centerX, float centerY, Rectangle cameraView) {
         Rectangle spawnBoundsHorizontal = new Rectangle(
                 centerX - (BMW_WIDTH_HORIZONTAL / 2f),
@@ -316,6 +444,9 @@ public class BmwEnemy extends Obstacle {
         return spawnBoundsHorizontal.overlaps(cameraView) || spawnBoundsVertical.overlaps(cameraView);
     }
 
+    /**
+     * Caches road tiles from the current road layer.
+     */
     private static void cacheRoadTiles() {
         for (int x = 0; x < mapWidth; x++) {
             for (int y = 0; y < mapHeight; y++) {
@@ -326,6 +457,9 @@ public class BmwEnemy extends Obstacle {
         }
     }
 
+    /**
+     * Recomputes cached road tiles.
+     */
     public static void recomputeRoadTiles() {
         if (roadLayer == null) {
             return;
@@ -334,6 +468,11 @@ public class BmwEnemy extends Obstacle {
         cacheRoadTiles();
     }
 
+    /**
+     * Sets the road layer used for BMW navigation.
+     *
+     * @param newRoadLayer new road layer
+     */
     public static void setRoadLayer(TiledMapTileLayer newRoadLayer) {
         if (newRoadLayer == null) {
             return;
@@ -349,6 +488,9 @@ public class BmwEnemy extends Obstacle {
         }
     }
 
+    /**
+     * Picks a new random goal tile from road tiles.
+     */
     private void pickNewGoal() {
         if (roadTiles.isEmpty()) {
             return;
@@ -358,6 +500,9 @@ public class BmwEnemy extends Obstacle {
         goalY = target.y;
     }
 
+    /**
+     * Recalculates the path to the current goal.
+     */
     private void recalcPath() {
         int startX = clampTileX(getX() + getWidth() / 2f);
         int startY = clampTileY(getY() + getHeight() / 2f);
@@ -365,6 +510,11 @@ public class BmwEnemy extends Obstacle {
         pathIndex = 0;
     }
 
+    /**
+     * Moves along the current path.
+     *
+     * @param delta frame delta time
+     */
     private void followPath(float delta) {
         if (pathIndex >= path.size()) {
             moveToTileCenter(delta);
@@ -390,6 +540,11 @@ public class BmwEnemy extends Obstacle {
         setPosition(getX() + (dx / dist) * step, getY() + (dy / dist) * step);
     }
 
+    /**
+     * Moves toward the center of the current tile.
+     *
+     * @param delta frame delta time
+     */
     private void moveToTileCenter(float delta) {
         float centerX = getX() + getWidth() / 2f;
         float centerY = getY() + getHeight() / 2f;
@@ -408,6 +563,11 @@ public class BmwEnemy extends Obstacle {
         setPosition(getX() + (dx / dist) * step, getY() + (dy / dist) * step);
     }
 
+    /**
+     * Checks whether the BMW is centered on a tile.
+     *
+     * @return {@code true} if centered
+     */
     private boolean isCenteredOnTile() {
         float centerX = getX() + getWidth() / 2f;
         float centerY = getY() + getHeight() / 2f;
@@ -423,13 +583,32 @@ public class BmwEnemy extends Obstacle {
         return false;
     }
 
+    /**
+     * Clamps x coordinate to map bounds.
+     *
+     * @param centerX center coordinate
+     * @return clamped tile x
+     */
     private static int clampTileX(float centerX) {
         return pathfinder.clampCoord(MathUtils.floor(centerX), mapWidth);
     }
+
+    /**
+     * Clamps y coordinate to map bounds.
+     *
+     * @param centerY center coordinate
+     * @return clamped tile y
+     */
     private static int clampTileY(float centerY) {
         return pathfinder.clampCoord(MathUtils.floor(centerY), mapHeight);
     }
 
+    /**
+     * Updates size based on movement direction.
+     *
+     * @param dx delta x
+     * @param dy delta y
+     */
     private void updateSizeForDirection(float dx, float dy) {
         if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 0f) {
             setSizeKeepingCenter(1f, 2f);
@@ -438,6 +617,12 @@ public class BmwEnemy extends Obstacle {
         }
     }
 
+    /**
+     * Updates facing direction based on movement vector.
+     *
+     * @param dx delta x
+     * @param dy delta y
+     */
     private void updateFacingDirection(float dx, float dy) {
         if (Math.abs(dx) >= Math.abs(dy)) {
             facingDirection = dx >= 0f ? Direction.E : Direction.W;
@@ -446,6 +631,12 @@ public class BmwEnemy extends Obstacle {
         }
     }
 
+    /**
+     * Sets size while keeping the current center position.
+     *
+     * @param width new width
+     * @param height new height
+     */
     private void setSizeKeepingCenter(float width, float height) {
         float centerX = getX() + getWidth() / 2f;
         float centerY = getY() + getHeight() / 2f;

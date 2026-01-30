@@ -8,15 +8,35 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.PriorityQueue;
 
+/**
+ * A* pathfinding restricted to road tiles.
+ */
 public class RoadPathfinder {
+    /** X offsets for cardinal movement. */
     private static final int[] DIR_X = {1, -1, 0, 0};
+    /** Y offsets for cardinal movement. */
     private static final int[] DIR_Y = {0, 0, 1, -1};
+    /** Road layer used to check walkability. */
     private final TiledMapTileLayer roadLayer;
 
+    /**
+     * Creates a road pathfinder.
+     *
+     * @param roadLayer road layer
+     */
     public RoadPathfinder(TiledMapTileLayer roadLayer) {
         this.roadLayer = roadLayer;
     }
 
+    /**
+     * Finds a path between start and goal coordinates on road tiles.
+     *
+     * @param startX start tile x
+     * @param startY start tile y
+     * @param goalX goal tile x
+     * @param goalY goal tile y
+     * @return list of path points, empty if none
+     */
     public ArrayList<GridPoint2> findPath(int startX, int startY, int goalX, int goalY) {
         int width = roadLayer.getWidth();
         int height = roadLayer.getHeight();
@@ -74,6 +94,13 @@ public class RoadPathfinder {
         return new ArrayList<>();
     }
 
+    /**
+     * Clamps a coordinate to the valid map range.
+     *
+     * @param value coordinate value
+     * @param maxExclusive max exclusive bound
+     * @return clamped coordinate
+     */
     public int clampCoord(int value, int maxExclusive) {
         if (value < 0) {
             return 0;
@@ -84,6 +111,14 @@ public class RoadPathfinder {
         return value;
     }
 
+    /**
+     * Reconstructs the path from a terminal node.
+     *
+     * @param node terminal node
+     * @param startX start tile x
+     * @param startY start tile y
+     * @return reconstructed path
+     */
     private ArrayList<GridPoint2> reconstructPath(Node node, int startX, int startY) {
         ArrayDeque<GridPoint2> reversed = new ArrayDeque<>();
         Node current = node;
@@ -96,10 +131,26 @@ public class RoadPathfinder {
         return new ArrayList<>(reversed);
     }
 
+    /**
+     * Manhattan distance heuristic.
+     *
+     * @param x current x
+     * @param y current y
+     * @param goalX goal x
+     * @param goalY goal y
+     * @return manhattan distance
+     */
     private float manhattan(int x, int y, int goalX, int goalY) {
         return Math.abs(goalX - x) + Math.abs(goalY - y);
     }
 
+    /**
+     * Checks whether a tile is a road tile.
+     *
+     * @param x tile x
+     * @param y tile y
+     * @return {@code true} if road tile
+     */
     private boolean isWalkable(int x, int y) {
         if (x < 0 || y < 0 || x >= roadLayer.getWidth() || y >= roadLayer.getHeight()) {
             return false;
@@ -107,6 +158,13 @@ public class RoadPathfinder {
         return roadLayer.getCell(x, y) != null;
     }
 
+    /**
+     * Finds the closest road tile to a starting position.
+     *
+     * @param startX start tile x
+     * @param startY start tile y
+     * @return closest road tile, or {@code null} if none
+     */
     private GridPoint2 findClosestWalkable(int startX, int startY) {
         if (isWalkable(startX, startY)) {
             return new GridPoint2(startX, startY);
@@ -137,13 +195,30 @@ public class RoadPathfinder {
         return null;
     }
 
+    /**
+     * Node used by the A* search.
+     */
     private static class Node {
+        /** Tile x coordinate. */
         private final int x;
+        /** Tile y coordinate. */
         private final int y;
+        /** Cost from start. */
         private final float g;
+        /** Estimated total cost. */
         private final float f;
+        /** Parent node for path reconstruction. */
         private final Node parent;
 
+        /**
+         * Creates a node for the search.
+         *
+         * @param x tile x
+         * @param y tile y
+         * @param g cost from start
+         * @param f total estimated cost
+         * @param parent parent node
+         */
         private Node(int x, int y, float g, float f, Node parent) {
             this.x = x;
             this.y = y;

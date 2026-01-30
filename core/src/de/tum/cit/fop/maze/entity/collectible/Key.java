@@ -8,7 +8,17 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;
 import de.tum.cit.fop.maze.system.PointManager;
 
+/**
+ * Collectible key required to open the exit.
+ */
 public class Key extends Collectible {
+    /**
+     * Creates a key collectible.
+     *
+     * @param x spawn x position
+     * @param y spawn y position
+     * @param pointManager point manager for scoring
+     */
     public Key(float x, float y, PointManager pointManager) {
         super(x, y, 1, 1, pointManager);
         int variantCount = 0;
@@ -32,6 +42,9 @@ public class Key extends Collectible {
         }
     }
 
+    /**
+     * Handles player collision by awarding points and granting the key.
+     */
     @Override
     protected void collision() {
         if (!this.getPickedUp()) {

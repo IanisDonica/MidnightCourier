@@ -1,6 +1,12 @@
 package de.tum.cit.fop.maze.system.progression;
 
+/**
+ * Upgrade that further increases movement speed.
+ */
 public class SpeedIIUpgrade extends BaseUpgrade {
+    /**
+     * Creates the speed II upgrade.
+     */
     public SpeedIIUpgrade() {
         super(
                 "speed_2",

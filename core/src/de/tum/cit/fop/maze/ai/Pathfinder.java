@@ -8,15 +8,35 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.PriorityQueue;
 
+/**
+ * A* pathfinding on a tiled collision layer.
+ */
 public class Pathfinder {
+    /** X offsets for cardinal movement. */
     private static final int[] DIR_X = {1, -1, 0, 0};
+    /** Y offsets for cardinal movement. */
     private static final int[] DIR_Y = {0, 0, 1, -1};
+    /** Collision layer used to check walkability. */
     private final TiledMapTileLayer collisionLayer;
 
+    /**
+     * Creates a pathfinder for a collision layer.
+     *
+     * @param collisionLayer collision layer
+     */
     public Pathfinder(TiledMapTileLayer collisionLayer) {
         this.collisionLayer = collisionLayer;
     }
 
+    /**
+     * Finds a path between start and goal coordinates.
+     *
+     * @param startX start tile x
+     * @param startY start tile y
+     * @param goalX goal tile x
+     * @param goalY goal tile y
+     * @return list of path points, empty if none
+     */
     public ArrayList<GridPoint2> findPath(int startX, int startY, int goalX, int goalY) {
         int width = collisionLayer.getWidth();
         int height = collisionLayer.getHeight();
@@ -76,6 +96,13 @@ public class Pathfinder {
 
     // Sometimes due floating point precision (or the player going out of bounds),
     // the coordinates can be -1 or width/height, clamp them to the min/max allowed.
+    /**
+     * Clamps a coordinate to the valid map range.
+     *
+     * @param value coordinate value
+     * @param maxExclusive max exclusive bound
+     * @return clamped coordinate
+     */
     public int clampCoord(int value, int maxExclusive) {
         if (value < 0) {
             return 0;
@@ -86,6 +113,14 @@ public class Pathfinder {
         return value;
     }
 
+    /**
+     * Reconstructs the path from a terminal node.
+     *
+     * @param node terminal node
+     * @param startX start tile x
+     * @param startY start tile y
+     * @return reconstructed path
+     */
     private ArrayList<GridPoint2> reconstructPath(Node node, int startX, int startY) {
         ArrayDeque<GridPoint2> reversed = new ArrayDeque<>();
         Node current = node;
@@ -98,10 +133,26 @@ public class Pathfinder {
         return new ArrayList<>(reversed);
     }
 
+    /**
+     * Manhattan distance heuristic.
+     *
+     * @param x current x
+     * @param y current y
+     * @param goalX goal x
+     * @param goalY goal y
+     * @return manhattan distance
+     */
     private float manhattan(int x, int y, int goalX, int goalY) {
         return Math.abs(goalX - x) + Math.abs(goalY - y);
     }
 
+    /**
+     * Checks whether a tile is walkable.
+     *
+     * @param x tile x
+     * @param y tile y
+     * @return {@code true} if walkable
+     */
     private boolean isWalkable(int x, int y) {
         if (x < 0 || y < 0 || x >= collisionLayer.getWidth() || y >= collisionLayer.getHeight()) {
             return false;
@@ -109,6 +160,13 @@ public class Pathfinder {
         return collisionLayer.getCell(x, y) == null;
     }
 
+    /**
+     * Finds the closest walkable tile to a starting position.
+     *
+     * @param startX start tile x
+     * @param startY start tile y
+     * @return closest walkable tile, or {@code null} if none
+     */
     private GridPoint2 findClosestWalkable(int startX, int startY) {
         if (isWalkable(startX, startY)) {
             return new GridPoint2(startX, startY);
@@ -139,13 +197,30 @@ public class Pathfinder {
         return null;
     }
 
+    /**
+     * Node used by the A* search.
+     */
     private static class Node {
+        /** Tile x coordinate. */
         private final int x;
+        /** Tile y coordinate. */
         private final int y;
+        /** Cost from start. */
         private final float g;
+        /** Estimated total cost. */
         private final float f;
+        /** Parent node for path reconstruction. */
         private final Node parent;
 
+        /**
+         * Creates a node for the search.
+         *
+         * @param x tile x
+         * @param y tile y
+         * @param g cost from start
+         * @param f total estimated cost
+         * @param parent parent node
+         */
         private Node(int x, int y, float g, float f, Node parent) {
             this.x = x;
             this.y = y;

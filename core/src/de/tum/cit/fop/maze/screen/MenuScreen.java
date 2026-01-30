@@ -29,24 +29,38 @@ import de.tum.cit.fop.maze.map.MapLoader;
 import de.tum.cit.fop.maze.system.UiUtils;
 
 /**
- * The MenuScreen class is responsible for displaying the main menu of the game.
- * It extends the LibGDX Screen class and sets up the UI components for the menu.
+ * Main menu screen with animated background.
  */
 public class MenuScreen implements Screen {
+    /** Game instance for navigation and resources. */
     private final MazeRunnerGame game;
+    /** Stage hosting UI elements. */
     private final Stage stage;
+    /** Audio manager for UI sounds. */
     private final AudioManager audioManager;
+    /** Vignette texture overlay. */
     private final Texture vignetteTexture;
+    /** Background map used for menu animation. */
     private final TiledMap backgroundMap;
+    /** Renderer for the background map. */
     private final OrthogonalTiledMapRenderer backgroundRenderer;
+    /** Camera used for the background map. */
     private final OrthographicCamera backgroundCamera;
+    /** Map loader for background assets. */
     private final MapLoader mapLoader;
+    /** Stage for background actors. */
     private final Stage backgroundStage;
+    /** Stage for vignette overlay. */
     private final Stage vignetteStage;
+    /** Collision layer for background actors. */
     private final TiledMapTileLayer collisionLayer;
+    /** Road layer for background BMWs. */
     private final TiledMapTileLayer roadLayer;
+    /** Background camera viewport height. */
     private static final float BACKGROUND_VIEW_HEIGHT = 100f;
+    /** Background camera X offset. */
     private static final float BACKGROUND_OFFSET_X = -100f;
+    /** Background camera Y offset. */
     private static final float BACKGROUND_OFFSET_Y = 0f;
 
     /**
@@ -177,6 +191,11 @@ public class MenuScreen implements Screen {
         });
     }
 
+    /**
+     * Renders the menu and its animated background.
+     *
+     * @param delta frame delta time
+     */
     @Override
     public void render(float delta) {
         if (!game.shouldRenderMenuBackground()) {
@@ -187,6 +206,12 @@ public class MenuScreen implements Screen {
         stage.draw(); // Draw the stage
     }
 
+    /**
+     * Updates viewports and background camera on resize.
+     *
+     * @param width new width
+     * @param height new height
+     */
     @Override
     public void resize(int width, int height) {
         stage.getViewport().update(width, height, true); // Update the stage viewport on resize
@@ -196,6 +221,9 @@ public class MenuScreen implements Screen {
         vignetteStage.getViewport().update(width, height, true);
     }
 
+    /**
+     * Disposes menu resources.
+     */
     @Override
     public void dispose() {
         // Dispose of the stage when the screen is disposed
@@ -207,6 +235,9 @@ public class MenuScreen implements Screen {
         backgroundMap.dispose();
     }
 
+    /**
+     * Sets input processing for the menu.
+     */
     @Override
     public void show() {
         // Set the input processor so the stage can receive input events
@@ -214,7 +245,6 @@ public class MenuScreen implements Screen {
         stage.addListener(game.getKeyHandler());
     }
 
-    // The following methods are part of the Screen interface but are not used in this screen.
     @Override
     public void pause() {
     }
@@ -227,6 +257,14 @@ public class MenuScreen implements Screen {
     public void hide() {
     }
 
+    /**
+     * Creates a solid color texture.
+     *
+     * @param w width in pixels
+     * @param h height in pixels
+     * @param color texture color
+     * @return created texture
+     */
     private Texture makeSolidTexture(int w, int h, Color color) {
         Pixmap pm = new Pixmap(w, h, Pixmap.Format.RGBA8888);
         pm.setColor(color);
@@ -236,6 +274,12 @@ public class MenuScreen implements Screen {
         return tex;
     }
 
+    /**
+     * Updates the background camera viewport to match the window aspect.
+     *
+     * @param width window width
+     * @param height window height
+     */
     private void updateBackgroundCamera(int width, int height) {
         float aspect = width / (float) height;
         backgroundCamera.viewportHeight = BACKGROUND_VIEW_HEIGHT;
@@ -243,6 +287,11 @@ public class MenuScreen implements Screen {
         backgroundCamera.update();
     }
 
+    /**
+     * Renders the animated background and vignette overlay.
+     *
+     * @param delta frame delta time
+     */
     public void renderBackground(float delta) {
         updateBackgroundCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         centerBackgroundCamera();
@@ -256,6 +305,9 @@ public class MenuScreen implements Screen {
         vignetteStage.draw();
     }
 
+    /**
+     * Centers the background camera on the map, respecting bounds.
+     */
     private void centerBackgroundCamera() {
         TiledMapTileLayer layer = (TiledMapTileLayer) backgroundMap.getLayers().get(0);
         float mapCenterX = layer.getWidth() / 2f + BACKGROUND_OFFSET_X;
@@ -272,6 +324,11 @@ public class MenuScreen implements Screen {
         backgroundCamera.update();
     }
 
+    /**
+     * Centers the dummy player on the background map.
+     *
+     * @param dummyPlayer dummy player actor
+     */
     private void centerDummyPlayer(MenuDummyPlayer dummyPlayer) {
         TiledMapTileLayer layer = (TiledMapTileLayer) backgroundMap.getLayers().get(0);
         float mapCenterX = layer.getWidth() / 2f + BACKGROUND_OFFSET_X;
@@ -287,7 +344,17 @@ public class MenuScreen implements Screen {
         dummyPlayer.setPosition(mapCenterX, mapCenterY);
     }
 
+    /**
+     * Invisible player used for spawning background enemies.
+     */
     private static class MenuDummyPlayer extends Player {
+        /**
+         * Creates a dummy player for background animations.
+         *
+         * @param collisionLayer collision layer for movement checks
+         * @param x start x
+         * @param y start y
+         */
         public MenuDummyPlayer(TiledMapTileLayer collisionLayer, float x, float y) {
             super(collisionLayer, x, y, null);
             setVisible(false);

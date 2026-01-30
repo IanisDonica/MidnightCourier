@@ -1,6 +1,12 @@
 package de.tum.cit.fop.maze.system.progression;
 
+/**
+ * Upgrade that improves energy drink speed boost.
+ */
 public class DrinkSpeedIUpgrade extends BaseUpgrade {
+    /**
+     * Creates the drink speed I upgrade.
+     */
     public DrinkSpeedIUpgrade() {
         super(
                 "drink_speed_1",

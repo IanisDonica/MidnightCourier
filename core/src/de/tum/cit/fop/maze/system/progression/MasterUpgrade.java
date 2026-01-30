@@ -1,6 +1,12 @@
 package de.tum.cit.fop.maze.system.progression;
 
+/**
+ * Upgrade that unlocks the final tier.
+ */
 public class MasterUpgrade extends BaseUpgrade {
+    /**
+     * Creates the mastery upgrade.
+     */
     public MasterUpgrade() {
         super(
                 "master",

@@ -1,6 +1,12 @@
 package de.tum.cit.fop.maze.system.progression;
 
+/**
+ * Upgrade that regenerates HP over time.
+ */
 public class RegenUpgrade extends BaseUpgrade {
+    /**
+     * Creates the regeneration upgrade.
+     */
     public RegenUpgrade() {
         super(
                 "regen",

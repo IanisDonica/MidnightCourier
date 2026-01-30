@@ -13,12 +13,24 @@ import de.tum.cit.fop.maze.MazeRunnerGame;
 import de.tum.cit.fop.maze.system.AudioManager;
 import de.tum.cit.fop.maze.system.UiUtils;
 
+/**
+ * Settings screen for game-specific options.
+ */
 public class SettingsGameScreen implements Screen {
+    /** Game instance for navigation and resources. */
     private final MazeRunnerGame game;
+    /** Audio manager for UI sounds. */
     private final AudioManager audioManager;
+    /** Stage hosting UI elements. */
     private final Stage stage;
+    /** Vignette texture overlay. */
     private final Texture vignetteTexture;
 
+    /**
+     * Creates the game settings screen.
+     *
+     * @param game game instance
+     */
     public SettingsGameScreen(MazeRunnerGame game) {
         this.game = game;
         audioManager = game.getAudioManager();
@@ -31,12 +43,20 @@ public class SettingsGameScreen implements Screen {
         stage.addActor(vignetteImage);
     }
 
+    /**
+     * Sets input processing for the screen.
+     */
     @Override
     public void show() {
         Gdx.input.setInputProcessor(stage);
         stage.addListener(game.getKeyHandler());
     }
 
+    /**
+     * Renders the screen.
+     *
+     * @param v frame delta time
+     */
     @Override
     public void render(float v) {
         if (!game.shouldRenderMenuBackground()) {
@@ -46,6 +66,12 @@ public class SettingsGameScreen implements Screen {
         stage.draw();
     }
 
+    /**
+     * Updates viewport on resize.
+     *
+     * @param i new width
+     * @param i1 new height
+     */
     @Override
     public void resize(int i, int i1) {
         stage.getViewport().update(i, i1, true);
@@ -66,6 +92,9 @@ public class SettingsGameScreen implements Screen {
 
     }
 
+    /**
+     * Disposes stage and textures.
+     */
     @Override
     public void dispose() {
         stage.dispose();

@@ -1,6 +1,12 @@
 package de.tum.cit.fop.maze.system.progression;
 
+/**
+ * Upgrade that improves visibility through fog.
+ */
 public class NewGlassesUpgrade extends BaseUpgrade {
+    /**
+     * Creates the new glasses upgrade.
+     */
     public NewGlassesUpgrade() {
         super(
                 "new_glasses",
