@@ -10,8 +10,6 @@ public abstract class BaseUpgrade implements Upgrade {
     private final String title;
     /** Description text. */
     private final String description;
-    /** Image path for UI. */
-    private final String imagePath;
     /** Cost in points. */
     private final int cost;
     /** Prerequisite upgrade names. */
@@ -23,15 +21,13 @@ public abstract class BaseUpgrade implements Upgrade {
      * @param name unique upgrade name
      * @param title display title
      * @param description description text
-     * @param imagePath image path for UI
      * @param cost upgrade cost
      * @param prerequisites prerequisite upgrade names
      */
-    protected BaseUpgrade(String name, String title, String description, String imagePath, int cost, String[] prerequisites) {
+    protected BaseUpgrade(String name, String title, String description, int cost, String[] prerequisites) {
         this.name = name;
         this.title = title;
         this.description = description;
-        this.imagePath = imagePath;
         this.cost = cost;
         this.prerequisites = prerequisites;
     }
@@ -64,16 +60,6 @@ public abstract class BaseUpgrade implements Upgrade {
     @Override
     public String getDescription() {
         return description;
-    }
-
-    /**
-     * Returns the image path.
-     *
-     * @return image path
-     */
-    @Override
-    public String getImagePath() {
-        return imagePath;
     }
 
     /**

@@ -113,7 +113,7 @@ public class MapLoader {
             if (value >= 101) {
                 continue;
             }
-            if (value == 11 || value == 12) {
+            if (value == 11) {
                 layer.setCell((int) entry[0], (int) entry[1], new TiledMapTileLayer.Cell());
             }
         }

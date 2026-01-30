@@ -12,7 +12,6 @@ public class NewGlassesUpgrade extends BaseUpgrade {
                 "new_glasses",
                 "New glasses",
                 "Increases fog intensity.",
-                "assets/ui/upgrades/new_glasses.png",
                 250,
                 new String[0]
         );

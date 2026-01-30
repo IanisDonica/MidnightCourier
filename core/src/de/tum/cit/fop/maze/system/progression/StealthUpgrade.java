@@ -12,7 +12,6 @@ public class StealthUpgrade extends BaseUpgrade {
                 "stealth",
                 "Stealth",
                 "Reduces enemy detection range.",
-                "assets/ui/upgrades/stealth.png",
                 260,
                 new String[] {"root"}
         );

@@ -63,7 +63,7 @@ public class Explosion extends Actor {
             float dy = playerCenterY - (getY() + getHeight() / 2f);
             float dist = (float) Math.sqrt(dx * dx + dy * dy);
             if (dist <= radius) {
-                player.damage(1, DeathCause.BMW_EXPLOSION);
+                player.damage(0, DeathCause.BMW_EXPLOSION);
             }
         }
         timer += delta;

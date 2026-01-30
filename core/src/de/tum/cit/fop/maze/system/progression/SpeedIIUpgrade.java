@@ -12,7 +12,6 @@ public class SpeedIIUpgrade extends BaseUpgrade {
                 "speed_2",
                 "Speed II",
                 "Further increases movement speed.",
-                "assets/ui/upgrades/speed_2.png",
                 220,
                 new String[] {"speed"}
         );

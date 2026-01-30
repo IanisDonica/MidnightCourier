@@ -12,7 +12,6 @@ public class HealthBoostIIUpgrade extends BaseUpgrade {
                 "health_2",
                 "Health Boost II",
                 "Further increases max HP.",
-                "assets/ui/upgrades/health_2.png",
                 240,
                 new String[] {"health"}
         );
