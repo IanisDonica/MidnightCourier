@@ -47,7 +47,13 @@ Notes:
 
 ## UML Diagram
 
-// TODO denis add here
+<img width="2204" height="1398" alt="AIBehaviour" src="https://github.com/user-attachments/assets/dd7f6fed-c458-474c-a093-478914633220" />
+<img width="1952" height="1226" alt="Pathfinders" src="https://github.com/user-attachments/assets/00710ea1-be41-4c57-9f57-3834674e8a5b" />
+<img width="5826" height="5143" alt="Entity" src="https://github.com/user-attachments/assets/10366b2b-b95e-4586-a6cd-953c12d00156" />
+<img width="1130" height="1040" alt="MapLoader" src="https://github.com/user-attachments/assets/11d4a035-e58c-4c0a-b05b-df7c88d9a183" />
+<img width="7706" height="4306" alt="screens" src="https://github.com/user-attachments/assets/7a2265f9-2012-44ad-b108-634075516a81" />
+<img width="5368" height="2387" alt="managers2" src="https://github.com/user-attachments/assets/d72d2e5c-2961-4d4b-bac4-ba166cdd10c1" />
+<img width="4252" height="2357" alt="managers" src="https://github.com/user-attachments/assets/862badb4-23a2-4bb4-8c48-1d36aae286d0" />
 
 ## How to run the game
 
