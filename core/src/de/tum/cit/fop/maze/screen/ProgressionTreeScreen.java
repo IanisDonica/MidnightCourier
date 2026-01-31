@@ -247,7 +247,7 @@ public class ProgressionTreeScreen implements Screen {
         Upgrade upgrade = progressionManager.getUpgrade(upgradeName);
         String title = upgrade == null ? upgradeName : upgrade.getTitle();
         int cost = upgrade == null ? 0 : upgrade.getCost();
-        TextButton button = new TextButton(title + "\n[#FFD54F]" + cost + " lei[]", game.getSkin());
+        TextButton button = new TextButton(title + "\n[#FFD54F]" + cost + " lei[]", game.getSkin(), "menu");
         button.getLabel().getStyle().font.getData().markupEnabled = true;
         boolean lockGlasses = "new_glasses".equals(upgradeName)
                 && (game.getCurrentLevelNumber() == 1 || game.getCurrentLevelNumber() == 2);

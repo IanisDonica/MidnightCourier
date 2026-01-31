@@ -43,7 +43,7 @@
 <tileset firstgid="602" source="32Concrete+grass.tsx"/>
 <tileset firstgid="606" source="RailTrack.tsx"/>
 <tileset firstgid="607" source="TrainStation.tsx"/>
-<tileset firstgid="631" source="restaurant_tileswide_96x128.tsx"/>
+<tileset firstgid="631" source="Restaurant96x128.tsx"/>
 <tileset firstgid="643" source="Road_Intersection.tsx"/>
  <layer id="1" name="Tile Layer 1" width="225" height="250">
   <data encoding="csv">

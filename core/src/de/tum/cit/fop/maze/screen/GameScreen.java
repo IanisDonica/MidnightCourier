@@ -18,6 +18,10 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.*;
+import de.tum.cit.fop.maze.entity.collectible.Collectible;
+import de.tum.cit.fop.maze.entity.collectible.DropOff;
+import de.tum.cit.fop.maze.entity.collectible.Key;
+import de.tum.cit.fop.maze.entity.obstacle.Enemy;
 import de.tum.cit.fop.maze.system.HUD;
 import de.tum.cit.fop.maze.MazeRunnerGame;
 import de.tum.cit.fop.maze.entity.Player;
@@ -156,7 +160,6 @@ public class GameScreen implements Screen {
         devConsole.setPlayer(player);
         devConsole.setSpawnLayers(collisionLayer, roadLayer);
         devConsole.addToStage(hud.getStage());
-
     }
 
     /**
@@ -377,11 +380,11 @@ public class GameScreen implements Screen {
         float exitY = Float.NaN;
         float dropOffX = Float.NaN;
         float dropOffY = Float.NaN;
-        for (de.tum.cit.fop.maze.entity.collectible.Collectible collectible : collectibles) {
-            if (collectible instanceof de.tum.cit.fop.maze.entity.collectible.Key && !collectible.getPickedUp()) {
+        for (Collectible collectible : collectibles) {
+            if (collectible instanceof Key && !collectible.getPickedUp()) {
                 keyX = collectible.getSpawnX();
                 keyY = collectible.getSpawnY();
-            } else if (collectible instanceof de.tum.cit.fop.maze.entity.collectible.DropOff && !collectible.getPickedUp()) {
+            } else if (collectible instanceof DropOff && !collectible.getPickedUp()) {
                 dropOffX = collectible.getSpawnX();
                 dropOffY = collectible.getSpawnY();
             }
@@ -406,10 +409,10 @@ public class GameScreen implements Screen {
         List<EnemyData> enemyDataList = new ArrayList<>();
         List<CollectibleData> collectibleDataList = new ArrayList<>();
 
-        for (de.tum.cit.fop.maze.entity.obstacle.Enemy enemy : enemies) {
+        for (Enemy enemy : enemies) {
             enemyDataList.add(new EnemyData(enemy.getX(), enemy.getY()));
         }
-        for (de.tum.cit.fop.maze.entity.collectible.Collectible collectible : collectibles) {
+        for (Collectible collectible : collectibles) {
             // We use the initial coordinates as ID.
             collectibleDataList.add(new CollectibleData(collectible.getSpawnX(), collectible.getSpawnY(), collectible.getPickedUp()));
         }
