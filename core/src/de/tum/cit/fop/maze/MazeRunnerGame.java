@@ -92,7 +92,7 @@ public class MazeRunnerGame extends Game {
         achievementPopupScreen = new AchievementPopupScreen(this);
         AchievementManager.setPopupScreen(achievementPopupScreen);
         progressionManager = new ProgressionManager(2000);
-        audioManager.preloadSounds("Click.wav");
+        audioManager.preloadSounds("Click.wav", "pickup.wav", "siren.ogg");
         audioManager.playMusic("background.mp3", 1f, true);
         graphicsManager.load();
         graphicsManager.applySettings();
