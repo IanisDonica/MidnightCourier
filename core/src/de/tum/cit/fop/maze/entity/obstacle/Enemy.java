@@ -520,6 +520,7 @@ public class Enemy extends Obstacle {
             boolean willArrest = !player.isGodMode()
                     && !player.isGameOverTriggered()
                     && player.getHp() <= 1;
+            player.playSoundEffect("siren.ogg", 1f);
             player.damage(1);
             if (willArrest) {
                 AchievementManager.incrementProgress("first_time_for_everything", 1);
