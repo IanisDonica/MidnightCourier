@@ -146,6 +146,7 @@ public class GameScreen implements Screen {
         float spawnX = spawnPoint != null ? spawnPoint.x : 78f; // 78 x 46 is the default spawn if there is no spawn place in the map
         float spawnY = spawnPoint != null ? spawnPoint.y : 46f;
         player = new Player(collisionLayer, spawnX, spawnY, game::goToGameOverScreen);
+        player.setAudioManager(game.getAudioManager());
         player.setDeathCauseListener(game::handlePlayerDeath);
         player.setWorldBounds(WORLD_WIDTH, WORLD_HEIGHT);
         applyUpgrades();
@@ -195,6 +196,7 @@ public class GameScreen implements Screen {
         float spawnX = spawnPoint != null ? spawnPoint.x : 78f;
         float spawnY = spawnPoint != null ? spawnPoint.y : 46f;
         player = new Player(collisionLayer, spawnX, spawnY, game::goToGameOverScreen);
+        player.setAudioManager(game.getAudioManager());
         player.setDeathCauseListener(game::handlePlayerDeath);
         player.setWorldBounds(WORLD_WIDTH, WORLD_HEIGHT);
         applyUpgrades();
