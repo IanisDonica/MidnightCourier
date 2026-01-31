@@ -283,7 +283,11 @@ public class GraphicsManager {
      *
      * @return target aspect ratio
      */
-    public float getTargetAspectRatio() {return targetAspectRatio;}
+    public String getTargetAspectRatio() {
+        if (targetAspectRatio == 16.0f / 10.0f) return "16/10";
+        if (targetAspectRatio == 4.0f / 3.0f) return "4/3";
+        return "16/9";
+    }
 
     /**
      * Returns the current measured frame rate.

@@ -27,6 +27,15 @@ button
   orig: 372, 65
   offset: 0, 0
   index: -1
+checkbox
+  rotate: false
+  xy: 1, 309
+  size: 65, 65
+  split: 7, 7, 7, 11
+  pad: 8, 8, 8, 12
+  orig: 372, 65
+  offset: 0, 0
+  index: -1
 button-disabled
   rotate: false
   xy: 650, 958

@@ -45,11 +45,12 @@ public class SettingsAudioScreen implements Screen {
         this.game = game;
         configManager = game.getConfigManager();
         audioManager = game.getAudioManager();
+        var graphicsManager = game.getGraphicsManager();
 
         var camera = new OrthographicCamera();
         camera.zoom = 1.5f; // Set camera zoom for a closer view
 
-        Viewport viewport = new FitViewport(1920, 1080);
+        Viewport viewport = new FitViewport(graphicsManager.getWidth(), graphicsManager.getHeight());
         stage = new Stage(viewport, game.getSpriteBatch());
 
         vignetteTexture = UiUtils.buildVignetteTexture(512, 512, 0.9f);

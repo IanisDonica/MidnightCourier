@@ -22,7 +22,7 @@ public class DriftyMovementController {
     /**
      * Friction multiplier applied per frame.
      */
-    private float friction = 0.997f; // 0 means maximum friction, 1 is no friction
+    private float friction = 0.998f; // 0 means maximum friction, 1 is no friction
     /**
      * Degrees per second for smooth rotation to input direction.
      */
@@ -160,10 +160,24 @@ public class DriftyMovementController {
      * Applies friction to the velocity.
      */
     private void applyFriction() {
-        if (velocity.len() < 0.5f && decelarating) {
-            velocity.setZero();  // Stop if speed is negligible
+        if (velocity.len() < 0.5f) {
+            if (decelarating) velocity.setZero();  // Stop if speed is negligible
         } else {
-            velocity.scl(friction);  // Apply friction decay - very high friction = extreme drift
+            float currentFriction = friction;
+
+            float movementAngle = velocity.angleDeg();
+            float angleDiff = Math.abs(movementAngle - orientation);
+            if (angleDiff > 180) {
+                angleDiff = 360 - angleDiff;
+            }
+
+            if (angleDiff > 35) {
+                // Reduce the friction multiplier (meaning more friction)
+                // The lower the value, the higher the friction.
+                currentFriction = friction * 0.995f;
+            }
+
+            velocity.scl(currentFriction);  // Apply friction decay
         }
     }
 

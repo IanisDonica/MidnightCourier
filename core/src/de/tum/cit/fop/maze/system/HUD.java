@@ -94,7 +94,8 @@ public class HUD {
     public HUD(MazeRunnerGame game){
         //this.game = game;
         this.configManager = game.getConfigManager();
-        viewport = new ExtendViewport(1920, 1080);
+        var graphicsManager = game.getGraphicsManager();
+        viewport = new ExtendViewport(graphicsManager.getWidth(), graphicsManager.getHeight());
         stage = new Stage(viewport);
         scoreLabel = new Label("Score: ", game.getSkin());
         scoreLabel.setFontScale(2.0f);

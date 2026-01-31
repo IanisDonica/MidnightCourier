@@ -100,8 +100,9 @@ public class SecondCutsceneScreen implements Screen {
         this.targetLevel = targetLevel;
         this.isEndCutscene = targetLevel == 6;
         this.useRollingText = !(targetLevel == 3 || targetLevel == 4 || targetLevel == 5 || isEndCutscene);
+        var graphicsManager = game.getGraphicsManager();
 
-        Viewport viewport = new FitViewport(1920, 1080);
+        Viewport viewport = new FitViewport(graphicsManager.getWidth(), graphicsManager.getHeight());
         stage = new Stage(viewport, game.getSpriteBatch());
 
         List<FileHandle> slideFiles = loadSlideFiles();
