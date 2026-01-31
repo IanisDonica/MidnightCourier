@@ -92,7 +92,6 @@ public class ProgressionTreeScreen implements Screen {
         stage.addActor(backgroundImage);
         megaTexture = new Texture(Gdx.files.internal("Assets_Map/mega.png"));
         megaImage = new Image(megaTexture);
-
         table = new Table();
         table.setFillParent(true);
         table.top();

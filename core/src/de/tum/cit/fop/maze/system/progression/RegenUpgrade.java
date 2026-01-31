@@ -10,7 +10,7 @@ public class RegenUpgrade extends BaseUpgrade {
     public RegenUpgrade() {
         super(
                 "regen",
-                "Regeneration",
+                "Passive Income",
                 "Slowly regenerates HP over time.",
                 280,
                 new String[] {"health_2"}

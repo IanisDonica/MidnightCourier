@@ -10,6 +10,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import de.tum.cit.fop.maze.system.CollisionHandler;
 import de.tum.cit.fop.maze.system.DriftyMovementController;
+import de.tum.cit.fop.maze.system.AudioManager;
 
 /**
  * Player entity with movement, health, and interaction state.
@@ -127,9 +128,10 @@ public class Player extends Entity {
      * Whether god mode is enabled.
      */
     private boolean godMode = false;
-    /// private final GameOverListener trapOverListener;
-
-    //Initialize the player on a specific coordinate point
+    /**
+     * Audio manager for sound effects.
+     */
+    private AudioManager audioManager;
 
     /**
      * Creates a player at a given position.
@@ -366,6 +368,27 @@ public class Player extends Entity {
     }
 
     /**
+     * Sets the audio manager for sound playback.
+     *
+     * @param audioManager audio manager instance
+     */
+    public void setAudioManager(AudioManager audioManager) {
+        this.audioManager = audioManager;
+    }
+
+    /**
+     * Plays a sound effect if audio manager is available.
+     *
+     * @param soundPath sound file path relative to Sound/
+     * @param volume    volume multiplier
+     */
+    public void playSoundEffect(String soundPath, float volume) {
+        if (audioManager != null) {
+            audioManager.playSound(soundPath, volume);
+        }
+    }
+
+    /**
      * Sets the death cause listener.
      *
      * @param deathCauseListener listener instance
@@ -520,7 +543,6 @@ public class Player extends Entity {
      * Applies the energy drink speed-up effect.
      */
     public void drinkEnergyDrink() {
-        //This method seems useless, but it's mostly for later to handle sounds / screen effects etc.
         speedUpTimer = 5f * drinkDurationMultiplier;
     }
 
@@ -528,7 +550,6 @@ public class Player extends Entity {
      * Marks the key as collected.
      */
     public void pickupKey() {
-        // For more complex logic later
         this.hasKey = true;
     }
 

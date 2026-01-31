@@ -49,6 +49,7 @@ public class Key extends Collectible {
     protected void collision() {
         if (!this.getPickedUp()) {
             pointManager.add(2000);
+            player.playSoundEffect("pickup.wav", 1f);
             player.pickupKey();
             markPickedUp();
         }

@@ -65,7 +65,9 @@ public class HUD {
     private Image regenImage;
     /** Animation for regeneration. */
     private Animation<TextureRegion> regenAnimation;
-    /** Texture containing regen frames and heart sprites. */
+    /** Texture containing heart sprites. */
+    private final Texture heartTexture;
+    /** Texture containing regen frames. */
     private final Texture regenTexture;
     /** Texture for the direction arrow. */
     private final Texture arrowTexture;
@@ -115,11 +117,12 @@ public class HUD {
         deliveryTimerLabel.setFontScale(2.0f);
         deliveryTimerLabel.setVisible(false);
 
-        regenTexture = new Texture(Gdx.files.internal("objects.png"));
-        heart_texture = new TextureRegion(regenTexture, 0, 64, 16, 16);
+        heartTexture = new Texture(Gdx.files.internal("objects.png"));
+        heart_texture = new TextureRegion(heartTexture, 0, 64, 16, 16);
+        regenTexture = new Texture(Gdx.files.internal("CoinRegen.png"));
         Array<TextureRegion> regenFrames = new Array<>(TextureRegion.class);
-        for (int col = 0; col < 5; col++) {
-            regenFrames.add(new TextureRegion(regenTexture, 128 - col * 16, 0, 16, 16));
+        for (int col = 5; col > 1; col--) {
+            regenFrames.add(new TextureRegion(regenTexture, col * 16, 0, 16, 16));
         }
         regenAnimation = new Animation<>(0.25f, regenFrames);
         regenImage = new Image(regenFrames.first());
@@ -386,6 +389,7 @@ public class HUD {
      */
     public void dispose() {
         stage.dispose();
+        heartTexture.dispose();
         regenTexture.dispose();
         arrowTexture.dispose();
         hudBoxTexture.dispose();
