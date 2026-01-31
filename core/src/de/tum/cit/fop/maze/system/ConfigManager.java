@@ -83,6 +83,11 @@ public class ConfigManager {
      */
     public void saveKeyBindings() {
         try {
+            java.io.File directory = new java.io.File("config");
+            if (!directory.exists()) {
+                directory.mkdirs();
+            }
+
             Json json = new Json();
             json.setOutputType(JsonWriter.OutputType.json);
 

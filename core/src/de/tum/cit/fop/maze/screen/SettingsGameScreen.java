@@ -3,10 +3,14 @@ package de.tum.cit.fop.maze.screen;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
-import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.ui.*;
+import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import de.tum.cit.fop.maze.MazeRunnerGame;
@@ -26,6 +30,7 @@ public class SettingsGameScreen implements Screen {
     /** Vignette texture overlay. */
     private final Texture vignetteTexture;
 
+    private boolean warned;
     /**
      * Creates the game settings screen.
      *
@@ -34,14 +39,58 @@ public class SettingsGameScreen implements Screen {
     public SettingsGameScreen(MazeRunnerGame game) {
         this.game = game;
         audioManager = game.getAudioManager();
-        var graphicsManager = game.getGraphicsManager();
-        Viewport viewport = new FitViewport(graphicsManager.getWidth(), graphicsManager.getHeight());
+        var camera = new OrthographicCamera();
+        camera.zoom = 1f; // Set camera zoom for a closer view
+
+        Viewport viewport = new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), camera);
         stage = new Stage(viewport, game.getSpriteBatch());
         vignetteTexture = UiUtils.buildVignetteTexture(512, 512, 0.9f);
         Image vignetteImage = new Image(vignetteTexture);
         vignetteImage.setFillParent(true);
         vignetteImage.setTouchable(Touchable.disabled);
         stage.addActor(vignetteImage);
+        MessageDialog messageDialog = new MessageDialog(game.getSkin(), stage, game);
+
+        Table table = new Table();
+        table.setFillParent(true);
+
+        table.add(new Label("Settings: Game", game.getSkin(), "title")).colspan(2).padBottom(15).row();
+
+        Label devConsoleLabel = new Label("Development Console", game.getSkin(), "title");
+        CheckBox devConsoleCheckbox = new CheckBox("", game.getSkin());
+        devConsoleCheckbox.getImageCell().padRight(10);
+        devConsoleCheckbox.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                audioManager.playSound("Click.wav", 1);
+                if (!warned) {
+                    messageDialog.show("Enabling dev console turns off achievments");
+                    warned = true;
+                    devConsoleCheckbox.setChecked(false);
+                    return;
+                }
+                if (game.getGameScreen() != null){
+                    game.getGameScreen().setDevConsole(devConsoleCheckbox.isChecked());
+                }
+                if (game.getSurvivalScreen() != null){
+                    game.getSurvivalScreen().setDevConsole(devConsoleCheckbox.isChecked());
+                }
+            }
+        });
+
+        TextButton backButton = new TextButton("Back", game.getSkin());
+        backButton.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                audioManager.playSound("Click.wav", 1);
+                game.goToSettingsScreen();
+            }
+        });
+
+        table.add(devConsoleLabel).pad(15);
+        table.add(devConsoleCheckbox).pad(15).row();
+        table.add(backButton).colspan(2).align(Align.center).size(120,45).pad(15);
+        stage.addActor(table);
     }
 
     /**

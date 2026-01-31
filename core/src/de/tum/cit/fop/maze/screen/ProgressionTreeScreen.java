@@ -5,6 +5,7 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
@@ -79,8 +80,10 @@ public class ProgressionTreeScreen implements Screen {
     public ProgressionTreeScreen(MazeRunnerGame game) {
         this.game = game;
         audioManager = game.getAudioManager();
-        var graphicsManager = game.getGraphicsManager();
-        Viewport viewport = new FitViewport(graphicsManager.getWidth(), graphicsManager.getHeight());
+        var camera = new OrthographicCamera();
+        camera.zoom = 1f; // Set camera zoom for a closer view
+
+        Viewport viewport = new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), camera);
         stage = new Stage(viewport, game.getSpriteBatch());
         shapeRenderer = new ShapeRenderer();
         backgroundTexture = new Texture(Gdx.files.internal("Assets_Map/mega_inside.png"));

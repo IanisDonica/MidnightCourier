@@ -3,6 +3,7 @@ package de.tum.cit.fop.maze.screen;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -40,8 +41,10 @@ public class SettingsScreen implements Screen {
         this.game = game;
         audioManager = game.getAudioManager();
         var graphicsManager = game.getGraphicsManager();
+        var camera = new OrthographicCamera();
+        camera.zoom = 1f; // Set camera zoom for a closer view
 
-        Viewport viewport = new FitViewport(graphicsManager.getWidth(), graphicsManager.getHeight());
+        Viewport viewport = new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), camera);
         stage = new Stage(viewport, game.getSpriteBatch()); // Create a stage for UI elements
 
         vignetteTexture = UiUtils.buildVignetteTexture(512, 512, 0.9f);
@@ -103,6 +106,14 @@ public class SettingsScreen implements Screen {
             public void changed(ChangeEvent event, Actor actor) {
                 audioManager.playSound("Click.wav", 1);
                 game.goToSettingsVideoScreen();
+            }
+        });
+
+        gameSettings.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                audioManager.playSound("Click.wav", 1);
+                game.goToSettingsGameScreen();
             }
         });
     }
