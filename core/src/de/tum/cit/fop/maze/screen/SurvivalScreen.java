@@ -5,141 +5,247 @@ import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.maps.tiled.TiledMap;
+import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
-import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.math.GridPoint2;
-import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.ScreenUtils;
-import com.badlogic.gdx.utils.viewport.*;
-import de.tum.cit.fop.maze.system.HUD;
+import com.badlogic.gdx.utils.viewport.ExtendViewport;
+import com.badlogic.gdx.utils.viewport.Viewport;
 import de.tum.cit.fop.maze.MazeRunnerGame;
 import de.tum.cit.fop.maze.entity.Player;
+import de.tum.cit.fop.maze.entity.obstacle.BmwEnemy;
+import de.tum.cit.fop.maze.entity.obstacle.Enemy;
 import de.tum.cit.fop.maze.map.MapLoader;
 import de.tum.cit.fop.maze.system.*;
-import de.tum.cit.fop.maze.system.ProgressionManager;
-import de.tum.cit.fop.maze.entity.obstacle.Enemy;
+
 import java.util.ArrayList;
 import java.util.List;
-import de.tum.cit.fop.maze.entity.obstacle.BmwEnemy;
 
 /**
  * Endless survival game screen with dynamic spawns and timers.
  */
 public class SurvivalScreen implements Screen {
-    /** World width in tiles. */
+    /**
+     * World width in tiles.
+     */
     public static final int WORLD_WIDTH = 225;
-    /** World height in tiles. */
+    /**
+     * World height in tiles.
+     */
     public static final int WORLD_HEIGHT = 250;
-    /** Game instance for navigation and resources. */
-    private final MazeRunnerGame game;
-    /** Loaded tiled map. */
-    private final TiledMap map;
-    /** Collision layer for movement. */
-    private final TiledMapTileLayer  collisionLayer;
-    /** Road layer for BMW movement. */
-    private final TiledMapTileLayer roadLayer;
-    /** Map renderer for tiled map. */
-    private final OrthogonalTiledMapRenderer mapRenderer;
-    /** Stage for world actors. */
-    private final Stage stage;
-    /** Grayscale shader for effects. */
-    private final ShaderProgram grayScaleShader;
-    /** Combined shader for fog and effects. */
-    private final ShaderProgram combinedShader;
-    /** UI camera for HUD overlay. */
-    private final OrthographicCamera uiCamera;
-    /** Particle system for drifting. */
-    private final DriftParticleSystem driftParticleSystem;
-    /** Fog radius intensity. */
-    private float fogIntensity = 7f;
-    /** Whether glasses upgrade has been applied. */
-    private boolean glassesApplied = false;
-    /** Whether noire mode is enabled. */
-    private boolean noireMode = false;
-    /** Framebuffer for world rendering. */
-    private FrameBuffer fbo;
-    /** Region of the framebuffer texture. */
-    private TextureRegion fboRegion;
-    /** Framebuffer for key preview. */
-    private FrameBuffer keyPreviewFbo;
-    /** Region for key preview framebuffer. */
-    private TextureRegion keyPreviewRegion;
-    /** Camera for key preview rendering. */
-    private OrthographicCamera keyPreviewCamera;
-    /** Marker texture for key preview. */
-    private Texture keyPreviewMarker;
-    /** Whether key preview is visible. */
-    private boolean keyPreviewVisible = false;
-    /** Key preview center x. */
-    private float keyPreviewCenterX = 0f;
-    /** Key preview center y. */
-    private float keyPreviewCenterY = 0f;
-    /** Player actor. */
-    private final Player player;
-    /** Point manager for scoring. */
-    public PointManager pointManager;
-    /** Map loader for generating layers and entities. */
-    private final MapLoader mapLoader = new MapLoader();
-    /** Base map path. */
-    private String mapPath = "Assets_Map/THE_MAP.tmx";
-    /** Level number (0 for survival). */
-    private int level;
-    /** Properties file path for the level. */
-    private String propertiesPath;
-    /** HUD overlay. */
-    private final HUD hud;
-    /** Developer console overlay. */
-    private final DevConsole devConsole;
-    /** Active enemies. */
-    private final List<de.tum.cit.fop.maze.entity.obstacle.Enemy> enemies = new ArrayList<>();
-    /** Active collectibles. */
-    private final List<de.tum.cit.fop.maze.entity.collectible.Collectible> collectibles = new ArrayList<>();
-    /** Current saved game state. */
-    private GameState gameState;
-    /** Whether the game is paused. */
-    private boolean paused = false;
-    /** Regen interval seconds. */
+    /**
+     * Regen interval seconds.
+     */
     private static final float REGEN_INTERVAL_SECONDS = 10f;
-    /** Points awarded when regen triggers at full health. */
+    /**
+     * Points awarded when regen triggers at full health.
+     */
     private static final int REGEN_POINTS_ON_FULL = 100;
-    /** Regen timer accumulator. */
-    private float regenTimer = 0f;
-    /** BMW spawn interval seconds. */
+    /**
+     * BMW spawn interval seconds.
+     */
     private static final float BMW_SPAWN_INTERVAL_SECONDS = 8f;
-    /** Hard cap for policemen in endless mode, so that there is always a chance to beat the game and so that the game doesnt lag out*/
+    /**
+     * Hard cap for policemen in endless mode, so that there is always a chance to beat the game and so that the game doesnt lag out
+     */
     private static final int MAX_POLICEMEN = 20;
-    /** BMW spawn timer accumulator. */
-    private float bmwSpawnTimer = 0f;
-    /** Initial delivery time limit. */
+    /**
+     * Initial delivery time limit.
+     */
     private static final float DELIVERY_TIME_START_SECONDS = 90f;
-    /** Minimum delivery time limit. */
+    /**
+     * Minimum delivery time limit.
+     */
     private static final float DELIVERY_TIME_MIN_SECONDS = 30f;
-    /** Amount to decrease delivery time after completion. */
+    /**
+     * Amount to decrease delivery time after completion.
+     */
     private static final float DELIVERY_TIME_DECREASE_SECONDS = 2f;
-    /** Current delivery time limit. */
-    private float deliveryTimeLimit = DELIVERY_TIME_START_SECONDS;
-    /** Current delivery timer value. */
-    private float deliveryTimer = 0f;
-    /** Whether the delivery timer is active. */
-    private boolean deliveryTimerActive = false;
-    /** Minimum camera zoom. */
+    /**
+     * Minimum camera zoom.
+     */
     private static final float MIN_ZOOM = 0.03f;
-    /** Maximum camera zoom. */
+    /**
+     * Maximum camera zoom.
+     */
     private static final float MAX_ZOOM = 0.3f;
-    /** Spawn timing counter. */
+    /**
+     * Game instance for navigation and resources.
+     */
+    private final MazeRunnerGame game;
+    /**
+     * Loaded tiled map.
+     */
+    private final TiledMap map;
+    /**
+     * Collision layer for movement.
+     */
+    private final TiledMapTileLayer collisionLayer;
+    /**
+     * Road layer for BMW movement.
+     */
+    private final TiledMapTileLayer roadLayer;
+    /**
+     * Map renderer for tiled map.
+     */
+    private final OrthogonalTiledMapRenderer mapRenderer;
+    /**
+     * Stage for world actors.
+     */
+    private final Stage stage;
+    /**
+     * Grayscale shader for effects.
+     */
+    private final ShaderProgram grayScaleShader;
+    /**
+     * Combined shader for fog and effects.
+     */
+    private final ShaderProgram combinedShader;
+    /**
+     * UI camera for HUD overlay.
+     */
+    private final OrthographicCamera uiCamera;
+    /**
+     * Particle system for drifting.
+     */
+    private final DriftParticleSystem driftParticleSystem;
+    /**
+     * Player actor.
+     */
+    private final Player player;
+    /**
+     * Map loader for generating layers and entities.
+     */
+    private final MapLoader mapLoader = new MapLoader();
+    /**
+     * HUD overlay.
+     */
+    private final HUD hud;
+    /**
+     * Developer console overlay.
+     */
+    private final DevConsole devConsole;
+    /**
+     * Active enemies.
+     */
+    private final List<de.tum.cit.fop.maze.entity.obstacle.Enemy> enemies = new ArrayList<>();
+    /**
+     * Active collectibles.
+     */
+    private final List<de.tum.cit.fop.maze.entity.collectible.Collectible> collectibles = new ArrayList<>();
+    /**
+     * Point manager for scoring.
+     */
+    public PointManager pointManager;
+    /**
+     * Fog radius intensity.
+     */
+    private float fogIntensity = 7f;
+    /**
+     * Whether glasses upgrade has been applied.
+     */
+    private boolean glassesApplied = false;
+    /**
+     * Whether noire mode is enabled.
+     */
+    private boolean noireMode = false;
+    /**
+     * Framebuffer for world rendering.
+     */
+    private FrameBuffer fbo;
+    /**
+     * Region of the framebuffer texture.
+     */
+    private TextureRegion fboRegion;
+    /**
+     * Framebuffer for key preview.
+     */
+    private final FrameBuffer keyPreviewFbo;
+    /**
+     * Region for key preview framebuffer.
+     */
+    private final TextureRegion keyPreviewRegion;
+    /**
+     * Camera for key preview rendering.
+     */
+    private final OrthographicCamera keyPreviewCamera;
+    /**
+     * Marker texture for key preview.
+     */
+    private final Texture keyPreviewMarker;
+    /**
+     * Whether key preview is visible.
+     */
+    private boolean keyPreviewVisible = false;
+    /**
+     * Key preview center x.
+     */
+    private float keyPreviewCenterX = 0f;
+    /**
+     * Key preview center y.
+     */
+    private float keyPreviewCenterY = 0f;
+    /**
+     * Base map path.
+     */
+    private String mapPath = "Assets_Map/THE_MAP.tmx";
+    /**
+     * Level number (0 for survival).
+     */
+    private final int level;
+    /**
+     * Properties file path for the level.
+     */
+    private final String propertiesPath;
+    /**
+     * Current saved game state.
+     */
+    private GameState gameState;
+    /**
+     * Whether the game is paused.
+     */
+    private boolean paused = false;
+    /**
+     * Regen timer accumulator.
+     */
+    private float regenTimer = 0f;
+    /**
+     * BMW spawn timer accumulator.
+     */
+    private float bmwSpawnTimer = 0f;
+    /**
+     * Current delivery time limit.
+     */
+    private float deliveryTimeLimit = DELIVERY_TIME_START_SECONDS;
+    /**
+     * Current delivery timer value.
+     */
+    private float deliveryTimer = 0f;
+    /**
+     * Whether the delivery timer is active.
+     */
+    private boolean deliveryTimerActive = false;
+    /**
+     * Spawn timing counter.
+     */
     private int Delta = 0;
-    /** Spawn timing multiplier. */
+    /**
+     * Spawn timing multiplier.
+     */
     private float Adder = 1;
+    private int autosaveTimer = 0;
+
     /**
      * Creates a new survival screen with a fresh state.
      *
@@ -196,7 +302,7 @@ public class SurvivalScreen implements Screen {
     /**
      * Creates a survival screen from a saved game state.
      *
-     * @param game game instance
+     * @param game      game instance
      * @param gameState saved state to load
      */
     public SurvivalScreen(MazeRunnerGame game, GameState gameState) {
@@ -260,6 +366,58 @@ public class SurvivalScreen implements Screen {
     }
 
     /**
+     * Builds a properties path for a level.
+     *
+     * @param levelNumber level number
+     * @return properties file path
+     */
+    private static String toPropertiesPath(int levelNumber) {
+        return String.format("maps/level-%d.properties", levelNumber);
+    }
+
+    /**
+     * Collects all walkable tiles from the collision layer.
+     *
+     * @param collisionLayer collision layer to scan
+     * @return list of walkable tile coordinates
+     */
+    private static List<GridPoint2> collectWalkableTiles(TiledMapTileLayer collisionLayer) {
+        List<GridPoint2> tiles = new ArrayList<>();
+        int width = collisionLayer.getWidth();
+        int height = collisionLayer.getHeight();
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                if (collisionLayer.getCell(x, y) == null) {
+                    tiles.add(new GridPoint2(x, y));
+                }
+            }
+        }
+        return tiles;
+    }
+
+    /**
+     * Checks whether spawning at a tile would collide with existing actors.
+     *
+     * @param stage stage containing actors
+     * @param x     spawn x
+     * @param y     spawn y
+     * @return {@code true} if collision would occur
+     */
+    private static boolean wouldCollideAt(Stage stage, float x, float y) {
+        if (stage == null) {
+            return true;
+        }
+        Rectangle spawnBounds = new Rectangle(x, y, 1f, 1f);
+        for (Actor actor : stage.getActors()) {
+            Rectangle actorBounds = new Rectangle(actor.getX(), actor.getY(), actor.getWidth(), actor.getHeight());
+            if (spawnBounds.overlaps(actorBounds)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Adjusts camera zoom by the given amount.
      *
      * @param amount zoom delta
@@ -270,12 +428,15 @@ public class SurvivalScreen implements Screen {
         camera.update();
     }
 
+    // If I have more time ill make it, so this isn't polled every frame (the original idea was to make it fired in the upgrade classes),
+    // But for now this also works
+
     /**
      * Generates a TMX file for the level based on properties.
      *
      * @param templateMapPath TMX template path
-     * @param propertiesPath properties path for tiles
-     * @param level level number
+     * @param propertiesPath  properties path for tiles
+     * @param level           level number
      * @return output TMX path
      */
     private String buildGeneratedTmx(String templateMapPath, String propertiesPath, int level) {
@@ -300,8 +461,6 @@ public class SurvivalScreen implements Screen {
         noireMode = !noireMode;
     }
 
-    // If I have more time ill make it, so this isn't polled every frame (the original idea was to make it fired in the upgrade classes),
-    // But for now this also works
     /**
      * Applies upgrade effects to the player each frame.
      */
@@ -348,8 +507,7 @@ public class SurvivalScreen implements Screen {
         ensureKeyAndExit();
 
         enemies.removeIf(enemy -> enemy.getStage() == null);
-        while(Delta >= 80)
-        {
+        while (Delta >= 80) {
             Delta = -80;
             int remainingSlots = MAX_POLICEMEN - enemies.size();
             if (remainingSlots <= 0) {
@@ -445,20 +603,7 @@ public class SurvivalScreen implements Screen {
                 dropOffY = collectible.getSpawnY();
             }
         }
-        hud.update(
-                level,
-                player.getHp(),
-                pointManager.getPoints(),
-                player.hasKey(),
-                player.canLeave(),
-                game.getProgressionManager().hasUpgrade("regen"),
-                regenTimer,
-                REGEN_INTERVAL_SECONDS,
-                deliveryTimerActive ? deliveryTimer : -1f,
-                player.getX() + player.getWidth() / 2f,
-                player.getY() + player.getHeight() / 2f,
-                keyX, keyY, exitX, exitY, dropOffX, dropOffY
-        );
+        hud.update(level, player.getHp(), pointManager.getPoints(), player.hasKey(), player.canLeave(), game.getProgressionManager().hasUpgrade("regen"), regenTimer, REGEN_INTERVAL_SECONDS, deliveryTimerActive ? deliveryTimer : -1f, player.getX() + player.getWidth() / 2f, player.getY() + player.getHeight() / 2f, keyX, keyY, exitX, exitY, dropOffX, dropOffY);
         hud.getStage().act(delta);
         hud.getStage().draw();
 
@@ -474,46 +619,22 @@ public class SurvivalScreen implements Screen {
         }
 
         if (gameState != null) {
-            gameState.save(
-                    mapPath,
-                    level,
-                    ((OrthographicCamera) stage.getCamera()).zoom,
-                    player.getX(),
-                    player.getY(),
-                    player.getHp(),
-                    pointManager,
-                    player.hasKey(),
-                    player.canLeave(),
-                    enemyDataList,
-                    collectibleDataList,
-                    game.getProgressionManager().getPoints(),
-                    new java.util.HashSet<>(game.getProgressionManager().getOwnedUpgrades())
-            );
+            gameState.save(mapPath, level, ((OrthographicCamera) stage.getCamera()).zoom, player.getX(), player.getY(), player.getHp(), pointManager, player.hasKey(), player.canLeave(), enemyDataList, collectibleDataList, game.getProgressionManager().getPoints(), new java.util.HashSet<>(game.getProgressionManager().getOwnedUpgrades()));
+        } else {
+            gameState = new GameState(mapPath, level, ((OrthographicCamera) stage.getCamera()).zoom, player.getX(), player.getY(), player.getHp(), pointManager, player.hasKey(), player.canLeave(), enemyDataList, collectibleDataList, game.getProgressionManager().getPoints(), new java.util.HashSet<>(game.getProgressionManager().getOwnedUpgrades()));
         }
-        else {
-            gameState = new GameState(
-                    mapPath,
-                    level,
-                    ((OrthographicCamera) stage.getCamera()).zoom,
-                    player.getX(),
-                    player.getY(),
-                    player.getHp(),
-                    pointManager,
-                    player.hasKey(),
-                    player.canLeave(),
-                    enemyDataList,
-                    collectibleDataList,
-                    game.getProgressionManager().getPoints(),
-                    new java.util.HashSet<>(game.getProgressionManager().getOwnedUpgrades())
-            );
+        autosaveTimer++;
+        if (autosaveTimer == 60) {
+            autosaveTimer = 0;
+            SaveManager.saveGame(gameState);
+            SaveManager.saveInfo(true, 4);
         }
-        SaveManager.saveGame(gameState);
     }
 
     /**
      * Resizes viewports and framebuffers.
      *
-     * @param width new width
+     * @param width  new width
      * @param height new height
      */
     @Override
@@ -660,16 +781,6 @@ public class SurvivalScreen implements Screen {
     }
 
     /**
-     * Builds a properties path for a level.
-     *
-     * @param levelNumber level number
-     * @return properties file path
-     */
-    private static String toPropertiesPath(int levelNumber) {
-        return String.format("maps/level-%d.properties", levelNumber);
-    }
-
-    /**
      * Applies regeneration over time if the upgrade is owned.
      *
      * @param delta frame delta time
@@ -756,9 +867,7 @@ public class SurvivalScreen implements Screen {
         player.clearKey();
         player.clearCanLeave();
         for (de.tum.cit.fop.maze.entity.collectible.Collectible collectible : collectibles) {
-            if (collectible instanceof de.tum.cit.fop.maze.entity.collectible.ExitDoor
-                    || collectible instanceof de.tum.cit.fop.maze.entity.collectible.DropOff
-                    || collectible instanceof de.tum.cit.fop.maze.entity.collectible.Key) {
+            if (collectible instanceof de.tum.cit.fop.maze.entity.collectible.ExitDoor || collectible instanceof de.tum.cit.fop.maze.entity.collectible.DropOff || collectible instanceof de.tum.cit.fop.maze.entity.collectible.Key) {
                 collectible.markPickedUp();
             }
         }
@@ -816,8 +925,7 @@ public class SurvivalScreen implements Screen {
         if (tile == null) {
             return;
         }
-        de.tum.cit.fop.maze.entity.collectible.Key key =
-                new de.tum.cit.fop.maze.entity.collectible.Key(tile.x, tile.y, pointManager);
+        de.tum.cit.fop.maze.entity.collectible.Key key = new de.tum.cit.fop.maze.entity.collectible.Key(tile.x, tile.y, pointManager);
         stage.addActor(key);
         collectibles.add(key);
         triggerKeyPreview(tile.x + 0.5f, tile.y + 0.5f);
@@ -831,8 +939,7 @@ public class SurvivalScreen implements Screen {
         if (tile == null) {
             return;
         }
-        de.tum.cit.fop.maze.entity.collectible.DropOff dropOff =
-                new de.tum.cit.fop.maze.entity.collectible.DropOff(tile.x, tile.y, pointManager, this::handleEndlessVictory, false);
+        de.tum.cit.fop.maze.entity.collectible.DropOff dropOff = new de.tum.cit.fop.maze.entity.collectible.DropOff(tile.x, tile.y, pointManager, this::handleEndlessVictory, false);
         stage.addActor(dropOff);
         collectibles.add(dropOff);
         triggerKeyPreview(tile.x + 0.5f, tile.y + 0.5f);
@@ -857,48 +964,6 @@ public class SurvivalScreen implements Screen {
             }
         }
         return null;
-    }
-
-    /**
-     * Collects all walkable tiles from the collision layer.
-     *
-     * @param collisionLayer collision layer to scan
-     * @return list of walkable tile coordinates
-     */
-    private static List<GridPoint2> collectWalkableTiles(TiledMapTileLayer collisionLayer) {
-        List<GridPoint2> tiles = new ArrayList<>();
-        int width = collisionLayer.getWidth();
-        int height = collisionLayer.getHeight();
-        for (int x = 0; x < width; x++) {
-            for (int y = 0; y < height; y++) {
-                if (collisionLayer.getCell(x, y) == null) {
-                    tiles.add(new GridPoint2(x, y));
-                }
-            }
-        }
-        return tiles;
-    }
-
-    /**
-     * Checks whether spawning at a tile would collide with existing actors.
-     *
-     * @param stage stage containing actors
-     * @param x spawn x
-     * @param y spawn y
-     * @return {@code true} if collision would occur
-     */
-    private static boolean wouldCollideAt(Stage stage, float x, float y) {
-        if (stage == null) {
-            return true;
-        }
-        Rectangle spawnBounds = new Rectangle(x, y, 1f, 1f);
-        for (Actor actor : stage.getActors()) {
-            Rectangle actorBounds = new Rectangle(actor.getX(), actor.getY(), actor.getWidth(), actor.getHeight());
-            if (spawnBounds.overlaps(actorBounds)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     /**
@@ -938,6 +1003,15 @@ public class SurvivalScreen implements Screen {
         }
     }
 
+    public void setDevConsole(boolean enabled) {
+        if (enabled) {
+            devConsole.enable();
+        } else {
+            devConsole.disable();
+            if (devConsole.isVisible()) devConsole.toggle(hud.getStage());
+        }
+    }
+
     /**
      * Renders the key preview framebuffer.
      *
@@ -969,5 +1043,9 @@ public class SurvivalScreen implements Screen {
         Texture texture = new Texture(pixmap);
         pixmap.dispose();
         return texture;
+    }
+
+    public GameState getGameState() {
+        return gameState;
     }
 }

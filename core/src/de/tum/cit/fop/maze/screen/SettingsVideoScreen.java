@@ -46,11 +46,11 @@ public class SettingsVideoScreen implements Screen {
         audioManager = game.getAudioManager();
         graphicsManager = game.getGraphicsManager();
         var camera = new OrthographicCamera();
-        camera.zoom = 1.5f; // Set camera zoom for a closer view
+        camera.zoom = 1f; // Set camera zoom for a closer view
 
-        Viewport viewport = new FitViewport(graphicsManager.getWidth(), graphicsManager.getHeight(), camera);
+        Viewport viewport = new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), camera);
         stage = new Stage(viewport, game.getSpriteBatch());
-        restartDialog = new RestartDialog(game.getSkin(), stage);
+        restartDialog = new RestartDialog(game.getSkin(), stage, game);
 
         vignetteTexture = UiUtils.buildVignetteTexture(512, 512, 0.9f);
         Image vignetteImage = new Image(vignetteTexture);
@@ -100,40 +100,9 @@ public class SettingsVideoScreen implements Screen {
                     graphicsManager.setWindowed();
                 } else if (displayMode.getSelected().equals("Borderless Windowed")) {
                     graphicsManager.setBorderless();
-                    restartDialog.show("Graphics settings changed", "Borderless windowed mode requires restart");
+                    restartDialog.show("Borderless windowed mode requires restart");
                 } else if (displayMode.getSelected().equals("Fullscreen")) {
                     graphicsManager.setFullscreen();
-                }
-            }
-        });
-
-        Label resolutionLabel = new Label("Resolution:", game.getSkin(), "title");
-        SelectBox<String> resolution = new SelectBox<>(buildSelectBoxStyle());
-
-        Label aspectRatioLabel = new Label("AspectRatio:", game.getSkin(), "title");
-        SelectBox<String> aspectRatio = new SelectBox<>(buildSelectBoxStyle());
-        aspectRatio.setItems("4:3", "16:9", "16:10");
-        aspectRatio.setSelected(graphicsManager.getTargetAspectRatio().replace("/", ":"));
-        aspectRatio.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent event, Actor actor) {
-                audioManager.playSound("Click.wav", 1);
-                updateResolutionItems(aspectRatio.getSelected(), resolution);
-            }
-        });
-
-        updateResolutionItems(aspectRatio.getSelected(), resolution);
-        resolution.setSelected(graphicsManager.getWidth() + "x" + graphicsManager.getHeight());
-        resolution.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent event, Actor actor) {
-                audioManager.playSound("Click.wav", 1);
-                String selected = resolution.getSelected();
-                if (selected != null) {
-                    String[] parts = selected.split("x");
-                    int w = Integer.parseInt(parts[0]);
-                    int h = Integer.parseInt(parts[1]);
-                    graphicsManager.setResolution(w, h);
                 }
             }
         });
@@ -152,37 +121,39 @@ public class SettingsVideoScreen implements Screen {
                     case "MSAA 16x": graphicsManager.setAntiAliasingMode(GraphicsManager.AAMode.MSAA_16); break;
                     default: graphicsManager.setAntiAliasingMode(GraphicsManager.AAMode.DISABLED); break;
                 }
+                restartDialog.show("Changing antialising mode requires restart");
+            }
+        });
+
+        TextButton menuButton = new TextButton("Menu", game.getSkin());
+        menuButton.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                audioManager.playSound("Click.wav", 1);
+                game.goToSettingsScreen();
+            }
+        });
+
+        TextButton saveButton = new TextButton("Save", game.getSkin());
+        saveButton.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                audioManager.playSound("Click.wav", 1);
+                graphicsManager.save();
             }
         });
 
         table.add(displayLabel).pad(15).align(Align.left);
-        table.add(displayMode).width(graphicsManager.getWidth() * 0.5f).height(graphicsManager.getHeight() * 0.07f).pad(15).align(Align.left).row();
-        table.add(aspectRatioLabel).pad(15).align(Align.left);
-        table.add(aspectRatio).width(graphicsManager.getWidth() * 0.5f).height(graphicsManager.getHeight() * 0.07f).pad(15).align(Align.left).row();
-        table.add(resolutionLabel).pad(15).align(Align.left);
-        table.add(resolution).width(graphicsManager.getWidth() * 0.5f).height(graphicsManager.getHeight() * 0.07f).pad(15).align(Align.left).row();
+        table.add(displayMode).width(800).height(50).pad(15).align(Align.right).row();
         table.add(fpsLabel).pad(15).align(Align.left);
-        table.add(fpsSlider).width(graphicsManager.getWidth() * 0.5f).pad(15).align(Align.left).row();
+        table.add(fpsSlider).width(800).pad(15).align(Align.right).row();
         table.add(vsyncLabel).pad(15).align(Align.left);
-        table.add(vsyncCheckBox).size(60).pad(15).align(Align.left).row();
+        table.add(vsyncCheckBox).size(60).pad(15).align(Align.right).row();
         table.add(antialiasLabel).pad(15).align(Align.left);
-        table.add(antialias).width(graphicsManager.getWidth() * 0.5f).height(graphicsManager.getHeight() * 0.07f).pad(15).align(Align.left).row();
+        table.add(antialias).width(800).height(50).pad(15).align(Align.right).row();
+        table.add(menuButton).pad(15).align(Align.center).size(120,45);
+        table.add(saveButton).pad(15).align(Align.center).size(120,45).row();
 
-    }
-
-    /**
-     * Updates the resolution select box based on the selected aspect ratio.
-     * @param aspectRatio selected aspect ratio
-     * @param resolutionSelectBox resolution select box
-     */
-    private void updateResolutionItems(String aspectRatio, SelectBox<String> resolutionSelectBox) {
-        String[] resolutions = switch (aspectRatio) {
-            case "4:3" -> new String[]{"800x600", "1024x768", "1280x960", "1400x1050", "1600x1200", "2048x1536"};
-            case "16:9" -> new String[]{"1280x720", "1366x768", "1600x900", "1920x1080", "2560x1440", "3840x2160"};
-            case "16:10" -> new String[]{"1280x800", "1440x900", "1680x1050", "1920x1200", "2560x1600"};
-            default -> new String[]{};
-        };
-        resolutionSelectBox.setItems(resolutions);
     }
 
     /**

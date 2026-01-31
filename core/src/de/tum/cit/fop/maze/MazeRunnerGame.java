@@ -33,6 +33,8 @@ public class MazeRunnerGame extends Game {
     private GameScreen gameScreen;
     /** Endless/survival mode screen. */
     private SurvivalScreen survivalScreen;
+    /** False if the last screen is gamescreen, true if the last screen is survivalScreen. */
+    private boolean selectedScreen;
     /** Settings root screen. */
     private SettingsScreen settingsScreen;
     /** Level selection screen. */
@@ -93,6 +95,7 @@ public class MazeRunnerGame extends Game {
         audioManager.preloadSounds("Click.wav", "pickup.wav", "siren.ogg");
         audioManager.playMusic("background.mp3", 1f, true);
         graphicsManager.load();
+        graphicsManager.applySettings();
         goToMenu(); // Navigate to the menu screen
     }
 
@@ -118,6 +121,7 @@ public class MazeRunnerGame extends Game {
             survivalScreen.dispose();
             survivalScreen = null;
         }
+        this.selectedScreen = false;
         this.setScreen(gameScreen);
     }
 
@@ -133,6 +137,7 @@ public class MazeRunnerGame extends Game {
             survivalScreen.dispose();
             survivalScreen = null;
         }
+        this.selectedScreen = true;
         survivalScreen = new SurvivalScreen(this);
         currentLevelNumber = 0;
         this.setScreen(survivalScreen);
@@ -152,22 +157,35 @@ public class MazeRunnerGame extends Game {
             survivalScreen.dispose();
             survivalScreen = null;
         }
+        this.selectedScreen = true;
         currentLevelNumber = levelNumber;
         survivalScreen = new SurvivalScreen(this);
         this.setScreen(survivalScreen);
     }
 
     /**
-     * Switches to survival mode.
+     * Switches to endless mode with a specific game state.
+     *
+     * @param gameState the state of the loaded game
      */
-    public void goToSurvival() {
-        if (survivalScreen == null) {
-            survivalScreen = new SurvivalScreen(this);
+    public void goToEndless(GameState gameState) {
+        if (gameState == null) {
+            goToMenu();
+            return;
         }
+        loadProgressionFromGameState(gameState);
         if (gameScreen != null) {
             gameScreen.dispose();
             gameScreen = null;
         }
+        if (survivalScreen != null) {
+            survivalScreen.dispose();
+            survivalScreen = null;
+        }
+
+        this.selectedScreen = true;
+        currentLevelNumber = gameState.getLevel();
+        survivalScreen = new SurvivalScreen(this, gameState);
         this.setScreen(survivalScreen);
     }
 
@@ -187,7 +205,7 @@ public class MazeRunnerGame extends Game {
             survivalScreen.dispose();
             survivalScreen = null;
         }
-
+        this.selectedScreen = false;
         currentLevelNumber = levelNumber;
         gameScreen = new GameScreen(this, currentLevelNumber);
         this.setScreen(gameScreen);
@@ -212,6 +230,7 @@ public class MazeRunnerGame extends Game {
             survivalScreen.dispose();
             survivalScreen = null;
         }
+        this.selectedScreen = false;
         currentLevelNumber = gameState.getLevel();
         gameScreen = new GameScreen(this, gameState);
         this.setScreen(gameScreen);
@@ -621,6 +640,10 @@ public class MazeRunnerGame extends Game {
     public boolean shouldRenderMenuBackground() {
         Screen current = getScreen();
         return !(current instanceof GameScreen) && !(current instanceof SurvivalScreen);
+    }
+
+    public boolean getSelectedScreen(){
+        return selectedScreen;
     }
 
     /**

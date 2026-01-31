@@ -22,7 +22,7 @@ public class DriftyMovementController {
     /**
      * Friction multiplier applied per frame.
      */
-    private float friction = 0.998f; // 0 means maximum friction, 1 is no friction
+    private float friction = 0.999f; // 0 means maximum friction, 1 is no friction
     /**
      * Degrees per second for smooth rotation to input direction.
      */
@@ -152,7 +152,7 @@ public class DriftyMovementController {
             maxSpeedActual *= 1.5f;
         }
         if (velocity.len() > maxSpeedActual) {
-            velocity.setLength(maxSpeedActual);
+            velocity.scl(0.9f);
         }
     }
 

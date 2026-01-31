@@ -9,11 +9,9 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.EventListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
-import com.badlogic.gdx.scenes.scene2d.ui.Image;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.ui.Slider;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import de.tum.cit.fop.maze.MazeRunnerGame;
@@ -48,9 +46,9 @@ public class SettingsAudioScreen implements Screen {
         var graphicsManager = game.getGraphicsManager();
 
         var camera = new OrthographicCamera();
-        camera.zoom = 1.5f; // Set camera zoom for a closer view
+        camera.zoom = 1f; // Set camera zoom for a closer view
 
-        Viewport viewport = new FitViewport(graphicsManager.getWidth(), graphicsManager.getHeight());
+        Viewport viewport = new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), camera);
         stage = new Stage(viewport, game.getSpriteBatch());
 
         vignetteTexture = UiUtils.buildVignetteTexture(512, 512, 0.9f);
@@ -70,6 +68,7 @@ public class SettingsAudioScreen implements Screen {
         Label masterVolumeLabel = new Label("Master Volume", game.getSkin(), "title");
         Label soundEffectsVolumeLabel = new Label("Sound Effects Volume", game.getSkin(), "title");
         Label musicVolumeLabel = new Label("Music", game.getSkin(), "title");
+
 
         masterVolumeSlider.setValue(audioManager.getMasterVolume());
         soundEffectsVolumeSlider.setValue(audioManager.getSoundEffectsVolume());
@@ -108,6 +107,16 @@ public class SettingsAudioScreen implements Screen {
                 configManager.saveAudioSettings();
             }
         });
+
+        TextButton menuButton = new TextButton("Menu", game.getSkin());
+        menuButton.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                audioManager.playSound("Click.wav", 1);
+                game.goToSettingsScreen();
+            }
+        });
+        table.add(menuButton).colspan(2).align(Align.center).pad(15).size(120,45).row();
     }
 
     /**
