@@ -206,6 +206,7 @@ public class GameScreen implements Screen {
         this.player.setX(gameState.getPlayerX());
         this.player.setY(gameState.getPlayerY());
         if (gameState.hasKey()) player.pickupKey();
+        if (gameState.canLeave()) player.grantCanLeave();
         if (gameState.getPointManager() != null) {
             pointManager = gameState.getPointManager();
         } else {
@@ -372,13 +373,15 @@ public class GameScreen implements Screen {
         float keyY = Float.NaN;
         float exitX = Float.NaN;
         float exitY = Float.NaN;
+        float dropOffX = Float.NaN;
+        float dropOffY = Float.NaN;
         for (de.tum.cit.fop.maze.entity.collectible.Collectible collectible : collectibles) {
             if (collectible instanceof de.tum.cit.fop.maze.entity.collectible.Key && !collectible.getPickedUp()) {
                 keyX = collectible.getSpawnX();
                 keyY = collectible.getSpawnY();
-            } else if (collectible instanceof de.tum.cit.fop.maze.entity.collectible.ExitDoor) {
-                exitX = collectible.getSpawnX();
-                exitY = collectible.getSpawnY();
+            } else if (collectible instanceof de.tum.cit.fop.maze.entity.collectible.DropOff && !collectible.getPickedUp()) {
+                dropOffX = collectible.getSpawnX();
+                dropOffY = collectible.getSpawnY();
             }
         }
         hud.update(
@@ -386,13 +389,14 @@ public class GameScreen implements Screen {
                 player.getHp(),
                 pointManager.getPoints(),
                 player.hasKey(),
+                player.canLeave(),
                 game.getProgressionManager().hasUpgrade("regen"),
                 regenTimer,
                 REGEN_INTERVAL_SECONDS,
                 -1f,
                 player.getX() + player.getWidth() / 2f,
                 player.getY() + player.getHeight() / 2f,
-                keyX, keyY, exitX, exitY
+                keyX, keyY, exitX, exitY, dropOffX, dropOffY
         );
         hud.getStage().act(delta);
         hud.getStage().draw();
@@ -418,6 +422,7 @@ public class GameScreen implements Screen {
                     player.getHp(),
                     pointManager,
                     player.hasKey(),
+                    player.canLeave(),
                     enemyDataList,
                     collectibleDataList,
                     game.getProgressionManager().getPoints(),
@@ -434,6 +439,7 @@ public class GameScreen implements Screen {
                     player.getHp(),
                     pointManager,
                     player.hasKey(),
+                    player.canLeave(),
                     enemyDataList,
                     collectibleDataList,
                     game.getProgressionManager().getPoints(),
@@ -495,7 +501,7 @@ public class GameScreen implements Screen {
         stage.addActor(player);
 
         if (enemies.isEmpty() && collectibles.isEmpty()) {
-            mapLoader.spawnEntitiesFromProperties(stage, pointManager, collisionLayer, roadLayer, propertiesPath, hud, enemies, collectibles, game::goToVictoryScreen);
+            mapLoader.spawnEntitiesFromProperties(stage, pointManager, collisionLayer, roadLayer, propertiesPath, hud, enemies, collectibles, game::goToVictoryScreen, null, true);
         }
 
         if (gameState != null) {

@@ -76,6 +76,10 @@ public class Player extends Entity {
      */
     private boolean hasKey = false;
     /**
+     * Whether the player is allowed to leave.
+     */
+    private boolean canLeave = false;
+    /**
      * Whether the player is stunned.
      */
     private boolean stunned = false;
@@ -551,6 +555,29 @@ public class Player extends Entity {
      */
     public void clearKey() {
         this.hasKey = false;
+    }
+
+    /**
+     * Grants permission to leave.
+     */
+    public void grantCanLeave() {
+        this.canLeave = true;
+    }
+
+    /**
+     * Clears permission to leave.
+     */
+    public void clearCanLeave() {
+        this.canLeave = false;
+    }
+
+    /**
+     * Returns whether the player can leave.
+     *
+     * @return {@code true} if the player can leave
+     */
+    public boolean canLeave() {
+        return canLeave;
     }
 
     /**

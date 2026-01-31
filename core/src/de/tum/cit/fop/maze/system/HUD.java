@@ -236,6 +236,7 @@ public class HUD {
      * @param hp current health
      * @param score current score
      * @param hasKey whether the player has the key
+     * @param canLeave whether the player can leave
      * @param hasRegen whether regeneration is active
      * @param regenTimerSeconds current regen timer
      * @param regenIntervalSeconds regen interval duration
@@ -246,12 +247,14 @@ public class HUD {
      * @param keyY key y position
      * @param exitX exit x position
      * @param exitY exit y position
+     * @param dropOffX drop-off x position
+     * @param dropOffY drop-off y position
      */
-    public void update(int levelNumber, int hp, int score, boolean hasKey, boolean hasRegen,
+    public void update(int levelNumber, int hp, int score, boolean hasKey, boolean canLeave, boolean hasRegen,
                        float regenTimerSeconds, float regenIntervalSeconds,
                        float deliveryTimerSeconds,
                        float playerX, float playerY,
-                       float keyX, float keyY, float exitX, float exitY) {
+                       float keyX, float keyY, float exitX, float exitY, float dropOffX, float dropOffY) {
         healthTable.clear();
         levelLabel.setText("Level: " + levelNumber);
         levelLabel.setVisible(showLevel);
@@ -266,9 +269,11 @@ public class HUD {
             healthTable.add(heart_image).padLeft(50).padTop(40);
         }
         shopButton.setText("Open Shop (" + configManager.getKeyBindingName("openShop") + ")");
-        if(hasKey){
+        if (canLeave) {
+            keyLabel.setText("Can leave");
+        } else if (hasKey) {
             keyLabel.setText("Has key");
-        }else{
+        } else {
             keyLabel.setText("No key");
         }
 
@@ -290,8 +295,26 @@ public class HUD {
             regenImage.setDrawable(new TextureRegionDrawable(frame));
         }
 
-        float targetX = hasKey ? exitX : keyX;
-        float targetY = hasKey ? exitY : keyY;
+        boolean hasDropOffTarget = !Float.isNaN(dropOffX) && !Float.isNaN(dropOffY);
+        boolean hasExitTarget = !Float.isNaN(exitX) && !Float.isNaN(exitY);
+        float targetX;
+        float targetY;
+        if (canLeave && hasDropOffTarget) {
+            targetX = dropOffX;
+            targetY = dropOffY;
+        } else if (hasKey && hasExitTarget) {
+            targetX = exitX;
+            targetY = exitY;
+        } else if (hasKey && hasDropOffTarget) {
+            targetX = dropOffX;
+            targetY = dropOffY;
+        } else if (!Float.isNaN(keyX) && !Float.isNaN(keyY)) {
+            targetX = keyX;
+            targetY = keyY;
+        } else {
+            arrowImage.setVisible(false);
+            return;
+        }
         float dx = targetX - playerX;
         float dy = targetY - playerY;
         float angle = MathUtils.atan2(dy, dx) * MathUtils.radiansToDegrees;

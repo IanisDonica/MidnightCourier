@@ -10,8 +10,8 @@ The story is delivered through high quality, oscar worthy cutscenes, play and fi
 
 
 ## Rules
-The game has 2 modes, Endless and Campain, in general the player must pick up a delivery (key), the arrow will point to it if not picked up, and take it to a drop off point (exit), to wich the arrow will also point to if the delivery has been picked up. 
-However policeman, bad infastructure (potholes) and BMW drivers try to kill or bancrupt the player, Potholes and BMW driver collisions result in an instant death, explostions will knock the player back and policemen will arrest the player if he runs out of bride money (HP).
+The game has 2 modes, Endless and Campain. In general the player must pick up a delivery (key), the arrow will point to it if not picked up, and then take it to a drop-off point (DropOff). In Campaign, the drop-off grants permission to leave (can-leave), and the ExitDoor ends the level once can-leave is active. In Endless, the loop is: key (delivery) → drop-off → new key (delivery), repeating forever. The arrow tracks the current target, in endless the player also has a small map on to show him the area where he must go (to make it less frustrating). 
+During the gameplay loop, the player is targeted by policeman, bad infastructure (potholes) and BMW drivers that try to kill or bancrupt him, Potholes and BMW driver collisions result in an instant death, explostions will knock the player back and policemen will arrest the player if he runs out of bride money (HP).
 In Endless mode, dificualty scales over time: spawns accelerate the longer you survive, so the map gradually fills with more threats. The delivery timer adapts to player skill, finishing a delivery quickly reduces the next time limit more, while slower completions reduce it less.
 
 ## Code Organization
@@ -30,13 +30,14 @@ These values are interpreted by `MapLoader` when spawning entities and building 
 | Value | Meaning | Used for |
 |------:|---------|----------|
 | 1 | Entry point | Player spawn |
-| 2 | Exit | ExitDoor (also blocks in collision layer) |
+| 2 | Exit | ExitDoor (campaign only; requires can-leave to trigger victory; blocks collision) |
 | 3 | Health pickup | Collectible (HP + points) |
 | 4 | Guard enemy | Dynamic obstacle (policeman) |
 | 5 | Key | Required to open exit |
 | 6 | Energy drink | Speed boost collectible |
 | 7 | Wall | Collision layer block |
 | 8 | Pothole trap | Static obstacle |
+| 9 | Drop-off | Delivery drop-off (not solid; grants can-leave in campaign, completes delivery in endless) |
 | 10 | Shop | Interaction zone + collision block |
 | 11 | Road | BMW pathing layer |
 | 13 | BMW driver | Dynamic obstacle (road-only enemy) |

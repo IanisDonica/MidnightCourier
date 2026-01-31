@@ -9,33 +9,37 @@ import de.tum.cit.fop.maze.system.AchievementManager;
 import de.tum.cit.fop.maze.system.PointManager;
 
 /**
- * Exit door that grants permission to leave when the player has the key.
+ * Drop-off point that completes a delivery when the player has the key.
  */
-public class ExitDoor extends Collectible {
-    // The door is obviously not a Collectible, but it's easier to implement it as such due to the colision code
+public class DropOff extends Collectible {
     /**
-     * Listener invoked when victory is triggered.
+     * Listener invoked when the drop-off is completed.
      */
-    public interface VictoryListener {
-        void onVictory();
+    public interface DropOffListener {
+        void onDropOff();
     }
 
-    /** Listener to notify on victory. */
-    private final VictoryListener victoryListener;
-    /** Whether the exit has been triggered. */
+    /** Listener to notify on drop-off completion. */
+    private final DropOffListener dropOffListener;
+    /** Whether the drop-off grants can-leave instead of triggering victory. */
+    private final boolean grantsCanLeave;
+    /** Whether the drop-off has been triggered. */
     private boolean triggered = false;
 
     /**
-     * Creates an exit door collectible.
+     * Creates a drop-off collectible.
      *
      * @param x spawn x position
      * @param y spawn y position
      * @param pointManager point manager for scoring
+     * @param dropOffListener listener to call on completion
+     * @param grantsCanLeave whether to grant can-leave instead of triggering victory (to distinguish between the endless and gamescreen loop)
      */
-    public ExitDoor(float x, float y, PointManager pointManager, VictoryListener victoryListener) {
+    public DropOff(float x, float y, PointManager pointManager, DropOffListener dropOffListener, boolean grantsCanLeave) {
         super(x, y, 1, 1, pointManager);
-        this.victoryListener = victoryListener;
-        Texture texture = new Texture(Gdx.files.internal("RoadBlock.png"));
+        this.dropOffListener = dropOffListener;
+        this.grantsCanLeave = grantsCanLeave;
+        Texture texture = new Texture(Gdx.files.internal("DropOff.png"));
         Array<TextureRegion> frames = new Array<>(TextureRegion.class);
         frames.add(new TextureRegion(texture));
         spinAnimation = new Animation<>(1f, frames, Animation.PlayMode.NORMAL);
@@ -51,30 +55,41 @@ public class ExitDoor extends Collectible {
     public void act(float delta) {
         super.act(delta);
         if (player != null) {
-            setVisible(!player.canLeave());
+            if (grantsCanLeave) {
+                setVisible(player.hasKey() && !player.canLeave());
+            } else {
+                setVisible(player.hasKey());
+            }
         }
     }
 
     /**
-     * Handles player collision and triggers victory if leaving is allowed.
+     * Handles player collision and completes the drop-off if the key is owned.
      */
     @Override
     protected void collision() {
         if (triggered) {
             return;
         }
-        if (!this.player.canLeave()) {
+        if (!this.player.hasKey()) {
             return;
         }
         triggered = true;
+        if (grantsCanLeave) {
+            this.player.clearKey();
+            this.player.grantCanLeave();
+            markPickedUp();
+            return;
+        }
+        markPickedUp();
         this.pointManager.saveScore(this.player.getHp());
         AchievementManager.incrementProgress("first_delivery", 1);
         AchievementManager.incrementProgress("complete_100_deliveries", 1);
         if (this.pointManager.getLevel() == 5) {
             AchievementManager.incrementProgress("finish_level_5", 1);
         }
-        if (victoryListener != null) {
-            victoryListener.onVictory();
+        if (dropOffListener != null) {
+            dropOffListener.onDropOff();
         }
     }
 }

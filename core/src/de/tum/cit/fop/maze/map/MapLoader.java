@@ -6,6 +6,7 @@ import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import de.tum.cit.fop.maze.entity.collectible.Collectible;
+import de.tum.cit.fop.maze.entity.collectible.DropOff;
 import de.tum.cit.fop.maze.entity.collectible.EnergyDrink;
 import de.tum.cit.fop.maze.entity.collectible.ExitDoor;
 import de.tum.cit.fop.maze.entity.collectible.HealthPickup;
@@ -131,9 +132,11 @@ public class MapLoader {
      * @param hud HUD instance for shop interactions
      * @param enemies list to collect spawned enemies into
      * @param collectibles list to collect spawned collectibles into
-     * @param victoryListener callback invoked when the exit door triggers victory
+     * @param exitDoorListener callback invoked when the exit door triggers victory
+     * @param dropOffListener callback invoked when the drop-off is completed
+     * @param dropOffGrantsCanLeave whether drop-off should grant can-leave permission
      */
-    public void spawnEntitiesFromProperties(Stage stage, PointManager pointManager, TiledMapTileLayer collisionLayer, TiledMapTileLayer roadLayer, String propertiesPath, HUD hud, List<Enemy> enemies, List<Collectible> collectibles, ExitDoor.VictoryListener victoryListener) {
+    public void spawnEntitiesFromProperties(Stage stage, PointManager pointManager, TiledMapTileLayer collisionLayer, TiledMapTileLayer roadLayer, String propertiesPath, HUD hud, List<Enemy> enemies, List<Collectible> collectibles, ExitDoor.VictoryListener exitDoorListener, DropOff.DropOffListener dropOffListener, boolean dropOffGrantsCanLeave) {
         for (long[] entry : readPropertyEntries(propertiesPath)) {
             int x = (int) entry[0];
             int y = (int) entry[1];
@@ -154,9 +157,13 @@ public class MapLoader {
                 stage.addActor(keyGame);
                 collectibles.add(keyGame);
             } else if (value == 2) {
-                ExitDoor exitDoor = new ExitDoor(x, y, pointManager, victoryListener);
+                ExitDoor exitDoor = new ExitDoor(x, y, pointManager, exitDoorListener);
                 stage.addActor(exitDoor);
                 collectibles.add(exitDoor);
+            } else if (value == 9) {
+                DropOff dropOff = new DropOff(x, y, pointManager, dropOffListener, dropOffGrantsCanLeave);
+                stage.addActor(dropOff);
+                collectibles.add(dropOff);
             } else if (value == 8) {
                 Trap trap = new Trap(x, y);
                 stage.addActor(trap);
