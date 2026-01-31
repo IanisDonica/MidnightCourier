@@ -22,6 +22,8 @@ public class GameState implements Serializable {
     private PointManager pointManager;
     /** Whether the player has the key. */
     private boolean hasKey;
+    /** Whether the player can leave. */
+    private boolean canLeave;
     /** Enemy state data. */
     private List<EnemyData> enemies;
     /** Collectible state data. */
@@ -43,12 +45,13 @@ public class GameState implements Serializable {
      * @param playerLives remaining lives
      * @param pointManager point manager state
      * @param hasKey whether the player has the key
+     * @param canLeave whether the player can leave
      * @param enemies enemy state list
      * @param collectibles collectible state list
      * @param progressionPoints progression points
      * @param ownedUpgrades owned upgrade names
      */
-    public GameState(String mapPath, int level, float cameraZoom, float playerX, float playerY, int playerLives, PointManager pointManager, boolean hasKey, List<EnemyData> enemies, List<CollectibleData> collectibles, int progressionPoints, Set<String> ownedUpgrades) {
+    public GameState(String mapPath, int level, float cameraZoom, float playerX, float playerY, int playerLives, PointManager pointManager, boolean hasKey, boolean canLeave, List<EnemyData> enemies, List<CollectibleData> collectibles, int progressionPoints, Set<String> ownedUpgrades) {
         this.mapPath = mapPath;
         this.level = level;
         this.cameraZoom = cameraZoom;
@@ -57,6 +60,7 @@ public class GameState implements Serializable {
         this.playerY = playerY;
         this.pointManager = pointManager;
         this.hasKey = hasKey;
+        this.canLeave = canLeave;
         this.enemies = enemies;
         this.collectibles = collectibles;
         this.progressionPoints = progressionPoints;
@@ -74,12 +78,13 @@ public class GameState implements Serializable {
      * @param playerLives remaining lives
      * @param pointManager point manager state
      * @param hasKey whether the player has the key
+     * @param canLeave whether the player can leave
      * @param enemies enemy state list
      * @param collectibles collectible state list
      * @param progressionPoints progression points
      * @param ownedUpgrades owned upgrade names
      */
-    public void save(String mapPath, int level, float cameraZoom, float playerX, float playerY, int playerLives, PointManager pointManager, boolean hasKey, List<EnemyData> enemies, List<CollectibleData> collectibles, int progressionPoints, Set<String> ownedUpgrades) {
+    public void save(String mapPath, int level, float cameraZoom, float playerX, float playerY, int playerLives, PointManager pointManager, boolean hasKey, boolean canLeave, List<EnemyData> enemies, List<CollectibleData> collectibles, int progressionPoints, Set<String> ownedUpgrades) {
         this.mapPath = mapPath;
         this.level = level;
         this.cameraZoom = cameraZoom;
@@ -88,6 +93,7 @@ public class GameState implements Serializable {
         this.playerLives = playerLives;
         this.pointManager = pointManager;
         this.hasKey = hasKey;
+        this.canLeave = canLeave;
         this.enemies = enemies;
         this.collectibles = collectibles;
         this.progressionPoints = progressionPoints;
@@ -164,6 +170,15 @@ public class GameState implements Serializable {
      */
     public boolean hasKey() {
         return hasKey;
+    }
+
+    /**
+     * Returns whether the player can leave.
+     *
+     * @return {@code true} if the player can leave
+     */
+    public boolean canLeave() {
+        return canLeave;
     }
 
     /**

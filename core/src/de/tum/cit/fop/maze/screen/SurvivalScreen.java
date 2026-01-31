@@ -128,6 +128,8 @@ public class SurvivalScreen implements Screen {
     private float regenTimer = 0f;
     /** BMW spawn interval seconds. */
     private static final float BMW_SPAWN_INTERVAL_SECONDS = 8f;
+    /** Hard cap for policemen in endless mode, so that there is always a chance to beat the game and so that the game doesnt lag out*/
+    private static final int MAX_POLICEMEN = 20;
     /** BMW spawn timer accumulator. */
     private float bmwSpawnTimer = 0f;
     /** Initial delivery time limit. */
@@ -150,16 +152,6 @@ public class SurvivalScreen implements Screen {
     private int Delta = 0;
     /** Spawn timing multiplier. */
     private float Adder = 1;
-
-    /**
-     * Constructor for GameScreen. Sets up the camera and font.
-     *
-     * @param game The main game class, used to access global resources and methods.
-     */
-    ///public SurvivalScreen(MazeRunnerGame game) {
-        ///this(game, 1);
-    ///}
-
     /**
      * Creates a new survival screen with a fresh state.
      *
@@ -267,6 +259,7 @@ public class SurvivalScreen implements Screen {
         this.player.setX(gameState.getPlayerX());
         this.player.setY(gameState.getPlayerY());
         if (gameState.hasKey()) player.pickupKey();
+        if (gameState.canLeave()) player.grantCanLeave();
         if (gameState.getPointManager() != null) {
             pointManager = gameState.getPointManager();
         } else {
@@ -366,10 +359,15 @@ public class SurvivalScreen implements Screen {
 
         ensureKeyAndExit();
 
+        enemies.removeIf(enemy -> enemy.getStage() == null);
         while(Delta >= 80)
         {
             Delta = -80;
-            Enemy.spawnRandomEnemies(player, stage, collisionLayer, 1, getCameraViewBounds(), enemies);
+            int remainingSlots = MAX_POLICEMEN - enemies.size();
+            if (remainingSlots <= 0) {
+                break;
+            }
+            Enemy.spawnRandomEnemies(player, stage, collisionLayer, Math.min(1, remainingSlots), getCameraViewBounds(), enemies);
         }
 
 
@@ -420,6 +418,8 @@ public class SurvivalScreen implements Screen {
         float keyY = Float.NaN;
         float exitX = Float.NaN;
         float exitY = Float.NaN;
+        float dropOffX = Float.NaN;
+        float dropOffY = Float.NaN;
         for (de.tum.cit.fop.maze.entity.collectible.Collectible collectible : collectibles) {
             if (collectible instanceof de.tum.cit.fop.maze.entity.collectible.Key && !collectible.getPickedUp()) {
                 keyX = collectible.getSpawnX();
@@ -427,6 +427,9 @@ public class SurvivalScreen implements Screen {
             } else if (collectible instanceof de.tum.cit.fop.maze.entity.collectible.ExitDoor) {
                 exitX = collectible.getSpawnX();
                 exitY = collectible.getSpawnY();
+            } else if (collectible instanceof de.tum.cit.fop.maze.entity.collectible.DropOff && !collectible.getPickedUp()) {
+                dropOffX = collectible.getSpawnX();
+                dropOffY = collectible.getSpawnY();
             }
         }
         hud.update(
@@ -434,13 +437,14 @@ public class SurvivalScreen implements Screen {
                 player.getHp(),
                 pointManager.getPoints(),
                 player.hasKey(),
+                player.canLeave(),
                 game.getProgressionManager().hasUpgrade("regen"),
                 regenTimer,
                 REGEN_INTERVAL_SECONDS,
                 deliveryTimerActive ? deliveryTimer : -1f,
                 player.getX() + player.getWidth() / 2f,
                 player.getY() + player.getHeight() / 2f,
-                keyX, keyY, exitX, exitY
+                keyX, keyY, exitX, exitY, dropOffX, dropOffY
         );
         hud.getStage().act(delta);
         hud.getStage().draw();
@@ -466,6 +470,7 @@ public class SurvivalScreen implements Screen {
                     player.getHp(),
                     pointManager,
                     player.hasKey(),
+                    player.canLeave(),
                     enemyDataList,
                     collectibleDataList,
                     game.getProgressionManager().getPoints(),
@@ -482,6 +487,7 @@ public class SurvivalScreen implements Screen {
                     player.getHp(),
                     pointManager,
                     player.hasKey(),
+                    player.canLeave(),
                     enemyDataList,
                     collectibleDataList,
                     game.getProgressionManager().getPoints(),
@@ -541,10 +547,17 @@ public class SurvivalScreen implements Screen {
         stage.addActor(player);
 
         if (enemies.isEmpty() && collectibles.isEmpty()) {
-            mapLoader.spawnEntitiesFromProperties(stage, pointManager, collisionLayer, roadLayer, propertiesPath, hud, enemies, collectibles, this::handleEndlessVictory);
+            mapLoader.spawnEntitiesFromProperties(stage, pointManager, collisionLayer, roadLayer, propertiesPath, hud, enemies, collectibles, null, this::handleEndlessVictory, false);
+            collectibles.removeIf(collectible -> {
+                if (collectible instanceof de.tum.cit.fop.maze.entity.collectible.ExitDoor) {
+                    collectible.remove();
+                    return true;
+                }
+                return false;
+            });
         }
         ensureKeyAndExit();
-        updateKeyPreviewFromExistingKey();
+        updateKeyPreviewFromExistingTarget();
 
         if (gameState != null) {
             if (gameState.getEnemies() != null) {
@@ -685,11 +698,14 @@ public class SurvivalScreen implements Screen {
      * @param delta frame delta time
      */
     private void handleDeliveryTimer(float delta) {
-        if (player.hasKey()) {
+        if (player.hasKey() && !player.canLeave()) {
             if (!deliveryTimerActive) {
                 deliveryTimerActive = true;
                 deliveryTimer = deliveryTimeLimit;
             }
+        } else if (deliveryTimerActive) {
+            deliveryTimerActive = false;
+            deliveryTimer = 0f;
         }
         if (!deliveryTimerActive) {
             return;
@@ -726,8 +742,10 @@ public class SurvivalScreen implements Screen {
         deliveryTimeLimit = computeNextDeliveryTimeLimit();
         deliveryTimer = 0f;
         player.clearKey();
+        player.clearCanLeave();
         for (de.tum.cit.fop.maze.entity.collectible.Collectible collectible : collectibles) {
             if (collectible instanceof de.tum.cit.fop.maze.entity.collectible.ExitDoor
+                    || collectible instanceof de.tum.cit.fop.maze.entity.collectible.DropOff
                     || collectible instanceof de.tum.cit.fop.maze.entity.collectible.Key) {
                 collectible.markPickedUp();
             }
@@ -750,28 +768,31 @@ public class SurvivalScreen implements Screen {
     }
 
     /**
-     * Ensures that key and exit collectibles exist.
+     * Ensures that key and drop-off collectibles exist.
      */
     private void ensureKeyAndExit() {
         collectibles.removeIf(collectible -> collectible.getPickedUp() && collectible.getStage() == null);
         boolean hasKeyActor = false;
-        boolean hasExitActor = false;
+        boolean hasDropOffActor = false;
         for (de.tum.cit.fop.maze.entity.collectible.Collectible collectible : collectibles) {
             if (collectible.getPickedUp()) {
                 continue;
             }
             if (collectible instanceof de.tum.cit.fop.maze.entity.collectible.Key) {
                 hasKeyActor = true;
-            } else if (collectible instanceof de.tum.cit.fop.maze.entity.collectible.ExitDoor) {
-                hasExitActor = true;
+            } else if (collectible instanceof de.tum.cit.fop.maze.entity.collectible.DropOff) {
+                hasDropOffActor = true;
             }
         }
 
-        if (!hasKeyActor) {
-            spawnKeyAtRandomTile();
-        }
-        if (!hasExitActor) {
-            spawnExitAtRandomTile();
+        if (player.hasKey()) {
+            if (!hasDropOffActor) {
+                spawnDropOffAtRandomTile();
+            }
+        } else {
+            if (!hasKeyActor) {
+                spawnKeyAtRandomTile();
+            }
         }
     }
 
@@ -791,17 +812,18 @@ public class SurvivalScreen implements Screen {
     }
 
     /**
-     * Spawns an exit at a random walkable tile.
+     * Spawns a drop-off at a random walkable tile.
      */
-    private void spawnExitAtRandomTile() {
+    private void spawnDropOffAtRandomTile() {
         GridPoint2 tile = pickSpawnTile();
         if (tile == null) {
             return;
         }
-        de.tum.cit.fop.maze.entity.collectible.ExitDoor exitDoor =
-                new de.tum.cit.fop.maze.entity.collectible.ExitDoor(tile.x, tile.y, pointManager, this::handleEndlessVictory);
-        stage.addActor(exitDoor);
-        collectibles.add(exitDoor);
+        de.tum.cit.fop.maze.entity.collectible.DropOff dropOff =
+                new de.tum.cit.fop.maze.entity.collectible.DropOff(tile.x, tile.y, pointManager, this::handleEndlessVictory, false);
+        stage.addActor(dropOff);
+        collectibles.add(dropOff);
+        triggerKeyPreview(tile.x + 0.5f, tile.y + 0.5f);
     }
 
     /**
@@ -886,11 +908,20 @@ public class SurvivalScreen implements Screen {
     /**
      * Restores key preview if a key already exists.
      */
-    private void updateKeyPreviewFromExistingKey() {
-        for (de.tum.cit.fop.maze.entity.collectible.Collectible collectible : collectibles) {
-            if (collectible instanceof de.tum.cit.fop.maze.entity.collectible.Key && !collectible.getPickedUp()) {
-                triggerKeyPreview(collectible.getSpawnX() + 0.5f, collectible.getSpawnY() + 0.5f);
-                return;
+    private void updateKeyPreviewFromExistingTarget() {
+        if (player.hasKey()) {
+            for (de.tum.cit.fop.maze.entity.collectible.Collectible collectible : collectibles) {
+                if (collectible instanceof de.tum.cit.fop.maze.entity.collectible.DropOff && !collectible.getPickedUp()) {
+                    triggerKeyPreview(collectible.getSpawnX() + 0.5f, collectible.getSpawnY() + 0.5f);
+                    return;
+                }
+            }
+        } else {
+            for (de.tum.cit.fop.maze.entity.collectible.Collectible collectible : collectibles) {
+                if (collectible instanceof de.tum.cit.fop.maze.entity.collectible.Key && !collectible.getPickedUp()) {
+                    triggerKeyPreview(collectible.getSpawnX() + 0.5f, collectible.getSpawnY() + 0.5f);
+                    return;
+                }
             }
         }
     }
