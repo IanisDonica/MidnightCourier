@@ -47,8 +47,9 @@ public class CutsceneScreen implements Screen {
     public CutsceneScreen(MazeRunnerGame game) {
         this.game = game;
         this.audioManager = game.getAudioManager();
+        var graphicsManager = game.getGraphicsManager();
 
-        Viewport viewport = new FitViewport(1920, 1080);
+        Viewport viewport = new FitViewport(graphicsManager.getWidth(), graphicsManager.getHeight());
         stage = new Stage(viewport, game.getSpriteBatch());
 
         textures[0] = new Texture(Gdx.files.internal("Assets_Map/Comic Title1.png"));

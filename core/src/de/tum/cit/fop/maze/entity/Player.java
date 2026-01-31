@@ -6,7 +6,6 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import de.tum.cit.fop.maze.system.CollisionHandler;
@@ -16,69 +15,124 @@ import de.tum.cit.fop.maze.system.DriftyMovementController;
  * Player entity with movement, health, and interaction state.
  */
 public class Player extends Entity {
-    /** Collision handler for movement checks. */
+    /**
+     * Collision handler for movement checks.
+     */
     private final CollisionHandler collisionHandler;
-    /** Listener for game-over events. */
+    /**
+     * Listener for game-over events.
+     */
     private final GameOverListener gameOverListener;
-    /** Stunned animation for facing down. */
-    protected Animation<TextureRegion> stunnedDownAnimation;
-    /** Stunned animation for facing up. */
-    protected Animation<TextureRegion> stunnedUpAnimation;
-    /** Stunned animation for facing left. */
-    protected Animation<TextureRegion> stunnedLeftAnimation;
-    /** Stunned animation for facing right. */
-    protected Animation<TextureRegion> stunnedRightAnimation;
-    /** Listener for death cause events. */
-    private DeathCauseListener deathCauseListener;
-    /** Movement input flags. */
-    private boolean moveUp, moveDown, moveLeft, moveRight;
-    /** Whether sprinting is active. */
-    private boolean sprinting;
-    /** Maximum hit points. */
-    private int maxHp = 3;
-    /** Current hit points. */
-    private int hp = maxHp;
-    /** Timer for speed-up buff. */
-    private float speedUpTimer = 0;
-    /** Multiplier for drink duration. */
-    private float drinkDurationMultiplier = 1f;
-    /** Whether the player has the key. */
-    private boolean hasKey = false;
-    /** Whether the player is stunned. */
-    private boolean stunned = false;
-    /** Remaining stun duration. */
-    private float stunDuration;
-    /** Last input direction for knockback. */
-    private char lastInputDirection = 'd';
-    /** Whether game-over was already triggered. */
-    private boolean gameOverTriggered = false;
-    /** Speed multiplier from upgrades or buffs. */
-    private float speedMultiplier = 1f;
-    /** Frame movement deltas. */
-    private float speedX, speedY;
-    /** Whether pothole damage is ignored. */
-    private boolean potholeImmune = false;
-    /** Multiplier for enemy detection radius. */
-    private float detectionRangeMultiplier = 1f;
-    /** World bounds width. */
-    private float worldWidth = 0f;
-    /** World bounds height. */
-    private float worldHeight = 0f;
-    /** Debug speed multiplier. */
-    private float debugSpeedMultiplier = 1f;
-    /** Whether god mode is enabled. */
-    private boolean godMode = false;
-    /** Movement controller for drift-style motion. */
+    /**
+     * Movement controller for drift-style motion.
+     */
     private final DriftyMovementController driftyMovementController;
+    /**
+     * Stunned animation for facing down.
+     */
+    protected Animation<TextureRegion> stunnedDownAnimation;
+    /**
+     * Stunned animation for facing up.
+     */
+    protected Animation<TextureRegion> stunnedUpAnimation;
+    /**
+     * Stunned animation for facing left.
+     */
+    protected Animation<TextureRegion> stunnedLeftAnimation;
+    /**
+     * Stunned animation for facing right.
+     */
+    protected Animation<TextureRegion> stunnedRightAnimation;
+    /**
+     * Listener for death cause events.
+     */
+    private DeathCauseListener deathCauseListener;
+    /**
+     * Movement input flags.
+     */
+    private boolean moveUp, moveDown, moveLeft, moveRight;
+    /**
+     * Whether sprinting is active.
+     */
+    private boolean sprinting;
+    /**
+     * Maximum hit points.
+     */
+    private int maxHp = 3;
+    /**
+     * Current hit points.
+     */
+    private int hp = maxHp;
+    /**
+     * Timer for speed-up buff.
+     */
+    private float speedUpTimer = 0;
+    /**
+     * Multiplier for drink duration.
+     */
+    private float drinkDurationMultiplier = 1f;
+    /**
+     * Whether the player has the key.
+     */
+    private boolean hasKey = false;
+    /**
+     * Whether the player is stunned.
+     */
+    private boolean stunned = false;
+    /**
+     * Remaining stun duration.
+     */
+    private float stunDuration;
+    /**
+     * Last input direction for knockback.
+     */
+    private char lastInputDirection = 'd';
+    /**
+     * Whether game-over was already triggered.
+     */
+    private boolean gameOverTriggered = false;
+    /**
+     * Speed multiplier from upgrades or buffs.
+     */
+    private float speedMultiplier = 1f;
+    /**
+     * Frame movement deltas.
+     */
+    private float speedX, speedY;
+    /**
+     * Whether pothole damage is ignored.
+     */
+    private boolean potholeImmune = false;
+    /**
+     * Multiplier for enemy detection radius.
+     */
+    private float detectionRangeMultiplier = 1f;
+    /**
+     * World bounds width.
+     */
+    private float worldWidth = 0f;
+    /**
+     * World bounds height.
+     */
+    private float worldHeight = 0f;
+    /**
+     * Debug speed multiplier.
+     */
+    private float debugSpeedMultiplier = 1f;
+    /**
+     * Whether god mode is enabled.
+     */
+    private boolean godMode = false;
     /// private final GameOverListener trapOverListener;
 
     //Initialize the player on a specific coordinate point
+
     /**
      * Creates a player at a given position.
      *
-     * @param collisionLayer collision layer for movement checks
-     * @param x starting x position
-     * @param y starting y position
+     * @param collisionLayer   collision layer for movement checks
+     * @param x                starting x position
+     * @param y                starting y position
      * @param gameOverListener listener for game-over events
      */
     public Player(TiledMapTileLayer collisionLayer, float x, float y, GameOverListener gameOverListener) {
@@ -168,30 +222,12 @@ public class Player extends Entity {
     /**
      * Sets world bounds used for movement constraints.
      *
-     * @param worldWidth world width
+     * @param worldWidth  world width
      * @param worldHeight world height
      */
     public void setWorldBounds(float worldWidth, float worldHeight) {
         this.worldWidth = worldWidth;
         this.worldHeight = worldHeight;
-    }
-
-    /**
-     * Sets whether the player is immune to pothole damage.
-     *
-     * @param potholeImmune immunity flag
-     */
-    public void setPotholeImmune(boolean potholeImmune) {
-        this.potholeImmune = potholeImmune;
-    }
-
-    /**
-     * Sets the enemy detection radius multiplier.
-     *
-     * @param detectionRangeMultiplier multiplier for enemy vision range
-     */
-    public void setDetectionRangeMultiplier(float detectionRangeMultiplier) {
-        this.detectionRangeMultiplier = detectionRangeMultiplier;
     }
 
     /**
@@ -204,12 +240,12 @@ public class Player extends Entity {
     }
 
     /**
-     * Sets maximum hit points.
+     * Sets the enemy detection radius multiplier.
      *
-     * @param maxHp new max HP
+     * @param detectionRangeMultiplier multiplier for enemy vision range
      */
-    public void setMaxHp(int maxHp) {
-        this.maxHp = maxHp;
+    public void setDetectionRangeMultiplier(float detectionRangeMultiplier) {
+        this.detectionRangeMultiplier = detectionRangeMultiplier;
     }
 
     /**
@@ -219,6 +255,15 @@ public class Player extends Entity {
      */
     public int getMaxHp() {
         return maxHp;
+    }
+
+    /**
+     * Sets maximum hit points.
+     *
+     * @param maxHp new max HP
+     */
+    public void setMaxHp(int maxHp) {
+        this.maxHp = maxHp;
     }
 
     /**
@@ -266,10 +311,11 @@ public class Player extends Entity {
             walkRightFrames.add(new TextureRegion(walkSheetRight, col * frameWidthRightLeft, 0, frameWidthRightLeft, frameHeightRightLeft));
             walkDownFrames.add(new TextureRegion(walkSheetDownUp, col * frameWidthDownUp, 20, frameWidthDownUp, frameHeightDownUp));
             walkLeftFrames.add(new TextureRegion(walkSheetLeft, col * frameWidthRightLeft, 0, frameWidthRightLeft, frameHeightRightLeft));
-            stunnedLeftFrames.add(new TextureRegion(stunLeftSheet, col * frameWidthRightLeft, 0, frameWidthRightLeft, frameHeightRightLeft));
-            stunnedRightFrames.add(new TextureRegion(stunRightSheet, col * frameWidthRightLeft, 0, frameWidthRightLeft, frameHeightRightLeft));
+
             stunnedUpFrames.add(new TextureRegion(stunUpDownSheet, col * frameWidthDownUp, 0, frameWidthDownUp, frameHeightDownUp));
+            stunnedRightFrames.add(new TextureRegion(stunRightSheet, col * frameWidthRightLeft, 0, frameWidthRightLeft, frameHeightRightLeft));
             stunnedDownFrames.add(new TextureRegion(stunUpDownSheet, col * frameWidthDownUp, 20, frameWidthDownUp, frameHeightDownUp));
+            stunnedLeftFrames.add(new TextureRegion(stunLeftSheet, col * frameWidthRightLeft, 0, frameWidthRightLeft, frameHeightRightLeft));
         }
 
         downAnimation = new Animation<>(0.15f, walkDownFrames);
@@ -283,7 +329,7 @@ public class Player extends Entity {
     }
 
     /**
-     * Applies damage with default death cause.
+     * Applies damage with the default death cause.
      *
      * @param damage damage amount
      */
@@ -295,7 +341,7 @@ public class Player extends Entity {
      * Applies damage and triggers death handling if needed.
      *
      * @param damage damage amount
-     * @param cause death cause
+     * @param cause  death cause
      */
     public void damage(int damage, DeathCause cause) {
         if (godMode) {
@@ -327,7 +373,7 @@ public class Player extends Entity {
     /**
      * Draws the player using the current animation frame.
      *
-     * @param batch sprite batch
+     * @param batch       sprite batch
      * @param parentAlpha parent alpha
      */
     @Override
@@ -361,8 +407,10 @@ public class Player extends Entity {
     public void act(float delta) {
         super.act(delta);
         if (!stunned) {
-            // Update controller with current input
-            // Controller now handles smooth rotation toward input direction
+            /*
+             Update controller with the current input
+             Controller now handles smooth rotation toward the input direction
+            */
             driftyMovementController.update(delta, moveUp, moveDown, moveLeft, moveRight, sprinting);
 
             // Get velocity and apply delta scaling ONLY ONCE
@@ -423,7 +471,7 @@ public class Player extends Entity {
                 stunned = false;
             }
 
-            if ((deltaX > 0 && collisionHandler.checkCollision(this, 'r')) || (deltaX < 0 && collisionHandler.checkCollision(this, 'l'))){
+            if ((deltaX > 0 && collisionHandler.checkCollision(this, 'r')) || (deltaX < 0 && collisionHandler.checkCollision(this, 'l'))) {
                 setX(getX() + deltaX);
             }
 
@@ -440,11 +488,11 @@ public class Player extends Entity {
         }
 
         float orientation = driftyMovementController.getOrientation();
-        if (orientation >= 315 || orientation < 45) {
+        if (orientation >= 315 || orientation <= 45) {
             facingDirection = 'r'; // Right (0°)
-        } else if (orientation >= 45 && orientation < 135) {
+        } else if (orientation > 45 && orientation < 135) {
             facingDirection = 'u'; // Up (90°)
-        } else if (orientation >= 135 && orientation < 225) {
+        } else if (orientation >= 135 && orientation <= 225) {
             facingDirection = 'l'; // Left (180°)
         } else {
             facingDirection = 'd'; // Down (270°)
@@ -468,7 +516,7 @@ public class Player extends Entity {
      * Applies the energy drink speed-up effect.
      */
     public void drinkEnergyDrink() {
-        //This method seems useless, but it its mostly for later in order to handle sounds / screen effects etc.
+        //This method seems useless, but it's mostly for later to handle sounds / screen effects etc.
         speedUpTimer = 5f * drinkDurationMultiplier;
     }
 
@@ -485,7 +533,7 @@ public class Player extends Entity {
      *
      * @return speedX
      */
-    public float getSpeedX(){
+    public float getSpeedX() {
         return speedX;
     }
 
@@ -494,7 +542,7 @@ public class Player extends Entity {
      *
      * @return speedY
      */
-    public float getSpeedY(){
+    public float getSpeedY() {
         return speedY;
     }
 
@@ -551,12 +599,12 @@ public class Player extends Entity {
     }
 
     /**
-     * Enables or disables god mode.
+     * Sets whether the player is immune to pothole damage.
      *
-     * @param godMode new god mode state
+     * @param potholeImmune immunity flag
      */
-    public void setGodMode(boolean godMode) {
-        this.godMode = godMode;
+    public void setPotholeImmune(boolean potholeImmune) {
+        this.potholeImmune = potholeImmune;
     }
 
     /**
@@ -566,6 +614,15 @@ public class Player extends Entity {
      */
     public boolean isGodMode() {
         return godMode;
+    }
+
+    /**
+     * Enables or disables god mode.
+     *
+     * @param godMode new god mode state
+     */
+    public void setGodMode(boolean godMode) {
+        this.godMode = godMode;
     }
 
     /**

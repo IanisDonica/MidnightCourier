@@ -160,12 +160,13 @@ public class SurvivalScreen implements Screen {
         this.hud.setShowLevel(false);
         this.level = 0;
         this.propertiesPath = toPropertiesPath(level);
+        var graphicsManager = game.getGraphicsManager();
         Viewport viewport = new ExtendViewport(WORLD_WIDTH, WORLD_HEIGHT);
         stage = new Stage(viewport, game.getSpriteBatch());
         String generatedMapPath = buildGeneratedTmx(mapPath, propertiesPath, level);
         map = new TmxMapLoader().load(String.valueOf(Gdx.files.local(generatedMapPath)));
         mapRenderer = new OrthogonalTiledMapRenderer(map, 1 / 32f, game.getSpriteBatch());
-        fbo = new FrameBuffer(Pixmap.Format.RGBA8888, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), false);
+        fbo = new FrameBuffer(Pixmap.Format.RGBA8888, graphicsManager.getWidth(), graphicsManager.getHeight(), false);
         fboRegion = new TextureRegion(fbo.getColorBufferTexture());
         fboRegion.flip(false, true);
         keyPreviewFbo = new FrameBuffer(Pixmap.Format.RGBA8888, 640, 320, false);
@@ -177,7 +178,7 @@ public class SurvivalScreen implements Screen {
         grayScaleShader = new ShaderProgram(Gdx.files.internal("shaders/vertex.glsl"), Gdx.files.internal("shaders/grayscale.frag"));
         combinedShader = new ShaderProgram(Gdx.files.internal("shaders/vertex.glsl"), Gdx.files.internal("shaders/combined.frag"));
         ((OrthographicCamera) stage.getCamera()).zoom = MIN_ZOOM;
-        uiCamera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        uiCamera = new OrthographicCamera(graphicsManager.getWidth(), graphicsManager.getHeight());
         pointManager = new PointManager(level);
 
         collisionLayer = mapLoader.buildCollisionLayerFromProperties(map, this.propertiesPath);
@@ -219,10 +220,11 @@ public class SurvivalScreen implements Screen {
         String generatedMapPath = buildGeneratedTmx(this.mapPath, this.propertiesPath, this.level);
         this.map = new TmxMapLoader().load(String.valueOf(Gdx.files.local(generatedMapPath)));
 
+        var graphicsManager = game.getGraphicsManager();
         Viewport viewport = new ExtendViewport(WORLD_WIDTH, WORLD_HEIGHT);
         stage = new Stage(viewport, game.getSpriteBatch());
         mapRenderer = new OrthogonalTiledMapRenderer(map, 1 / 32f, game.getSpriteBatch());
-        fbo = new FrameBuffer(Pixmap.Format.RGBA8888, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), false);
+        fbo = new FrameBuffer(Pixmap.Format.RGBA8888, graphicsManager.getWidth(), graphicsManager.getHeight(), false);
         fboRegion = new TextureRegion(fbo.getColorBufferTexture());
         fboRegion.flip(false, true);
         keyPreviewFbo = new FrameBuffer(Pixmap.Format.RGBA8888, 640, 320, false);
@@ -233,7 +235,7 @@ public class SurvivalScreen implements Screen {
         grayScaleShader = new ShaderProgram(Gdx.files.internal("shaders/vertex.glsl"), Gdx.files.internal("shaders/grayscale.frag"));
         combinedShader = new ShaderProgram(Gdx.files.internal("shaders/vertex.glsl"), Gdx.files.internal("shaders/combined.frag"));
         ((OrthographicCamera) stage.getCamera()).zoom = MAX_ZOOM;
-        uiCamera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        uiCamera = new OrthographicCamera(graphicsManager.getWidth(), graphicsManager.getHeight());
         collisionLayer = mapLoader.buildCollisionLayerFromProperties(map, this.propertiesPath);
         roadLayer = mapLoader.buildRoadLayerFromProperties(map, this.propertiesPath);
         BmwEnemy.setRoadLayer(roadLayer);
