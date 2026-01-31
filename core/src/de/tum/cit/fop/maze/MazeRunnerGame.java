@@ -187,6 +187,7 @@ public class MazeRunnerGame extends Game {
             survivalScreen.dispose();
             survivalScreen = null;
         }
+
         currentLevelNumber = levelNumber;
         gameScreen = new GameScreen(this, currentLevelNumber);
         this.setScreen(gameScreen);

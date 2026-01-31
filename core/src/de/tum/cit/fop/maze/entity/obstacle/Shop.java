@@ -25,10 +25,10 @@ public class Shop extends MapObject {
      */
     public Shop(float x, float y, HUD hud) {
         setPosition(x, y);
-        setSize(4, 2);
+        setSize(3, 2);
         this.hud = hud;
-        Texture textureSheet = new Texture(Gdx.files.internal("basictiles.png"));
-        this.textureRegion = new TextureRegion(textureSheet, 0, 0, frameWidth * 4, frameHeight * 2);
+        Texture textureSheet = new Texture(Gdx.files.internal("Shop.png"));
+        this.textureRegion = new TextureRegion(textureSheet, 0, 0, frameWidth * 6, frameHeight * 4);
     }
 
     /**

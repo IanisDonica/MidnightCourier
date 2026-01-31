@@ -54,7 +54,7 @@ public class ContinueGameScreen implements Screen {
 
 
         TextButton autosaveButton = new TextButton("Autosave", game.getSkin());
-        table.add(autosaveButton).width(600).height(200).row();
+        table.add(autosaveButton).width(500).height(100).row();
         autosaveButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
@@ -64,17 +64,17 @@ public class ContinueGameScreen implements Screen {
         });
 
         TextButton file1Button = new TextButton("File 1", game.getSkin());
-        table.add(file1Button).width(600).height(200).row();
+        table.add(file1Button).width(500).height(100).row();
 
         TextButton file2Button = new TextButton("File 2", game.getSkin());
-        table.add(file2Button).width(600).height(200).row();
+        table.add(file2Button).width(500).height(100).row();
 
         TextButton file3Button = new TextButton("File 3", game.getSkin());
-        table.add(file3Button).width(600).height(200).row();
+        table.add(file3Button).width(500).height(100).row();
         table.row();
 
         TextButton goToMenu = new TextButton("Go back to menu", game.getSkin());
-        table.add(goToMenu).width(600).height(200).row();
+        table.add(goToMenu).width(500).height(100).row();
 
         goToMenu.addListener(new ChangeListener() {
             @Override

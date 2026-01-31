@@ -149,8 +149,8 @@
             "scale": 1,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 1128.5,
-                "y": 1720.5
+                "x": 1646.5,
+                "y": 235.5
             }
         },
         "Assets_Map/TrainStation.tsx": {
@@ -219,19 +219,20 @@
     ],
     "project": "tiled.tiled-project",
     "recentFiles": [
-        "basictiles.tsx",
-        "things.tsx",
-        "testmap.tmx",
         "untitled.tmx",
+        "testmap.tmx",
+        "things.tsx",
+        "Assets_Map/BIBLIOTECA_NATIONALA_IMPARTITA.tsx",
+        "Assets_Map/APARTAMENT_RED.tsx",
+        "Assets_Map/BIBLIOTECA_NATIONALA_2.tsx",
+        "basictiles.tsx",
         "Assets_Map/Block.tsx",
         "Assets_Map/BIG_ROAD.tsx",
         "Assets_Map/BIBLIOTECA_NATIONALA.tsx",
-        "Assets_Map/BIBLIOTECA_NATIONALA_IMPARTITA.tsx",
-        "Assets_Map/BIBLIOTECA_NATIONALA_2.tsx",
-        "Assets_Map/APARTAMENT_RED.tsx",
         "Assets_Map/4ParkRoad.tsx",
         "Assets_Map/96x160Block.tsx"
     ],
+    "tileset.lastUsedFilter": "Tiled tileset files (*.tsx *.xml)",
     "tileset.lastUsedFormat": "tsx",
     "tileset.tileSize": {
         "height": 16,
