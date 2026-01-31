@@ -59,7 +59,7 @@ public class AchievementPopupScreen {
         this.viewport = new ScreenViewport();
         this.batch = new SpriteBatch();
         this.stage = new Stage(viewport, batch);
-        this.viewport.update(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
+        this.viewport.update(game.getGraphicsManager().getWidth(), game.getGraphicsManager().getHeight(), true);
     }
 
     /**

@@ -36,8 +36,8 @@ public class AudioManager {
      * Currently playing music track.
      */
     private Music currentMusic;
-    private Map<String, Sound> currentSounds;
-    private Map<String, Long> currentSoundIDs;
+    private final Map<String, Sound> currentSounds;
+    private final Map<String, Long> currentSoundIDs;
     /**
      * Base volume for the currently playing music.
      */
@@ -105,11 +105,7 @@ public class AudioManager {
         executor.submit(() -> {
             Sound sound = getOrLoadSound(soundPath);
             if (sound != null) {
-                long id = sound.play(volume * soundEffectsVolume * masterVolume);
-                currentSounds.put(soundPath, sound);
-                currentSoundIDs.put(soundPath, id);
-                sound.setPitch(id, pitch);
-                sound.setPan(id, pan, volume * soundEffectsVolume * masterVolume);
+                internalPlaySound(soundPath, volume, pitch, pan, sound);
             }
         });
     }
@@ -138,14 +134,19 @@ public class AudioManager {
         executor.submit(() -> {
             Sound sound = getOrLoadSound(soundPath);
             if (sound != null) {
-                long soundID = sound.play(volume * soundEffectsVolume * masterVolume);
-                currentSounds.put(soundPath, sound);
-                currentSoundIDs.put(soundPath, soundID);
-                sound.setPitch(soundID, pitch);
-                sound.setPan(soundID, pan, volume * soundEffectsVolume * masterVolume);
+                long soundID = internalPlaySound(soundPath, volume, pitch, pan, sound);
                 sound.setLooping(soundID, true);
             }
         });
+    }
+
+    private long internalPlaySound(String soundPath, float volume, float pitch, float pan, Sound sound) {
+        long soundID = sound.play(volume * soundEffectsVolume * masterVolume);
+        currentSounds.put(soundPath, sound);
+        currentSoundIDs.put(soundPath, soundID);
+        sound.setPitch(soundID, pitch);
+        sound.setPan(soundID, pan, volume * soundEffectsVolume * masterVolume);
+        return soundID;
     }
 
     public void stopSound(String soundPath) {

@@ -37,8 +37,9 @@ public class NewGameScreen implements Screen {
         var camera = new OrthographicCamera();
         camera.zoom = 1.5f; // Set camera zoom for a closer view
         audioManager = game.getAudioManager();
+        var graphicsManager = game.getGraphicsManager();
 
-        Viewport viewport = new FitViewport(1920, 1080); // Create a viewport with the camera
+        Viewport viewport = new FitViewport(graphicsManager.getWidth(), graphicsManager.getHeight()); // Create a viewport with the camera
         stage = new Stage(viewport, game.getSpriteBatch()); // Create a stage for UI elements
 
         Table table = new Table(); // Create a table for layout

@@ -73,8 +73,9 @@ public class MenuScreen implements Screen {
         var camera = new OrthographicCamera();
         camera.zoom = 1.5f; // UI camera zoom
         audioManager = game.getAudioManager();
+        var graphicsManager = game.getGraphicsManager();
 
-        Viewport viewport = new FitViewport(1920, 1080);
+        Viewport viewport = new FitViewport(graphicsManager.getWidth(), graphicsManager.getHeight());
         stage = new Stage(viewport, game.getSpriteBatch()); // Create a stage for UI elements
 
         mapLoader = new MapLoader();
@@ -85,7 +86,7 @@ public class MenuScreen implements Screen {
         backgroundMap = new TmxMapLoader().load(String.valueOf(Gdx.files.local(outputPath)));
         backgroundRenderer = new OrthogonalTiledMapRenderer(backgroundMap, 1 / 32f, game.getSpriteBatch());
         backgroundCamera = new OrthographicCamera();
-        updateBackgroundCamera(1920, 1080);
+        updateBackgroundCamera(graphicsManager.getWidth(), graphicsManager.getHeight());
         centerBackgroundCamera();
         backgroundStage = new Stage(new FitViewport(backgroundCamera.viewportWidth, backgroundCamera.viewportHeight, backgroundCamera), game.getSpriteBatch());
         collisionLayer = mapLoader.buildCollisionLayerFromProperties(backgroundMap, propertiesPath);
@@ -101,7 +102,7 @@ public class MenuScreen implements Screen {
         Image vignetteImage = new Image(vignetteTexture);
         vignetteImage.setFillParent(true);
         vignetteImage.setTouchable(Touchable.disabled);
-        vignetteStage = new Stage(new FitViewport(1920, 1080), game.getSpriteBatch());
+        vignetteStage = new Stage(new FitViewport(graphicsManager.getWidth(), graphicsManager.getHeight()), game.getSpriteBatch());
         vignetteStage.addActor(vignetteImage);
 
         Table table = new Table(); // Create a table for layout
@@ -293,9 +294,10 @@ public class MenuScreen implements Screen {
      * @param delta frame delta time
      */
     public void renderBackground(float delta) {
-        updateBackgroundCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        var graphicsManager = game.getGraphicsManager();
+        updateBackgroundCamera(graphicsManager.getWidth(), graphicsManager.getHeight());
         centerBackgroundCamera();
-        backgroundStage.getViewport().update(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), false);
+        backgroundStage.getViewport().update(graphicsManager.getWidth(), graphicsManager.getHeight(), false);
         backgroundStage.getViewport().apply();
         backgroundRenderer.setView(backgroundCamera);
         backgroundRenderer.render();

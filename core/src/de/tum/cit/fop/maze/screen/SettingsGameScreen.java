@@ -34,7 +34,8 @@ public class SettingsGameScreen implements Screen {
     public SettingsGameScreen(MazeRunnerGame game) {
         this.game = game;
         audioManager = game.getAudioManager();
-        Viewport viewport = new FitViewport(1920, 1080);
+        var graphicsManager = game.getGraphicsManager();
+        Viewport viewport = new FitViewport(graphicsManager.getWidth(), graphicsManager.getHeight());
         stage = new Stage(viewport, game.getSpriteBatch());
         vignetteTexture = UiUtils.buildVignetteTexture(512, 512, 0.9f);
         Image vignetteImage = new Image(vignetteTexture);
