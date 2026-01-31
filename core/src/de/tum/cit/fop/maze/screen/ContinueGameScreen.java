@@ -38,8 +38,9 @@ public class ContinueGameScreen implements Screen {
         this.game = game;
         var camera = new OrthographicCamera();
         camera.zoom = 1.5f; // Set camera zoom for a closer view
+        var graphicsManager = game.getGraphicsManager();
 
-        Viewport viewport = new FitViewport(1920, 1080);
+        Viewport viewport = new FitViewport(graphicsManager.getWidth(), graphicsManager.getHeight());
         stage = new Stage(viewport, game.getSpriteBatch()); // Create a stage for UI elements
 
         audioManager = game.getAudioManager();

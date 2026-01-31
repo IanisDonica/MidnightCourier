@@ -56,7 +56,8 @@ public class HighscoreScreen implements Screen {
      */
     public HighscoreScreen(MazeRunnerGame game) {
         this.game = game;
-        Viewport viewport = new FitViewport(1920, 1080);
+        var graphicsManager = game.getGraphicsManager();
+        Viewport viewport = new FitViewport(graphicsManager.getWidth(), graphicsManager.getHeight());
         stage = new Stage(viewport, game.getSpriteBatch());
         audioManager = game.getAudioManager();
 

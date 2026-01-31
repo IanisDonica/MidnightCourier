@@ -139,7 +139,7 @@ public class DriftParticleSystem extends Actor {
             angleDiff = 360 - angleDiff;
         }
 
-        return angleDiff > 15;
+        return angleDiff > 25;
     }
 
     /**

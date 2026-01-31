@@ -76,8 +76,9 @@ public abstract class BaseEndScreen implements Screen {
             finalPoints = 0;
         }
         audioManager = game.getAudioManager();
+        var graphicsManager = game.getGraphicsManager();
 
-        Viewport viewport = new FitViewport(1920, 1080);
+        Viewport viewport = new FitViewport(graphicsManager.getWidth(), graphicsManager.getHeight());
         stage = new Stage(viewport, game.getSpriteBatch());
         backgroundTexture = new Texture(Gdx.files.internal(backgroundPath));
         backgroundImage = new Image(backgroundTexture);
