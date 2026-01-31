@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -56,8 +57,10 @@ public class HighscoreScreen implements Screen {
      */
     public HighscoreScreen(MazeRunnerGame game) {
         this.game = game;
-        var graphicsManager = game.getGraphicsManager();
-        Viewport viewport = new FitViewport(graphicsManager.getWidth(), graphicsManager.getHeight());
+        var camera = new OrthographicCamera();
+        camera.zoom = 1f; // Set camera zoom for a closer view
+
+        Viewport viewport = new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), camera);
         stage = new Stage(viewport, game.getSpriteBatch());
         audioManager = game.getAudioManager();
 

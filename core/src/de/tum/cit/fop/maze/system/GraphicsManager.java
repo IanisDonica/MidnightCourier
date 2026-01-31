@@ -1,6 +1,7 @@
 package de.tum.cit.fop.maze.system;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonWriter;
@@ -10,30 +11,51 @@ import com.badlogic.gdx.utils.JsonWriter;
  */
 public class GraphicsManager {
 
-    /** Local settings file path. */
-    private static final String SETTINGS_FILE = "graphics-settings.json";
-    /** Log tag for graphics settings. */
+    /**
+     * Local settings file path.
+     */
+    private static final String SETTINGS_FILE = "config/graphics-settings.json";
+    /**
+     * Log tag for graphics settings.
+     */
     private static final String TAG = "GraphicsSettings";
 
-    /** Target frames per second. */
+    /**
+     * Target frames per second.
+     */
     private int targetFrameRate = 60;
-    /** Whether VSync is enabled. */
+    /**
+     * Whether VSync is enabled.
+     */
     private boolean vsyncEnabled = false;
 
-    /** Anti-aliasing mode. */
+    /**
+     * Anti-aliasing mode.
+     */
     private AAMode antiAliasingMode = AAMode.MSAA_4;
 
     // General graphics
-    /** Display mode id. */
+    /**
+     * Display mode id.
+     */
     private int displayMode = 1;
-    /** Window width. */
+    /**
+     * Window width.
+     */
     private int width = 1920;
-    /** Window height. */
+    /**
+     * Window height.
+     */
     private int height = 1080;
-    /** Whether the window is resizable. */
+    /**
+     * Whether the window is resizable.
+     */
     private boolean resizable = true;
-    /** Target aspect ratio derived from resolution. */
+    /**
+     * Target aspect ratio derived from resolution.
+     */
     private float targetAspectRatio = 16.0f / 9.0f;
+
 
     /**
      * Creates a graphics manager with default settings.
@@ -98,6 +120,11 @@ public class GraphicsManager {
      */
     public void save() {
         try {
+            java.io.File directory = new java.io.File("config");
+            if (!directory.exists()) {
+                directory.mkdirs();
+            }
+
             Json jsonWriter = new Json();
             jsonWriter.setOutputType(JsonWriter.OutputType.json);
             String json = jsonWriter.prettyPrint(this);
@@ -149,13 +176,17 @@ public class GraphicsManager {
     /**
      * Sets resolution fields and updates aspect ratio.
      *
-     * @param width new width
+     * @param width  new width
      * @param height new height
      */
     public void setResolution(int width, int height) {
         this.width = width;
         this.height = height;
         this.targetAspectRatio = (float) width / height;
+
+        if (displayMode == 0 || displayMode == 2) { // Windowed or Borderless Windowed
+            Gdx.graphics.setWindowedMode(width, height);
+        }
     }
 
     /**
@@ -224,7 +255,8 @@ public class GraphicsManager {
      * Switches to fullscreen mode.
      */
     public void setFullscreen() {
-        this.displayMode = 1;
+        this.displayMode = 2;
+        this.resizable = false;
         Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
     }
 
@@ -234,18 +266,38 @@ public class GraphicsManager {
     public void setWindowed() {
         this.displayMode = 0;
         setResizable(true);
+        this.resizable = true;
         Gdx.graphics.setUndecorated(false);
-        Gdx.graphics.setWindowedMode(width / 2, height / 2); // Temp just so I can move it
+        Gdx.graphics.setWindowedMode(width, height);
     }
 
     /**
      * Switches to borderless windowed mode.
      */
-    public void setBorderless(){
-        this.displayMode = 2;
+    public void setBorderless() {
+        this.displayMode = 1;
         setResizable(false);
+        this.resizable = false;
         Gdx.graphics.setUndecorated(true);
-        Gdx.graphics.setWindowedMode(width, height); // Temp just so I can move it
+        Gdx.graphics.setWindowedMode(Gdx.graphics.getDisplayMode().width, Gdx.graphics.getDisplayMode().height);
+    }
+
+    /**
+     * Applies all graphics settings (resolution, display mode, frame rate).
+     */
+    public void applySettings() {
+        applyFrameRateSettings();
+        switch (displayMode) {
+            case 0:
+                setWindowed();
+                break;
+            case 1:
+                setBorderless();
+                break;
+            case 2:
+                setFullscreen();
+                break;
+        }
     }
 
     /**
@@ -336,15 +388,19 @@ public class GraphicsManager {
     public enum AAMode {
         DISABLED(0, "None"), MSAA_2(2, "MSAA 2x"), MSAA_4(4, "MSAA 4x"), MSAA_8(8, "MSAA 8x"), MSAA_16(16, "MSAA 16x");
 
-        /** Sample count for the AA mode. */
+        /**
+         * Sample count for the AA mode.
+         */
         public final int samples;
-        /** Display name for UI. */
+        /**
+         * Display name for UI.
+         */
         public final String displayName;
 
         /**
          * Creates an AA mode.
          *
-         * @param samples sample count
+         * @param samples     sample count
          * @param displayName display label
          */
         AAMode(int samples, String displayName) {

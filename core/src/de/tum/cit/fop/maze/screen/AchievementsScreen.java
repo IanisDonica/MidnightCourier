@@ -23,41 +23,60 @@ import de.tum.cit.fop.maze.system.UiUtils;
  * Screen that displays unlocked and locked achievements.
  */
 public class AchievementsScreen implements Screen {
-    /** Stage hosting UI elements. */
-    private Stage stage;
-    /** Game instance for navigation and resources. */
-    private MazeRunnerGame game;
-    /** Audio manager for UI sounds. */
-    private final AudioManager audioManager;
-    /** Vignette texture for background effect. */
-    private final Texture vignetteTexture;
-    /** Image for vignette overlay. */
-    private final Image vignetteImage;
-    /** Texture used for the scrollbar track. */
-    private final Texture scrollbarTrackTexture;
-    /** Texture used for the scrollbar knob. */
-    private final Texture scrollbarKnobTexture;
-    /** Scroll pane containing achievements list. */
-    private ScrollPane scrollPane;
-
-    /** Width of each achievement box. */
+    /**
+     * Width of each achievement box.
+     */
     private static final float BOX_WIDTH = 520f;
-    /** Height of each achievement box. */
+    /**
+     * Height of each achievement box.
+     */
     private static final float BOX_HEIGHT = 180f;
+    /**
+     * Audio manager for UI sounds.
+     */
+    private final AudioManager audioManager;
+    /**
+     * Vignette texture for background effect.
+     */
+    private final Texture vignetteTexture;
+    /**
+     * Image for vignette overlay.
+     */
+    private final Image vignetteImage;
+    /**
+     * Texture used for the scrollbar track.
+     */
+    private final Texture scrollbarTrackTexture;
+    /**
+     * Texture used for the scrollbar knob.
+     */
+    private final Texture scrollbarKnobTexture;
+    /**
+     * Stage hosting UI elements.
+     */
+    private Stage stage;
+    /**
+     * Game instance for navigation and resources.
+     */
+    private MazeRunnerGame game;
+    /**
+     * Scroll pane containing achievements list.
+     */
+    private ScrollPane scrollPane;
 
     /**
      * Creates the achievements screen.
      *
      * @param game game instance
      */
-    public AchievementsScreen(MazeRunnerGame game){
+    public AchievementsScreen(MazeRunnerGame game) {
         this.game = game;
         var camera = new OrthographicCamera();
-        camera.zoom = 1.5f; // Set camera zoom for a closer view
+        camera.zoom = 1f; // Set camera zoom for a closer view
         audioManager = game.getAudioManager();
         var graphicsManager = game.getGraphicsManager();
 
-        Viewport viewport = new FitViewport(graphicsManager.getWidth(), graphicsManager.getHeight());
+        Viewport viewport = new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), camera);
         stage = new Stage(viewport, game.getSpriteBatch()); // Create a stage for UI elements
         vignetteTexture = UiUtils.buildVignetteTexture(512, 512, 0.9f);
         vignetteImage = new Image(vignetteTexture);
@@ -168,7 +187,7 @@ public class AchievementsScreen implements Screen {
     /**
      * Updates viewport on resize.
      *
-     * @param width new width
+     * @param width  new width
      * @param height new height
      */
     @Override
@@ -214,12 +233,12 @@ public class AchievementsScreen implements Screen {
     /**
      * Builds a solid color texture for UI elements.
      *
-     * @param width texture width
+     * @param width  texture width
      * @param height texture height
-     * @param r red component
-     * @param g green component
-     * @param b blue component
-     * @param a alpha component
+     * @param r      red component
+     * @param g      green component
+     * @param b      blue component
+     * @param a      alpha component
      * @return created texture
      */
     private Texture buildSolidTexture(int width, int height, float r, float g, float b, float a) {
