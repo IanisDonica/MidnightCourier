@@ -36,6 +36,7 @@ public class Enemy extends Obstacle {
     private static final float PATROL_SPEED_SCALE = 0.5f;
     private static final int VISION_RANGE_TILES = 20;
     private static final float MAX_RETREAT_DURATION_SECONDS = 4f;
+
     /** Time (seconds) for which the police will run after the player,
      *  after that if they are still in chase mode, they will start running slower
      *   to give the player a chance to escape them
@@ -57,9 +58,8 @@ public class Enemy extends Obstacle {
      *  constantly checks to see if a retreat has been activated (global token is higher than local one), if yes - it increments
      *  the local token (ack the retreat) and retreats if appropritate (chasing the player), doing it this way (as opposed to keeping a boolean value)
      *  ensures that the player can still be targeted (by guards not witness to their arrest) and simplifies the logic.
-     *
-     *  the retreat check is done at the beginning of act(), and the global retreat token is done in the collision code.
-     * */
+
+     *  the retreat check is done at the beginning of act(), and the global retreat token is done in the collision code.*/
     private static int globalRetreatToken = 0;
     private int lastRetreatToken = 0;
 
@@ -71,6 +71,7 @@ public class Enemy extends Obstacle {
     private float retreatTimer = 0f;
     private float runTimer = 0f;
     private boolean isRunning = false;
+    private float centerX = 0f, centerY = 0f;
     /** Last path goal x/y coordinates, MIN_VALUE to force a path recalc */
     private int lastGoalX = Integer.MIN_VALUE, lastGoalY = Integer.MIN_VALUE;
     /** Current behavior state */
@@ -132,6 +133,7 @@ public class Enemy extends Obstacle {
     @Override
     public void act(float delta) {
         super.act(delta);
+        centerX = getX() + getWidth() / 2f; centerY = getY() + getHeight() / 2f;
 
         // If a global retreat has been called, only retreat if you are actually chasing the enemy.
         if (lastRetreatToken != globalRetreatToken) {
@@ -235,12 +237,8 @@ public class Enemy extends Obstacle {
         }
         GridPoint2 target = path.get(pathIndex);
 
-        float targetX = target.x + 0.5f;
-        float targetY = target.y + 0.5f;
-        float centerX = getX() + getWidth() / 2f;
-        float centerY = getY() + getHeight() / 2f;
-        float dx = targetX - centerX;
-        float dy = targetY - centerY;
+        float targetX = target.x + 0.5f, targetY = target.y + 0.5f;
+        float dx = targetX - centerX, dy = targetY - centerY;
         float dist = (float) Math.sqrt(dx * dx + dy * dy);
 
         if (dist < TARGET_EPS) {
@@ -263,13 +261,10 @@ public class Enemy extends Obstacle {
      * @param delta frame delta time
      */
     private void moveToTileCenter(float delta) {
-        float centerX = getX() + getWidth() / 2f;
-        float centerY = getY() + getHeight() / 2f;
-        float targetX = MathUtils.floor(centerX) + 0.5f;
-        float targetY = MathUtils.floor(centerY) + 0.5f;
-        float dx = targetX - centerX;
-        float dy = targetY - centerY;
+        float targetX = MathUtils.floor(centerX) + 0.5f, targetY = MathUtils.floor(centerY) + 0.5f;
+        float dx = targetX - centerX, dy = targetY - centerY;
         float dist = (float) Math.sqrt(dx * dx + dy * dy);
+
         if (dist < TARGET_EPS) {
             setPosition(getX() + dx, getY() + dy);
             return;
@@ -295,19 +290,25 @@ public class Enemy extends Obstacle {
 
     /**
      * Initializes the walking animations once.
+
+     * Will return for all but the first enemy (since it's static)
+     * the idea is to not have the same texture loaded for every enemy object
+     * curently this also means that all animations are synced.
      */
     private void initWalkAnimations() {
         if (animationsInitialized) {
             return;
         }
+
         animationsInitialized = true;
+
         Texture northSheet = new Texture(com.badlogic.gdx.Gdx.files.internal("Police/NORTH_MOVEMENT.png"));
         Texture southSheet = new Texture(com.badlogic.gdx.Gdx.files.internal("Police/SOUTH_MOVEMENT.png"));
         Texture eastSheet = new Texture(com.badlogic.gdx.Gdx.files.internal("Police/EAST_MOVEMENT.png"));
         Texture westSheet = new Texture(com.badlogic.gdx.Gdx.files.internal("Police/WEST_MOVEMENT.png"));
 
-        int frameW = 24;
-        int frameH = 24;
+        int frameW = 24, frameH = 24;
+
         Array<TextureRegion> northFrames = new Array<>(TextureRegion.class);
         Array<TextureRegion> southFrames = new Array<>(TextureRegion.class);
         Array<TextureRegion> eastFrames = new Array<>(TextureRegion.class);
@@ -412,9 +413,9 @@ public class Enemy extends Obstacle {
      * @return list of walkable tiles
      */
     private static List<GridPoint2> collectWalkableTiles(TiledMapTileLayer collisionLayer) {
+
         List<GridPoint2> tiles = new ArrayList<>();
-        int width = collisionLayer.getWidth();
-        int height = collisionLayer.getHeight();
+        int width = collisionLayer.getWidth(), height = collisionLayer.getHeight();
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
                 if (collisionLayer.getCell(x, y) == null) {
@@ -473,10 +474,6 @@ public class Enemy extends Obstacle {
      * @return {@code true} if collision would occur
      */
     private static boolean wouldCollideAt(Stage stage, float x, float y) {
-        // It probably will never be null, but why not check
-        if (stage == null) {
-            return true;
-        }
         Rectangle spawnBounds = new Rectangle(x, y, 1f, 1f);
         for (Actor actor : stage.getActors()) {
             Rectangle actorBounds = new Rectangle(actor.getX(), actor.getY(), actor.getWidth(), actor.getHeight());
@@ -542,13 +539,14 @@ public class Enemy extends Obstacle {
      *
      * @return {@code true} if centered
      */
+    @SuppressWarnings("DuplicatedCode")
+    // Creating a helper class is too much for this
+    // Adding them as obj vars isn't correct as we must guarantee that they are always correct,
+    // and computing them in act() isn't enough (submethods can change the position of the enemy).
+    // Thus, actually removing the duplicateCode would be too much of a hassle
     private boolean isCenteredOnTile() {
-        float centerX = getX() + getWidth() / 2f;
-        float centerY = getY() + getHeight() / 2f;
-        float targetX = MathUtils.floor(centerX) + 0.5f;
-        float targetY = MathUtils.floor(centerY) + 0.5f;
-        float dx = targetX - centerX;
-        float dy = targetY - centerY;
+        float targetX = MathUtils.floor(centerX) + 0.5f, targetY = MathUtils.floor(centerY) + 0.5f;
+        float dx = targetX - centerX, dy = targetY - centerY;
 
         if (Math.abs(dx) < CENTER_EPS && Math.abs(dy) < CENTER_EPS) {
             setPosition(getX() + dx, getY() + dy);
@@ -563,23 +561,18 @@ public class Enemy extends Obstacle {
      * @return {@code true} if the player is visible
      */
     private boolean canSeePlayer() {
-        int startX = clampTileX(getX() + getWidth() / 2f);
-        int startY = clampTileY(getY() + getHeight() / 2f);
-        int goalX = clampTileX(player.getX() + player.getWidth() / 2f);
-        int goalY = clampTileY(player.getY() + player.getHeight() / 2f);
+        int startX = clampTileX(getX() + getWidth() / 2f), startY = clampTileY(getY() + getHeight() / 2f);
+        int goalX = clampTileX(player.getX() + player.getWidth() / 2f), goalY = clampTileY(player.getY() + player.getHeight() / 2f);
 
         int visionRange = Math.max(1, Math.round(VISION_RANGE_TILES * player.getDetectionRangeMultiplier()));
         if (Math.abs(goalX - startX) > visionRange || Math.abs(goalY - startY) > visionRange) {
             return false;
         }
 
-        int dx = Math.abs(goalX - startX);
-        int dy = Math.abs(goalY - startY);
-        int sx = startX < goalX ? 1 : -1;
-        int sy = startY < goalY ? 1 : -1;
+        int dx = Math.abs(goalX - startX),dy = Math.abs(goalY - startY);
+        int sx = startX < goalX ? 1 : -1, sy = startY < goalY ? 1 : -1;
         int err = dx - dy;
-        int x = startX;
-        int y = startY;
+        int x = startX, y = startY;
 
         while (true) {
             if (!isWalkable(x, y) && !(x == startX && y == startY)) {
@@ -708,10 +701,14 @@ public class Enemy extends Obstacle {
 
     /**
      * Ensures the enemy is drawn above collectibles.
+
+     * Find the highest z-index among collectibles, then place the enemy just above them
+     * while still staying below the player (if present) and within actor bounds.
+
+     * Decided to do it here instead of in the gameScreen because it simplified the logic
+     * (entities may still be spawned midgame, so keeping track of it inside the EnemyLogic is simpler)
      */
     private void ensureAboveCollectibles() {
-        // Find the highest z-index among collectibles, then place the enemy just above them
-        // while still staying below the player (if present) and within actor bounds.
         int maxPickupZ = -1;
         for (int i = 0; i < getStage().getActors().size; i++) {
             if (getStage().getActors().get(i) instanceof Collectible) {
