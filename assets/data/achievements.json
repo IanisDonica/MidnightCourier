@@ -3,7 +3,7 @@
 	"id": "complete_100_deliveries",
 	"name": "Certified Delivery Man",
 	"description": "Complete 100 deliveries",
-	"progress": 7,
+	"progress": 11,
 	"target": 100
 },
 {
@@ -18,7 +18,9 @@
 	"id": "first_time_for_everything",
 	"name": "First time for everythihing",
 	"description": "Get arrested by a police officer for the first time",
-	"target": 1
+	"progress": 1,
+	"target": 1,
+	"unlocked": true
 },
 {
 	"id": "first_upgrade",
@@ -40,6 +42,7 @@
 	"id": "third_strike_and_out",
 	"name": "Three strike rule",
 	"description": "Get arrested 3 times",
+	"progress": 1,
 	"target": 3
 },
 {
@@ -52,6 +55,8 @@
 	"id": "german_engineering",
 	"name": "German Engineering",
 	"description": "Get run over by a BMW",
-	"target": 1
+	"progress": 1,
+	"target": 1,
+	"unlocked": true
 }
 ]

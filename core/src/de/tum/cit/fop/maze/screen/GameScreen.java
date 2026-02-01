@@ -451,6 +451,7 @@ public class GameScreen implements Screen {
         float exitY = Float.NaN;
         float dropOffX = Float.NaN;
         float dropOffY = Float.NaN;
+        float Min = 2000000;
         for (de.tum.cit.fop.maze.entity.collectible.Collectible collectible : collectibles) {
             if (collectible instanceof de.tum.cit.fop.maze.entity.collectible.Key && !collectible.getPickedUp()) {
                 keyX = collectible.getSpawnX();
@@ -458,6 +459,17 @@ public class GameScreen implements Screen {
             } else if (collectible instanceof de.tum.cit.fop.maze.entity.collectible.DropOff && !collectible.getPickedUp()) {
                 dropOffX = collectible.getSpawnX();
                 dropOffY = collectible.getSpawnY();
+            } else if (collectible instanceof de.tum.cit.fop.maze.entity.collectible.ExitDoor && !collectible.getPickedUp()){
+                float exitXTemp = collectible.getSpawnX();
+                float exitYTemp = collectible.getSpawnY();
+
+                if((exitXTemp - player.getX()) * (exitXTemp - player.getX()) + (exitYTemp - player.getY()) * (exitYTemp - player.getY()) < Min){
+                    exitX = exitXTemp;
+                    exitY = exitYTemp;
+                    Min = (exitXTemp - player.getX()) * (exitXTemp - player.getX()) + (exitYTemp - player.getY()) * (exitYTemp - player.getY());
+                }
+
+
             }
         }
         hud.update(level, player.getHp(), pointManager.getPoints(), player.hasKey(), player.canLeave(), game.getProgressionManager().hasUpgrade("regen"), regenTimer, REGEN_INTERVAL_SECONDS, -1f, player.getX() + player.getWidth() / 2f, player.getY() + player.getHeight() / 2f, keyX, keyY, exitX, exitY, dropOffX, dropOffY);
