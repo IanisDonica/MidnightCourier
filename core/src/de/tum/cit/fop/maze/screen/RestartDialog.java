@@ -16,7 +16,7 @@ import de.tum.cit.fop.maze.MazeRunnerGame;
 public class RestartDialog extends Dialog {
 
     /** Log tag for restart events. */
-    private static final String TAG = "MessageDialog";
+    private static final String TAG = "RestartDialog";
 
     /** Stage to show the dialog on. */
     private final Stage stage;
