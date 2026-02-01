@@ -260,6 +260,7 @@ public class MazeRunnerGame extends Game {
      */
     public void goToCutsceneScreen() {
         audioManager.stopAllSounds();
+        audioManager.stopPlaylist();
         this.setScreen(new CutsceneScreen(this));
     }
 
@@ -270,6 +271,7 @@ public class MazeRunnerGame extends Game {
      */
     public void goToSecondCutsceneScreen(int targetLevel) {
         audioManager.stopAllSounds();
+        audioManager.stopPlaylist();d
         this.setScreen(new SecondCutsceneScreen(this, targetLevel));
     }
 
