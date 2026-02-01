@@ -54,6 +54,12 @@ public class MazeRunnerGame extends Game {
     private ProgressionManager progressionManager;
     /** Screen to return to after leaving settings. */
     private Screen settingsReturnScreen;
+    /** Last known window width for aspect enforcement. */
+    private int lastWindowWidth = -1;
+    /** Last known window height for aspect enforcement. */
+    private int lastWindowHeight = -1;
+    /** Guard to avoid recursive resize loops. */
+    private boolean enforcingAspect = false;
     /** Screen to return to after leaving the continue game screen. */
     private Screen continueReturnScreen;
 
@@ -564,6 +570,7 @@ public class MazeRunnerGame extends Game {
     public void render() {
         Gdx.gl.glClearColor(0f, 0f, 0f, 1f);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+        enforceAspectRatio();
         Screen current = getScreen();
         if (shouldRenderMenuBackground() && !(current instanceof MenuScreen)) {
             if (menuScreen == null) {
@@ -704,6 +711,54 @@ public class MazeRunnerGame extends Game {
 
     public boolean getSelectedScreen(){
         return selectedScreen;
+    }
+
+    /**
+     * Enforces a 16:9 window aspect ratio on desktop by snapping resizes.
+     */
+    private void enforceAspectRatio() {
+        if (Gdx.app == null || Gdx.app.getType() != com.badlogic.gdx.Application.ApplicationType.Desktop) {
+            return;
+        }
+        if (Gdx.graphics.isFullscreen()) {
+            return;
+        }
+        int width = Gdx.graphics.getWidth();
+        int height = Gdx.graphics.getHeight();
+        if (width <= 0 || height <= 0) {
+            return;
+        }
+        if (width == lastWindowWidth && height == lastWindowHeight) {
+            return;
+        }
+        if (enforcingAspect) {
+            lastWindowWidth = width;
+            lastWindowHeight = height;
+            return;
+        }
+        int targetWidth = Math.round(height * 16f / 9f);
+        int targetHeight = Math.round(width * 9f / 16f);
+        int newWidth = width;
+        int newHeight = height;
+        if (lastWindowWidth > 0 && lastWindowHeight > 0) {
+            if (Math.abs(width - lastWindowWidth) >= Math.abs(height - lastWindowHeight)) {
+                newHeight = targetHeight;
+            } else {
+                newWidth = targetWidth;
+            }
+        } else {
+            newHeight = targetHeight;
+        }
+        if (newWidth != width || newHeight != height) {
+            enforcingAspect = true;
+            Gdx.graphics.setWindowedMode(newWidth, newHeight);
+            enforcingAspect = false;
+            lastWindowWidth = newWidth;
+            lastWindowHeight = newHeight;
+        } else {
+            lastWindowWidth = width;
+            lastWindowHeight = height;
+        }
     }
 
     private void playDefaultPlaylist(){
