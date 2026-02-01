@@ -116,6 +116,11 @@ public class MazeRunnerGame extends Game {
             survivalScreen = null;
         }
         audioManager.stopAllSounds();
+        if (this.menuScreen != null) {
+            this.setScreen(this.menuScreen);
+            return;
+        }
+
         audioManager.stopPlaylist();
         audioManager.playMusic("True_love.mp3", 1f, true);
 
@@ -261,6 +266,7 @@ public class MazeRunnerGame extends Game {
      */
     public void goToCutsceneScreen() {
         audioManager.stopAllSounds();
+        audioManager.stopPlaylist();
         this.setScreen(new CutsceneScreen(this));
     }
 
@@ -271,6 +277,7 @@ public class MazeRunnerGame extends Game {
      */
     public void goToSecondCutsceneScreen(int targetLevel) {
         audioManager.stopAllSounds();
+        audioManager.stopPlaylist();
         this.setScreen(new SecondCutsceneScreen(this, targetLevel));
     }
 
