@@ -31,8 +31,6 @@ public class SettingsGameScreen implements Screen {
     private final Texture vignetteTexture;
     /** Vignette image overlay. */
     private final Image vignetteImage;
-
-    private boolean warned;
     /**
      * Creates the game settings screen.
      *
@@ -51,8 +49,6 @@ public class SettingsGameScreen implements Screen {
         vignetteImage.setFillParent(true);
         vignetteImage.setTouchable(Touchable.disabled);
         stage.addActor(vignetteImage);
-        MessageDialog messageDialog = new MessageDialog(game.getSkin(), stage, game);
-
         Table table = new Table();
         table.setFillParent(true);
 
@@ -65,12 +61,6 @@ public class SettingsGameScreen implements Screen {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 audioManager.playSound("Click.wav", 1);
-                if (!warned) {
-                    messageDialog.show("Enabling dev console turns off achievments");
-                    warned = true;
-                    devConsoleCheckbox.setChecked(false);
-                    return;
-                }
                 if (game.getGameScreen() != null){
                     game.getGameScreen().setDevConsole(devConsoleCheckbox.isChecked());
                 }
