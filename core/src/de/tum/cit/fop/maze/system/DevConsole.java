@@ -226,7 +226,7 @@ public class DevConsole {
                 } else {
                     try {
                         float multiplier = Float.parseFloat(parts[1]);
-                        player.setSpeedMultiplier(multiplier);
+                        player.setDebugSpeedMultiplier(multiplier);
                         appendLine("multiplier set to " + multiplier);
                     } catch (NumberFormatException ex) {
                         appendLine("Invalid command.");

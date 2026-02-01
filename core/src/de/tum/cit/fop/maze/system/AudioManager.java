@@ -32,12 +32,12 @@ public class AudioManager {
      * Cache of loaded music tracks.
      */
     private final Map<String, Music> musicCache;
+    private final Map<String, Sound> currentSounds;
+    private final Map<String, Long> currentSoundIDs;
     /**
      * Currently playing music track.
      */
     private Music currentMusic;
-    private final Map<String, Sound> currentSounds;
-    private final Map<String, Long> currentSoundIDs;
     /**
      * Base volume for the currently playing music.
      */
@@ -165,6 +165,16 @@ public class AudioManager {
                     sound.stop();
                 }
             }
+        });
+    }
+
+    public void stopAllSounds() {
+        executor.submit(() -> {
+            for (Sound sound : currentSounds.values()) {
+                if (sound != null) sound.stop();
+            }
+            currentSounds.clear();
+            currentSoundIDs.clear();
         });
     }
     // Play music track with optional looping

@@ -67,7 +67,8 @@ public class DriftParticleSystem extends Actor {
     @Override
     public void act(float delta) {
         super.act(delta);
-        float speedBasedVolume = player.getMovementController().getVelocity().len() / 4;
+        float maxSpeed = player.getMovementController().getMaxSpeed();
+        float speedBasedVolume = player.getMovementController().getVelocity().len() / maxSpeed;
 
         // Update existing particles
         for (int i = particles.size - 1; i >= 0; i--) {
@@ -80,47 +81,46 @@ public class DriftParticleSystem extends Actor {
 
         // Spawn new particles if drifting
         spawnCooldown -= delta;
-        if (spawnCooldown <= 0) {
-            if (isDrifting()) {
-                if (!isPlayingDrift) audioManager.playSoundLooping("tires_loop.wav", speedBasedVolume, 0.7f, 0);
-                isPlayingDrift = true;
-                spawnDriftParticles();
-            } else {
-                audioManager.stopSound("tires_loop.wav");
-                if (isPlayingDrift) {
-                    // Play tire screech sound (with fade out) once so the cutoff isn't sudden
-                    audioManager.playSound("tires.wav", speedBasedVolume, 0.7f, 0);
-                }
-                isPlayingDrift = false;
+        if (isDrifting()) {
+            if (!isPlayingDrift) audioManager.playSoundLooping("tires_loop.wav", speedBasedVolume, 0.7f, 0);
+            isPlayingDrift = true;
+            if (spawnCooldown <= 0) spawnDriftParticles();
+        } else {
+            audioManager.stopSound("tires_loop.wav");
+            if (isPlayingDrift) {
+                // Play tire screech sound (with fade out) once so the cutoff isn't sudden
+                audioManager.playSound("tires.wav", speedBasedVolume, 0.7f, 0);
             }
-
-            if (player.getMovementController().isDecelerating()) {
-                if (!isPlayingDecelerating) {
-                    audioManager.playSoundLooping("decelerating.wav", speedBasedVolume);
-                    isPlayingDecelerating = true;
-                }
-
-                audioManager.setActiveSoundVolume("decelerating.wav", speedBasedVolume);
-                audioManager.stopSound("pedal.wav");
-                isPlayingPedaling = false;
-            } else {
-                audioManager.stopSound("decelerating.wav");
-                isPlayingDecelerating = false;
-
-                if (!isPlayingPedaling) {
-                    audioManager.playSoundLooping("pedal.wav", speedBasedVolume);
-                    isPlayingPedaling = true;
-                }
-                audioManager.setActiveSoundVolume("pedal.wav", speedBasedVolume);
-            }
-
-
-            spawnCooldown = SPAWN_INTERVAL;
+            isPlayingDrift = false;
         }
+
+        if (player.getMovementController().isDecelerating()) {
+            if (!isPlayingDecelerating) {
+                audioManager.playSoundLooping("decelerating.wav", speedBasedVolume);
+                isPlayingDecelerating = true;
+            }
+
+            audioManager.setActiveSoundVolume("decelerating.wav", speedBasedVolume);
+            audioManager.stopSound("pedal.wav");
+            isPlayingPedaling = false;
+        } else {
+            audioManager.stopSound("decelerating.wav");
+            isPlayingDecelerating = false;
+
+            if (!isPlayingPedaling) {
+                audioManager.playSoundLooping("pedal.wav", speedBasedVolume);
+                isPlayingPedaling = true;
+            }
+            audioManager.setActiveSoundVolume("pedal.wav", speedBasedVolume);
+        }
+
+
+        spawnCooldown = SPAWN_INTERVAL;
     }
 
     /**
      * Determines whether the player is drifting based on velocity vs. the facing angle.
+     *
      * @return {@code true} if the player is drifting
      */
     private boolean isDrifting() {

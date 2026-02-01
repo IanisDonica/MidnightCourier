@@ -5,6 +5,7 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.utils.Align;
 import de.tum.cit.fop.maze.MazeRunnerGame;
 import de.tum.cit.fop.maze.system.SaveManager;
 
@@ -56,7 +57,7 @@ public class SaveSlotDialog extends Dialog {
         this.getButtonTable().clearChildren();
 
         // Create the message label
-        String message = "Save slot" + slotName + "already contains data.\n\n" + "Would you like to load the existing save\n" + "or overwrite it with new data?";
+        String message = "Save slot " + slotName + " already contains data.\n\n" + "Would you like to load the existing save\n" + "or overwrite it with new data?";
 
         Label.LabelStyle style = getSkin().get(Label.LabelStyle.class);
         Label messageLabel = new Label(message, style);
@@ -66,9 +67,9 @@ public class SaveSlotDialog extends Dialog {
         this.getContentTable().add(messageLabel).width(700f).pad(20);
 
         // Add buttons with callbacks
-        this.button("Load Save", 1).padRight(10);
-        this.button("Overwrite", 2).padRight(10);
-        this.button("Cancel", 3);
+        this.button(" Load Save ", 1).align(Align.left).pad(10);
+        this.button(" Overwrite ", 2).align(Align.center).pad(10);
+        this.button(" Cancel ", 3).align(Align.right).pad(10);
 
         // Pack the dialog to fit content
         this.pack();
@@ -108,8 +109,8 @@ public class SaveSlotDialog extends Dialog {
         this.getContentTable().add(messageLabel).width(700f).pad(20);
 
         // Add buttons with callbacks
-        this.button("Save", 2).padRight(10);
-        this.button("Cancel", 3);
+        this.button(" Save ", 2).align(Align.left).pad(10);
+        this.button(" Cancel ", 3).align(Align.right).pad(10);
 
         // Pack the dialog to fit content
         this.pack();
@@ -165,7 +166,7 @@ public class SaveSlotDialog extends Dialog {
                         System.err.println("Game state is null");
                         break;
                     }
-                    SaveManager.saveGame("file" + choice, game.getGameScreen().getGameState());
+                    SaveManager.saveGame("file" + slotName, game.getGameScreen().getGameState());
                     SaveManager.saveInfo(false, slotName);
                 }
                 break;

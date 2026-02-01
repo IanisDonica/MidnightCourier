@@ -627,7 +627,7 @@ public class SurvivalScreen implements Screen {
         if (autosaveTimer == 60) {
             autosaveTimer = 0;
             SaveManager.saveGame(gameState);
-            SaveManager.saveInfo(true, 4);
+            SaveManager.saveInfo(true, 0);
         }
     }
 
@@ -660,6 +660,7 @@ public class SurvivalScreen implements Screen {
         if (paused) {
             resume();
         } else {
+            game.getAudioManager().stopAllSounds();
             paused = true;
             hud.setPauseMenuVisible(true);
         }
