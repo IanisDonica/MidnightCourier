@@ -10,20 +10,19 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.maps.tiled.TiledMap;
+import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
-import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.math.GridPoint2;
-import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.ScreenUtils;
-import com.badlogic.gdx.utils.viewport.*;
-import de.tum.cit.fop.maze.system.HUD;
+import com.badlogic.gdx.utils.viewport.ExtendViewport;
+import com.badlogic.gdx.utils.viewport.Viewport;
 import de.tum.cit.fop.maze.MazeRunnerGame;
 import de.tum.cit.fop.maze.entity.Player;
 import de.tum.cit.fop.maze.map.MapLoader;
 import de.tum.cit.fop.maze.system.*;
-import de.tum.cit.fop.maze.system.ProgressionManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,76 +32,147 @@ import java.util.List;
  */
 public class GameScreen implements Screen {
 
-    /** World width in tiles. */
+    /**
+     * World width in tiles.
+     */
     public static final int WORLD_WIDTH = 225;
-    /** World height in tiles. */
+    /**
+     * World height in tiles.
+     */
     public static final int WORLD_HEIGHT = 250;
-    /** Game instance for navigation and resources. */
-    private final MazeRunnerGame game;
-    /** Loaded tiled map. */
-    private final TiledMap map;
-    /** Collision layer for movement. */
-    private final TiledMapTileLayer  collisionLayer;
-    /** Road layer for BMW movement. */
-    private final TiledMapTileLayer roadLayer;
-    /** Map renderer for tiled map. */
-    private final OrthogonalTiledMapRenderer mapRenderer;
-    /** Stage for world actors. */
-    private final Stage stage;
-    /** Grayscale shader for effects. */
-    private final ShaderProgram grayScaleShader;
-    /** Combined shader for fog and effects. */
-    private final ShaderProgram combinedShader;
-    /** UI camera for HUD overlay. */
-    private final OrthographicCamera uiCamera;
-    /** Particle system for drifting. */
-    private final DriftParticleSystem driftParticleSystem;
-    /** Fog radius intensity. */
-    private float fogIntensity = 5f ;
-    /** Whether glasses upgrade has been applied. */
-    private boolean glassesApplied = false;
-    /** Whether noire mode is enabled. */
-    private boolean noireMode = false;
-    /** Framebuffer for world rendering. */
-    private FrameBuffer fbo;
-    /** Region of the framebuffer texture. */
-    private TextureRegion fboRegion;
-    /** Player actor. */
-    private final Player player;
-    /** Point manager for scoring. */
-    public PointManager pointManager;
-    /** Map loader for generating layers and entities. */
-    private final MapLoader mapLoader = new MapLoader();
-    /** Base map path. */
-    private String mapPath = "Assets_Map/THE_MAP.tmx";
-    /** Current level number. */
-    private int level;
-    /** Properties file path for the level. */
-    private String propertiesPath;
-    /** HUD overlay. */
-    private final HUD hud;
-    /** Developer console overlay. */
-    private final DevConsole devConsole;
-    /** Active enemies. */
-    private final List<de.tum.cit.fop.maze.entity.obstacle.Enemy> enemies = new ArrayList<>();
-    /** Active collectibles. */
-    private final List<de.tum.cit.fop.maze.entity.collectible.Collectible> collectibles = new ArrayList<>();
-    /** Current saved game state. */
-    private GameState gameState;
-    /** Whether the game is paused. */
-    private boolean paused = false;
-    /** Regen interval seconds. */
+    /**
+     * Regen interval seconds.
+     */
     private static final float REGEN_INTERVAL_SECONDS = 10f;
-    /** Points awarded when regen triggers at full health. */
+    /**
+     * Points awarded when regen triggers at full health.
+     */
     private static final int REGEN_POINTS_ON_FULL = 100;
-    /** Regen timer accumulator. */
-    private float regenTimer = 0f;
-    /** Minimum camera zoom. */
+    /**
+     * Minimum camera zoom.
+     */
     private static final float MIN_ZOOM = 0.05f;
-    /** Maximum camera zoom. */
+    /**
+     * Maximum camera zoom.
+     */
     private static final float MAX_ZOOM = 0.3f;
-    /** Fog intensity for early levels. */
+    /**
+     * Fog intensity for early levels.
+     */
     private static final float EARLY_LEVEL_FOG_INTENSITY = 50f;
+    /**
+     * Game instance for navigation and resources.
+     */
+    private final MazeRunnerGame game;
+    /**
+     * Loaded tiled map.
+     */
+    private final TiledMap map;
+    /**
+     * Collision layer for movement.
+     */
+    private final TiledMapTileLayer collisionLayer;
+    /**
+     * Road layer for BMW movement.
+     */
+    private final TiledMapTileLayer roadLayer;
+    /**
+     * Map renderer for tiled map.
+     */
+    private final OrthogonalTiledMapRenderer mapRenderer;
+    /**
+     * Stage for world actors.
+     */
+    private final Stage stage;
+    /**
+     * Grayscale shader for effects.
+     */
+    private final ShaderProgram grayScaleShader;
+    /**
+     * Combined shader for fog and effects.
+     */
+    private final ShaderProgram combinedShader;
+    /**
+     * UI camera for HUD overlay.
+     */
+    private final OrthographicCamera uiCamera;
+    /**
+     * Particle system for drifting.
+     */
+    private final DriftParticleSystem driftParticleSystem;
+    /**
+     * Player actor.
+     */
+    private final Player player;
+    /**
+     * Map loader for generating layers and entities.
+     */
+    private final MapLoader mapLoader = new MapLoader();
+    /**
+     * HUD overlay.
+     */
+    private final HUD hud;
+    /**
+     * Developer console overlay.
+     */
+    private final DevConsole devConsole;
+    /**
+     * Active enemies.
+     */
+    private final List<de.tum.cit.fop.maze.entity.obstacle.Enemy> enemies = new ArrayList<>();
+    /**
+     * Active collectibles.
+     */
+    private final List<de.tum.cit.fop.maze.entity.collectible.Collectible> collectibles = new ArrayList<>();
+    /**
+     * Current level number.
+     */
+    private final int level;
+    /**
+     * Properties file path for the level.
+     */
+    private final String propertiesPath;
+    /**
+     * Point manager for scoring.
+     */
+    public PointManager pointManager;
+    /**
+     * Fog radius intensity.
+     */
+    private float fogIntensity = 5f;
+    /**
+     * Whether glasses upgrade has been applied.
+     */
+    private boolean glassesApplied = false;
+    /**
+     * Whether noire mode is enabled.
+     */
+    private boolean noireMode = false;
+    /**
+     * Framebuffer for world rendering.
+     */
+    private FrameBuffer fbo;
+    /**
+     * Region of the framebuffer texture.
+     */
+    private TextureRegion fboRegion;
+    /**
+     * Base map path.
+     */
+    private String mapPath = "Assets_Map/THE_MAP.tmx";
+    /**
+     * Current saved game state.
+     */
+    private GameState gameState;
+    /**
+     * Whether the game is paused.
+     */
+    private boolean paused = false;
+    /**
+     * Regen timer accumulator.
+     */
+    private float regenTimer = 0f;
+    private int autosaveTimer = 0;
 
     /**
      * Constructor for GameScreen. Sets up the camera and font.
@@ -116,7 +186,7 @@ public class GameScreen implements Screen {
     /**
      * Creates a game screen for a specific level.
      *
-     * @param game game instance
+     * @param game  game instance
      * @param level level number
      */
     public GameScreen(MazeRunnerGame game, int level) {
@@ -162,7 +232,7 @@ public class GameScreen implements Screen {
     /**
      * Creates a game screen from a saved game state.
      *
-     * @param game game instance
+     * @param game      game instance
      * @param gameState saved state to load
      */
     public GameScreen(MazeRunnerGame game, GameState gameState) {
@@ -221,6 +291,16 @@ public class GameScreen implements Screen {
     }
 
     /**
+     * Builds a properties path for a level.
+     *
+     * @param levelNumber level number
+     * @return properties file path
+     */
+    private static String toPropertiesPath(int levelNumber) {
+        return String.format("maps/level-%d.properties", levelNumber);
+    }
+
+    /**
      * Adjusts camera zoom by the given amount.
      *
      * @param amount zoom delta
@@ -235,8 +315,8 @@ public class GameScreen implements Screen {
      * Generates a TMX file for the level based on properties.
      *
      * @param templateMapPath TMX template path
-     * @param propertiesPath properties path for tiles
-     * @param level level number
+     * @param propertiesPath  properties path for tiles
+     * @param level           level number
      * @return output TMX path
      */
     private String buildGeneratedTmx(String templateMapPath, String propertiesPath, int level) {
@@ -261,6 +341,9 @@ public class GameScreen implements Screen {
         noireMode = !noireMode;
     }
 
+    // If I have more time ill make it, so this isn't polled every frame (the original idea was to make it fired in the upgrade classes),
+    // But for now this also works
+
     /**
      * Increases fog intensity for early levels.
      */
@@ -270,8 +353,6 @@ public class GameScreen implements Screen {
         }
     }
 
-    // If I have more time ill make it, so this isn't polled every frame (the original idea was to make it fired in the upgrade classes),
-    // But for now this also works
     /**
      * Applies upgrade effects to the player each frame.
      */
@@ -357,16 +438,16 @@ public class GameScreen implements Screen {
         batch.setProjectionMatrix(camera.combined);
         batch.setShader(combinedShader);
         batch.begin();
-            // Set uniforms for fog
-            combinedShader.setUniformf("u_playerWorldPos", player.getX() + player.getWidth() / 2f, player.getY() + player.getHeight() / 2f);
-            combinedShader.setUniformf("u_camWorldPos", camera.position.x, camera.position.y);
-            combinedShader.setUniformf("u_worldViewSize", viewW, viewH);
-            combinedShader.setUniformf("u_radiusWorld", fogIntensity);
+        // Set uniforms for fog
+        combinedShader.setUniformf("u_playerWorldPos", player.getX() + player.getWidth() / 2f, player.getY() + player.getHeight() / 2f);
+        combinedShader.setUniformf("u_camWorldPos", camera.position.x, camera.position.y);
+        combinedShader.setUniformf("u_worldViewSize", viewW, viewH);
+        combinedShader.setUniformf("u_radiusWorld", fogIntensity);
 
-            combinedShader.setUniformi("u_noireMode", noireMode ? 1 : 0);
+        combinedShader.setUniformi("u_noireMode", noireMode ? 1 : 0);
 
-            // Draw the base world FBO
-            batch.draw(fboRegion, viewX, viewY, viewW, viewH);
+        // Draw the base world FBO
+        batch.draw(fboRegion, viewX, viewY, viewW, viewH);
         batch.end();
         batch.setShader(null);
 
@@ -386,20 +467,7 @@ public class GameScreen implements Screen {
                 dropOffY = collectible.getSpawnY();
             }
         }
-        hud.update(
-                level,
-                player.getHp(),
-                pointManager.getPoints(),
-                player.hasKey(),
-                player.canLeave(),
-                game.getProgressionManager().hasUpgrade("regen"),
-                regenTimer,
-                REGEN_INTERVAL_SECONDS,
-                -1f,
-                player.getX() + player.getWidth() / 2f,
-                player.getY() + player.getHeight() / 2f,
-                keyX, keyY, exitX, exitY, dropOffX, dropOffY
-        );
+        hud.update(level, player.getHp(), pointManager.getPoints(), player.hasKey(), player.canLeave(), game.getProgressionManager().hasUpgrade("regen"), regenTimer, REGEN_INTERVAL_SECONDS, -1f, player.getX() + player.getWidth() / 2f, player.getY() + player.getHeight() / 2f, keyX, keyY, exitX, exitY, dropOffX, dropOffY);
         hud.getStage().act(delta);
         hud.getStage().draw();
 
@@ -415,46 +483,22 @@ public class GameScreen implements Screen {
         }
 
         if (gameState != null) {
-            gameState.save(
-                    mapPath,
-                    level,
-                    ((OrthographicCamera) stage.getCamera()).zoom,
-                    player.getX(),
-                    player.getY(),
-                    player.getHp(),
-                    pointManager,
-                    player.hasKey(),
-                    player.canLeave(),
-                    enemyDataList,
-                    collectibleDataList,
-                    game.getProgressionManager().getPoints(),
-                    new java.util.HashSet<>(game.getProgressionManager().getOwnedUpgrades())
-            );
+            gameState.save(mapPath, level, ((OrthographicCamera) stage.getCamera()).zoom, player.getX(), player.getY(), player.getHp(), pointManager, player.hasKey(), player.canLeave(), enemyDataList, collectibleDataList, game.getProgressionManager().getPoints(), new java.util.HashSet<>(game.getProgressionManager().getOwnedUpgrades()));
+        } else {
+            gameState = new GameState(mapPath, level, ((OrthographicCamera) stage.getCamera()).zoom, player.getX(), player.getY(), player.getHp(), pointManager, player.hasKey(), player.canLeave(), enemyDataList, collectibleDataList, game.getProgressionManager().getPoints(), new java.util.HashSet<>(game.getProgressionManager().getOwnedUpgrades()));
         }
-        else {
-            gameState = new GameState(
-                    mapPath,
-                    level,
-                    ((OrthographicCamera) stage.getCamera()).zoom,
-                    player.getX(),
-                    player.getY(),
-                    player.getHp(),
-                    pointManager,
-                    player.hasKey(),
-                    player.canLeave(),
-                    enemyDataList,
-                    collectibleDataList,
-                    game.getProgressionManager().getPoints(),
-                    new java.util.HashSet<>(game.getProgressionManager().getOwnedUpgrades())
-            );
+        autosaveTimer++;
+        if (autosaveTimer == 60) {
+            autosaveTimer = 0;
+            SaveManager.saveGame(gameState);
+            SaveManager.saveInfo(false, 4);
         }
-        SaveManager.saveGame(gameState);
     }
 
     /**
      * Resizes viewports and framebuffers.
      *
-     * @param width new width
+     * @param width  new width
      * @param height new height
      */
     @Override
@@ -555,6 +599,10 @@ public class GameScreen implements Screen {
         mapRenderer.dispose();
     }
 
+    public GameState getGameState() {
+        return gameState;
+    }
+
     /**
      * Returns whether the game is paused.
      *
@@ -580,6 +628,15 @@ public class GameScreen implements Screen {
         devConsole.toggle(hud.getStage());
     }
 
+    public void setDevConsole(boolean enabled) {
+        if (enabled) {
+            devConsole.enable();
+        } else {
+            devConsole.disable();
+            if (devConsole.isVisible()) devConsole.toggle(hud.getStage());
+        }
+    }
+
     /**
      * Returns whether the developer console is visible.
      *
@@ -587,16 +644,6 @@ public class GameScreen implements Screen {
      */
     public boolean isDevConsoleVisible() {
         return devConsole.isVisible();
-    }
-
-    /**
-     * Builds a properties path for a level.
-     *
-     * @param levelNumber level number
-     * @return properties file path
-     */
-    private static String toPropertiesPath(int levelNumber) {
-        return String.format("maps/level-%d.properties", levelNumber);
     }
 
     /**

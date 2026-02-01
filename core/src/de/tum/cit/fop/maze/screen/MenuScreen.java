@@ -71,11 +71,11 @@ public class MenuScreen implements Screen {
     public MenuScreen(MazeRunnerGame game) {
         this.game = game;
         var camera = new OrthographicCamera();
-        camera.zoom = 1.5f; // UI camera zoom
+        camera.zoom = 1f; // UI camera zoom
         audioManager = game.getAudioManager();
         var graphicsManager = game.getGraphicsManager();
 
-        Viewport viewport = new FitViewport(graphicsManager.getWidth(), graphicsManager.getHeight());
+        Viewport viewport = new FitViewport(graphicsManager.getWidth(), graphicsManager.getHeight(), camera);
         stage = new Stage(viewport, game.getSpriteBatch()); // Create a stage for UI elements
 
         mapLoader = new MapLoader();
@@ -216,10 +216,10 @@ public class MenuScreen implements Screen {
     @Override
     public void resize(int width, int height) {
         stage.getViewport().update(width, height, true); // Update the stage viewport on resize
-        updateBackgroundCamera(width, height);
+        updateBackgroundCamera(game.getGraphicsManager().getWidth(), game.getGraphicsManager().getHeight());
         centerBackgroundCamera();
-        backgroundStage.getViewport().update(width, height, false);
-        vignetteStage.getViewport().update(width, height, true);
+        backgroundStage.getViewport().update(game.getGraphicsManager().getWidth(), game.getGraphicsManager().getHeight(), false);
+        vignetteStage.getViewport().update(game.getGraphicsManager().getWidth(), game.getGraphicsManager().getHeight(), true);
     }
 
     /**
@@ -295,10 +295,10 @@ public class MenuScreen implements Screen {
      */
     public void renderBackground(float delta) {
         var graphicsManager = game.getGraphicsManager();
+        backgroundStage.getViewport().update(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), false);
+        backgroundStage.getViewport().apply();
         updateBackgroundCamera(graphicsManager.getWidth(), graphicsManager.getHeight());
         centerBackgroundCamera();
-        backgroundStage.getViewport().update(graphicsManager.getWidth(), graphicsManager.getHeight(), false);
-        backgroundStage.getViewport().apply();
         backgroundRenderer.setView(backgroundCamera);
         backgroundRenderer.render();
         backgroundStage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));

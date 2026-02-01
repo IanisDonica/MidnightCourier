@@ -167,16 +167,6 @@ public class HUD {
         pauseTable.setFillParent(true);
         pauseTable.setVisible(false);
 
-        Button backMain = new TextButton("Main Menu", game.getSkin());
-        backMain.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent event, Actor actor) {
-            if (pauseTable.isVisible()) {
-                game.goToMenu();
-            }
-            }
-        });
-        pauseTable.add(backMain).row();
 
         Button unpause = new TextButton("Continue to Game", game.getSkin());
         unpause.addListener(new ChangeListener() {
@@ -187,7 +177,7 @@ public class HUD {
                 }
             }
         });
-        pauseTable.add(unpause).row();
+        pauseTable.add(unpause).width(400).row();
 
         Button settings = new TextButton("Settings", game.getSkin());
         settings.addListener(new ChangeListener() {
@@ -198,7 +188,19 @@ public class HUD {
                 }
             }
         });
-        pauseTable.add(settings).row();
+        pauseTable.add(settings).width(400).row();
+
+        Button backMain = new TextButton("Main Menu", game.getSkin());
+        backMain.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                if (pauseTable.isVisible()) {
+                    game.goToMenu();
+                }
+            }
+        });
+        pauseTable.add(backMain).width(400).row();
+
 
         Button exit = new TextButton("Exit game", game.getSkin());
         exit.addListener(new ChangeListener() {
@@ -207,7 +209,7 @@ public class HUD {
                 Gdx.app.exit();
             }
         });
-        pauseTable.add(exit).row();
+        pauseTable.add(exit).width(400).row();
 
         shopButton = new TextButton("Open Shop", game.getSkin());
         shopButton.setVisible(false);

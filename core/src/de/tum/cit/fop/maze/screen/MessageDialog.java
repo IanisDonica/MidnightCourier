@@ -7,11 +7,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import de.tum.cit.fop.maze.MazeRunnerGame;
 
-/**
- * Dialog prompting the user to restart after graphics changes.
- */
-public class RestartDialog extends Dialog {
-
+public class MessageDialog extends Dialog {
     /** Log tag for restart events. */
     private static final String TAG = "MessageDialog";
 
@@ -26,7 +22,7 @@ public class RestartDialog extends Dialog {
      * @param skin UI skin
      * @param stage stage to show the dialog on
      */
-    public RestartDialog(Skin skin, Stage stage, MazeRunnerGame game) {
+    public MessageDialog(Skin skin, Stage stage, MazeRunnerGame game) {
         super("", skin);
         this.game = game;
         this.stage = stage;
@@ -47,17 +43,16 @@ public class RestartDialog extends Dialog {
         this.getContentTable().clearChildren();
         this.getButtonTable().clearChildren();
 
-        // Create wrapped label for message
+        // Create a wrapped label for the message
         Label.LabelStyle style = getSkin().get(Label.LabelStyle.class);
         Label messageLabel = new Label(message, style);
         messageLabel.setWrap(true);
 
-        // Add the message with width constraint (content table width minus padding)
+        // Add the message with a width constraint (content table width minus padding)
         this.getContentTable().add(messageLabel).width(750f).pad(20f);
 
         // Add buttons
-        this.button("Save and Restart", true);
-        this.button("Cancel", false);
+        this.button("OK", false);
         this.defaults().pad(20);
         this.getButtonTable().pad(20);
 
@@ -78,22 +73,6 @@ public class RestartDialog extends Dialog {
      */
     @Override
     protected void result(Object object) {
-        if (Boolean.TRUE.equals(object)) {
-            game.getGraphicsManager().save();
-            game.getAudioManager().playSound("Click.wav",1);
-            Gdx.app.log(TAG, "Restarting application...");
-            restartApplication();
-        } else {
-            game.getAudioManager().playSound("Click.wav",1);
-            Gdx.app.log(TAG, "Restart cancelled");
-        }
     }
 
-    /**
-     * Exits the application to allow a restart.
-     */
-    private void restartApplication() {
-        Gdx.app.log(TAG, "Exiting application for restart");
-        Gdx.app.exit();
-    }
 }

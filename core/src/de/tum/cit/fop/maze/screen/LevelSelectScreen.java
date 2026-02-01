@@ -31,6 +31,8 @@ public class LevelSelectScreen implements Screen {
     private final AudioManager audioManager;
     /** Vignette texture overlay. */
     private final Texture vignetteTexture;
+    /** Vignette image overlay. */
+    private final Image vignetteImage;
 
     /**
      * Creates the level select screen.
@@ -39,16 +41,15 @@ public class LevelSelectScreen implements Screen {
      */
     public LevelSelectScreen(MazeRunnerGame game) {
         this.game = game;
-        var camera = new OrthographicCamera();
-        camera.zoom = 1.5f;
         audioManager = game.getAudioManager();
-        var graphicsManager = game.getGraphicsManager();
+        var camera = new OrthographicCamera();
+        camera.zoom = 1f; // Set camera zoom for a closer view
 
-        Viewport viewport = new FitViewport(graphicsManager.getWidth(), graphicsManager.getHeight());
+        Viewport viewport = new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), camera);
         stage = new Stage(viewport, game.getSpriteBatch());
 
         vignetteTexture = UiUtils.buildVignetteTexture(512, 512, 0.9f);
-        Image vignetteImage = new Image(vignetteTexture);
+        vignetteImage = new Image(vignetteTexture);
         vignetteImage.setFillParent(true);
         vignetteImage.setTouchable(Touchable.disabled);
         stage.addActor(vignetteImage);
@@ -67,6 +68,7 @@ public class LevelSelectScreen implements Screen {
                 @Override
                 public void changed(ChangeEvent event, Actor actor) {
                     audioManager.playSound("Click.wav", 1);
+                    game.startNewGameProgression();
                     game.goToGame(levelNumber);
                 }
             });
@@ -94,6 +96,7 @@ public class LevelSelectScreen implements Screen {
         if (!game.shouldRenderMenuBackground()) {
             Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         }
+        vignetteImage.setVisible(!game.shouldRenderMenuBackground());
         stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
         stage.draw();
     }

@@ -168,9 +168,9 @@ com.badlogic.gdx.scenes.scene2d.ui.TextButton$TextButtonStyle: {
   menu: {
     font: font
     fontColor: white
-    up: transparent
-    over: hoverBorder
-    down: hoverBorder
+    up: cell
+    over: button-hover
+    down: button-hover
   }
 
 },
