@@ -5,8 +5,13 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.GridPoint2;
+import com.badlogic.gdx.math.MathUtils;
 import de.tum.cit.fop.maze.entity.MapObject;
+import de.tum.cit.fop.maze.entity.Player;
 import com.badlogic.gdx.utils.Array;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Base class for obstacles with animated sprites.
@@ -68,5 +73,34 @@ public class Obstacle extends MapObject {
     @Override
     public void draw(Batch batch, float parentAlpha) {
         batch.draw(animation.getKeyFrame(animationTime, true), getX(), getY(), getWidth(), getHeight());
+    }
+
+    protected static List<GridPoint2> filterSpawnCandidates(List<GridPoint2> tiles,
+                                                            Player player,
+                                                            int mapWidth,
+                                                            int mapHeight,
+                                                            int minDistance) {
+        int playerTileX = clampTileCoord(player.getX() + player.getWidth() / 2f, mapWidth);
+        int playerTileY = clampTileCoord(player.getY() + player.getHeight() / 2f, mapHeight);
+        List<GridPoint2> candidates = new ArrayList<>(tiles.size());
+        for (GridPoint2 tile : tiles) {
+            if (Math.abs(tile.x - playerTileX) <= minDistance
+                    && Math.abs(tile.y - playerTileY) <= minDistance) {
+                continue;
+            }
+            candidates.add(tile);
+        }
+        return candidates;
+    }
+
+    private static int clampTileCoord(float center, int max) {
+        int tile = MathUtils.floor(center);
+        if (tile < 0) {
+            return 0;
+        }
+        if (tile >= max) {
+            return max - 1;
+        }
+        return tile;
     }
 }

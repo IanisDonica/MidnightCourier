@@ -381,7 +381,7 @@ public class Enemy extends Obstacle {
         if (walkableTiles.isEmpty()) {
             return;
         }
-        List<GridPoint2> candidates = getSpawnCandidates(walkableTiles, player, collisionLayer);
+        List<GridPoint2> candidates = filterSpawnCandidates(walkableTiles, player, collisionLayer.getWidth(), collisionLayer.getHeight(), 2);
         int spawned = 0;
         while (spawned < amount && !candidates.isEmpty()) {
             int index = MathUtils.random(candidates.size() - 1);
@@ -426,44 +426,6 @@ public class Enemy extends Obstacle {
         return tiles;
     }
 
-    /**
-     * Filters spawn candidates by distance from the player.
-     *
-     * @param tiles          candidate tiles
-     * @param player         player reference
-     * @param collisionLayer collision layer for bounds
-     * @return filtered candidate list
-     */
-    private static List<GridPoint2> getSpawnCandidates(List<GridPoint2> tiles, Player player, TiledMapTileLayer collisionLayer) {
-        int playerTileX = clampTileCoord(player.getX() + player.getWidth() / 2f, collisionLayer.getWidth());
-        int playerTileY = clampTileCoord(player.getY() + player.getHeight() / 2f, collisionLayer.getHeight());
-        List<GridPoint2> candidates = new ArrayList<>(tiles.size());
-        for (GridPoint2 tile : tiles) {
-            if (Math.abs(tile.x - playerTileX) <= 2 && Math.abs(tile.y - playerTileY) <= 2) {
-                continue;
-            }
-            candidates.add(tile);
-        }
-        return candidates;
-    }
-
-    /**
-     * Clamps a tile coordinate to map bounds.
-     *
-     * @param center center coordinate
-     * @param max max bound
-     * @return clamped tile coordinate
-     */
-    private static int clampTileCoord(float center, int max) {
-        int tile = MathUtils.floor(center);
-        if (tile < 0) {
-            return 0;
-        }
-        if (tile >= max) {
-            return max - 1;
-        }
-        return tile;
-    }
 
     /**
      * Checks whether spawning at a location would collide with actors.

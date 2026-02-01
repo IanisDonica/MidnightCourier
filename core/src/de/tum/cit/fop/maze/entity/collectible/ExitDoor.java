@@ -10,9 +10,10 @@ import de.tum.cit.fop.maze.system.PointManager;
 
 /**
  * Exit door that grants permission to leave when the player has the key.
+
+ * It's easier to implement it as a Collectible, (collision method, player exists as an attribute and no need for extra code to add him)
  */
 public class ExitDoor extends Collectible {
-    // The door is obviously not a Collectible, but it's easier to implement it as such due to the colision code
     /**
      * Listener invoked when victory is triggered.
      */
@@ -22,8 +23,6 @@ public class ExitDoor extends Collectible {
 
     /** Listener to notify on victory. */
     private final VictoryListener victoryListener;
-    /** Whether the exit has been triggered. */
-    private boolean triggered = false;
 
     /**
      * Creates an exit door collectible.
@@ -60,21 +59,17 @@ public class ExitDoor extends Collectible {
      */
     @Override
     protected void collision() {
-        if (triggered) {
-            return;
-        }
         if (!this.player.canLeave()) {
             return;
         }
-        triggered = true;
+
         this.pointManager.saveScore(this.player.getHp());
         AchievementManager.incrementProgress("first_delivery", 1);
         AchievementManager.incrementProgress("complete_100_deliveries", 1);
         if (this.pointManager.getLevel() == 5) {
             AchievementManager.incrementProgress("finish_level_5", 1);
         }
-        if (victoryListener != null) {
-            victoryListener.onVictory();
-        }
+
+        victoryListener.onVictory();
     }
 }
