@@ -47,14 +47,21 @@ Notes:
 - A single coordinate can effectively carry **multiple meanings**: one value defines the rendered tile (>=100), while a separate entry can define gameplay (e.g., wall/road/collectible) for the same `(x,y)` in the properties file.
 
 ## UML Diagram
+### AI
+<img width="2316" height="1857" alt="ai" src="https://github.com/user-attachments/assets/a3af56d1-7a8d-4416-b502-b96cecbc2792" />
 
-<img width="2204" height="1398" alt="AIBehaviour" src="https://github.com/user-attachments/assets/dd7f6fed-c458-474c-a093-478914633220" />
-<img width="1952" height="1226" alt="Pathfinders" src="https://github.com/user-attachments/assets/00710ea1-be41-4c57-9f57-3834674e8a5b" />
-<img width="5826" height="5143" alt="Entity" src="https://github.com/user-attachments/assets/10366b2b-b95e-4586-a6cd-953c12d00156" />
-<img width="1130" height="1040" alt="MapLoader" src="https://github.com/user-attachments/assets/11d4a035-e58c-4c0a-b05b-df7c88d9a183" />
-<img width="7706" height="4306" alt="screens" src="https://github.com/user-attachments/assets/7a2265f9-2012-44ad-b108-634075516a81" />
-<img width="5368" height="2387" alt="managers2" src="https://github.com/user-attachments/assets/d72d2e5c-2961-4d4b-bac4-ba166cdd10c1" />
-<img width="4252" height="2357" alt="managers" src="https://github.com/user-attachments/assets/862badb4-23a2-4bb4-8c48-1d36aae286d0" />
+### Entity
+<img width="1659" height="3669" alt="entity" src="https://github.com/user-attachments/assets/efbbeb06-0b06-46e9-996c-0e9d6b78723d" />
+
+### Map
+<img width="1130" height="1040" alt="map" src="https://github.com/user-attachments/assets/7e3c0476-d819-48c1-ba09-6a18910f5e87" />
+
+### Screen
+<img width="10282" height="4732" alt="screen" src="https://github.com/user-attachments/assets/b48248d5-ef2f-4933-a4ac-096b8e718d73" />
+
+### System
+<img width="6898" height="3754" alt="system" src="https://github.com/user-attachments/assets/0b5bd3c1-780b-4871-906e-312b9bbfe1fb" />
+
 
 ## How to run the game
 
