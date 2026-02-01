@@ -42,7 +42,7 @@
 	"id": "third_strike_and_out",
 	"name": "Three strike rule",
 	"description": "Get arrested 3 times",
-	"progress": 1,
+	"progress": 2,
 	"target": 3
 },
 {
