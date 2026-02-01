@@ -27,20 +27,20 @@ In Endless mode, dificualty scales over time: spawns accelerate the longer you s
 ### Map Value Table (properties files)
 These values are interpreted by `MapLoader` when spawning entities and building layers:
 
-| Value | Meaning | Used for |
-|------:|---------|----------|
-| 1 | Entry point | Player spawn |
-| 2 | Exit | ExitDoor (campaign only; requires can-leave to trigger victory; blocks collision) |
-| 3 | Health pickup | Collectible (HP + points) |
-| 4 | Guard enemy | Dynamic obstacle (policeman) |
-| 5 | Key | Required to open exit |
-| 6 | Energy drink | Speed boost collectible |
-| 7 | Wall | Collision layer block |
-| 8 | Pothole trap | Static obstacle |
-| 9 | Drop-off | Delivery drop-off (not solid; grants can-leave in campaign, completes delivery in endless) |
-| 10 | Shop | Interaction zone + collision block |
-| 11 | Road | BMW pathing layer |
-| 13 | BMW driver | Dynamic obstacle (road-only enemy) |
+| Value | Meaning |
+|------:|---------|
+| 1 | Entry point |
+| 2 | Exit |
+| 3 | Health pickup |
+| 4 | Guard enemy |
+| 5 | Key |
+| 6 | Energy drink |
+| 7 | Wall |
+| 8 | Pothole trap |
+| 9 | Drop-off |
+| 10 | Shop |
+| 11 | Road |
+| 13 | BMW driver |
 
 Notes:
 - Values **over 100** are treated as **tile IDs** for the visual TMX layer. `MapLoader` subtracts 100 and writes them into the generated map CSV.

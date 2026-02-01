@@ -33,6 +33,8 @@ public class SettingsAudioScreen implements Screen {
     private final ConfigManager configManager;
     /** Vignette texture overlay. */
     private final Texture vignetteTexture;
+    /** Vignette image overlay. */
+    private final Image vignetteImage;
 
     /**
      * Creates the audio settings screen.
@@ -52,7 +54,7 @@ public class SettingsAudioScreen implements Screen {
         stage = new Stage(viewport, game.getSpriteBatch());
 
         vignetteTexture = UiUtils.buildVignetteTexture(512, 512, 0.9f);
-        Image vignetteImage = new Image(vignetteTexture);
+        vignetteImage = new Image(vignetteTexture);
         vignetteImage.setFillParent(true);
         vignetteImage.setTouchable(Touchable.disabled);
         stage.addActor(vignetteImage);
@@ -138,6 +140,7 @@ public class SettingsAudioScreen implements Screen {
         if (!game.shouldRenderMenuBackground()) {
             Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT); // Clear the screen
         }
+        vignetteImage.setVisible(!game.shouldRenderMenuBackground());
         stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f)); // Update the stage
         stage.draw(); // Draw the stage
     }
