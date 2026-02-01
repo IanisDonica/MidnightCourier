@@ -1,10 +1,13 @@
 package de.tum.cit.fop.maze.screen;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import de.tum.cit.fop.maze.MazeRunnerGame;
 
 /**
@@ -60,6 +63,7 @@ public class RestartDialog extends Dialog {
         this.button("Cancel", false);
         this.defaults().pad(20);
         this.getButtonTable().pad(20);
+        removeButtonFade();
 
         // Center on screen
         this.setPosition(
@@ -68,7 +72,7 @@ public class RestartDialog extends Dialog {
         );
 
         // Show the dialog
-        this.show(stage);
+        this.show(stage, Actions.alpha(1f));
     }
 
     /**
@@ -87,6 +91,7 @@ public class RestartDialog extends Dialog {
             game.getAudioManager().playSound("Click.wav",1);
             Gdx.app.log(TAG, "Restart cancelled");
         }
+        this.hide(Actions.alpha(1f));
     }
 
     /**
@@ -95,5 +100,16 @@ public class RestartDialog extends Dialog {
     private void restartApplication() {
         Gdx.app.log(TAG, "Exiting application for restart");
         Gdx.app.exit();
+    }
+
+    private void removeButtonFade() {
+        for (Actor actor : getButtonTable().getChildren()) {
+            if (actor instanceof TextButton button) {
+                TextButton.TextButtonStyle style = new TextButton.TextButtonStyle(button.getStyle());
+                style.over = style.up;
+                style.down = style.up;
+                button.setStyle(style);
+            }
+        }
     }
 }

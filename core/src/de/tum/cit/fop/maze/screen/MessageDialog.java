@@ -1,10 +1,14 @@
 package de.tum.cit.fop.maze.screen;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import de.tum.cit.fop.maze.MazeRunnerGame;
 
 public class MessageDialog extends Dialog {
@@ -63,7 +67,7 @@ public class MessageDialog extends Dialog {
         );
 
         // Show the dialog
-        this.show(stage);
+        this.show(stage, Actions.alpha(1f));
     }
 
     /**
@@ -73,6 +77,7 @@ public class MessageDialog extends Dialog {
      */
     @Override
     protected void result(Object object) {
+        this.hide(Actions.alpha(1f));
     }
 
 }
