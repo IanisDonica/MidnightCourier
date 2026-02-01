@@ -53,6 +53,8 @@ public class MazeRunnerGame extends Game {
     private ProgressionManager progressionManager;
     /** Screen to return to after leaving settings. */
     private Screen settingsReturnScreen;
+    /** Screen to return to after leaving the continue game screen. */
+    private Screen continueReturnScreen;
 
 
     /**
@@ -100,6 +102,18 @@ public class MazeRunnerGame extends Game {
      * Switches to the menu screen.
      */
     public void goToMenu() {
+        if (gameScreen != null) {
+            SaveManager.saveGame(gameScreen.getGameState());
+            SaveManager.saveInfo(false, 0);
+            gameScreen.dispose();
+            gameScreen = null;
+        }
+        if (survivalScreen != null) {
+            SaveManager.saveGame(survivalScreen.getGameState());
+            SaveManager.saveInfo(true, 0);
+            survivalScreen.dispose();
+            survivalScreen = null;
+        }
         audioManager.stopAllSounds();
         if (menuScreen == null) {
             menuScreen = new MenuScreen(this);
@@ -249,7 +263,26 @@ public class MazeRunnerGame extends Game {
      */
     public void goToContinueGameScreen() {
         audioManager.stopAllSounds();
+        Screen current = getScreen();
+        if (!(current instanceof MenuScreen) && !(current instanceof ContinueGameScreen)) {
+            continueReturnScreen = current;
+        } else {
+            continueReturnScreen = null;
+        }
         this.setScreen(new ContinueGameScreen(this)); // Set the current screen to GameScreen
+    }
+
+    /**
+     * Returns from the continue game screen to the previous screen when available.
+     */
+    public void goBackFromContinueGame() {
+        audioManager.stopAllSounds();
+        if (continueReturnScreen != null) {
+            this.setScreen(continueReturnScreen);
+            continueReturnScreen = null;
+        } else {
+            goToMenu();
+        }
     }
 
     /**
