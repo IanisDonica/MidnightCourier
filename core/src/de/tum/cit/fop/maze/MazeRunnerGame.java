@@ -115,6 +115,11 @@ public class MazeRunnerGame extends Game {
             survivalScreen = null;
         }
         audioManager.stopAllSounds();
+        if (this.menuScreen != null) {
+            this.setScreen(this.menuScreen);
+            return;
+        }
+
         audioManager.stopPlaylist();
         audioManager.playMusic("True_love.mp3", 1f, true);
 
