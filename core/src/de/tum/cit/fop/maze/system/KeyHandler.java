@@ -240,16 +240,13 @@ public class KeyHandler extends InputListener {
             } else if (s instanceof SettingsGameScreen || s instanceof SettingsVideoScreen || s instanceof SettingsAudioScreen || s instanceof SettingsControlsScreen) {
                 audioManager.playSound("Click.wav", 1);
                 game.goToSettingsScreen();
+            } else if (s instanceof ContinueGameScreen) {
+                audioManager.playSound("Click.wav", 1);
+                game.goBackFromContinueGame();
             } else if (s instanceof PotholeDeathScreen || s instanceof DeathOverScreen || s instanceof GameOverScreen || s instanceof BmwExplosionDeathScreen || s instanceof FiredScreen) {
                 return true;
             } else if (s instanceof MenuScreen) {
-                if (game.getGameScreen() != null) {
-                    audioManager.playSound("Click.wav", 1);
-                    game.goToGame();
-                } else if (game.getSurvivalScreen() != null) {
-                    audioManager.playSound("Click.wav", 1);
-                    game.goToEndless();
-                }
+                return true;
             } else {
                 audioManager.playSound("Click.wav", 1);
                 game.goToMenu();
