@@ -69,6 +69,7 @@ public class Collectible extends MapObject {
      * @param rowY row y coordinate in the sheet
      * @param frameCount number of frames
      */
+    @SuppressWarnings("SameParameterValue") // So what
     protected void initSpinAnimation(int startX, int rowY, int frameCount) {
         Texture textureSheet = new Texture(Gdx.files.internal("objects.png"));
         Array<TextureRegion> spinFrames = new Array<>(TextureRegion.class);
@@ -114,7 +115,7 @@ public class Collectible extends MapObject {
     public void act(float delta) {
         super.act(delta);
 
-        // For now its ok if they all have the same shrink animation, later if we got time maybe we can give them seperate animatinos
+        // For now, it's ok if they all have the same shrink animation, later if we got time, maybe we can give them seperate animatinos
         // in which this code would need to be changed.
         if (pickedUp) {
             if (pickUpFrameCounter == 0) {

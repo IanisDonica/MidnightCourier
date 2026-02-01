@@ -218,11 +218,11 @@ public class KeyHandler extends InputListener {
      */
     private boolean handlePauseKey(int keycode) {
         if (keycode == configManager.getKeyBinding("pause")) {
-            audioManager.playSound("Click.wav", 1);
             Screen s = game.getScreen();
-            if (s instanceof CutsceneScreen || s instanceof SecondCutsceneScreen) {
+            if (s instanceof CutsceneScreen || s instanceof SecondCutsceneScreen || s instanceof BaseEndScreen) {
                 return true;
             }
+            audioManager.playSound("Click.wav", 1);
             if (s instanceof GameScreen || s instanceof SurvivalScreen) {
                 game.pause();
             } else if (s instanceof ProgressionTreeScreen) {
