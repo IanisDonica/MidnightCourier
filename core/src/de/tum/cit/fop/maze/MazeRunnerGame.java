@@ -540,6 +540,7 @@ public class MazeRunnerGame extends Game {
      */
     public void goToVictoryScreen() {
         audioManager.stopAllSounds();
+        audioManager.playSound("victory.mp3", 1);
         progressionManager.addPoints(500);
         this.setScreen(new VictoryScreen(this)); // Set the current screen to GameScreen
         if (settingsScreen != null) {
@@ -554,6 +555,7 @@ public class MazeRunnerGame extends Game {
      * @param cause the cause of death, or {@code null} for a generic game over
      */
     public void handlePlayerDeath(DeathCause cause) {
+        audioManager.playSound("verloren.mp3", 1);
         if (cause == null) {
             goToGameOverScreen();
             return;
