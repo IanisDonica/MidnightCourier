@@ -180,12 +180,16 @@ public class GraphicsManager {
      * @param height new height
      */
     public void setResolution(int width, int height) {
+        float lockedAspect = 16.0f / 9.0f;
+        int enforcedHeight = Math.round(width / lockedAspect);
+        if (enforcedHeight <= 0) {
+            enforcedHeight = height;
+        }
         this.width = width;
-        this.height = height;
-        this.targetAspectRatio = (float) width / height;
+        this.height = enforcedHeight;
 
         if (displayMode == 0 || displayMode == 2) { // Windowed or Borderless Windowed
-            Gdx.graphics.setWindowedMode(width, height);
+            Gdx.graphics.setWindowedMode(this.width, this.height);
         }
     }
 

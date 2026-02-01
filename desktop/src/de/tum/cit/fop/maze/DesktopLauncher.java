@@ -23,7 +23,7 @@ public class DesktopLauncher {
 
         config.setTitle("Maze Runner"); // Set the window title
         config.setWindowedMode(graphicsManager.getWidth(), graphicsManager.getHeight());
-        config.setResizable(graphicsManager.isResizable());
+        config.setResizable(true);
 
         config.setBackBufferConfig(8, 8, 8, 8, 16, 0, graphicsManager.getAntiAliasingMode().samples);
         config.setForegroundFPS(graphicsManager.getTargetFrameRate());
