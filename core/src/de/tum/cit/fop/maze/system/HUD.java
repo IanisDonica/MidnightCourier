@@ -146,7 +146,7 @@ public class HUD {
         keyPreviewImage.setVisible(false);
 
 
-        hudBoxTexture = buildBoxTexture(0f, 0f, 0f, 1f);
+        hudBoxTexture = buildBoxTexture(0f, 0f, 0f, 0f);
         topTable = new Table();
         topTable.top().left();
         healthTable = new Table();
@@ -297,11 +297,11 @@ public class HUD {
         }
         shopButton.setText("Open Shop (" + configManager.getKeyBindingName("openShop") + ")");
         if (canLeave) {
-            keyLabel.setText("Can leave");
+            keyLabel.setText("Exit the city");
         } else if (hasKey) {
-            keyLabel.setText("Has key");
+            keyLabel.setText("Has Food");
         } else {
-            keyLabel.setText("No key");
+            keyLabel.setText("No Food");
         }
 
         if (deliveryTimerSeconds >= 0f) {
