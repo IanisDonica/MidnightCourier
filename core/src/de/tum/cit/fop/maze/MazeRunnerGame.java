@@ -89,7 +89,7 @@ public class MazeRunnerGame extends Game {
         AchievementManager.setPopupScreen(achievementPopupScreen);
         progressionManager = new ProgressionManager(200);
         audioManager.preloadSounds("Click.wav", "pickup.wav", "siren.ogg", "decelerating.wav", "pedal.wav", "pickup.wav", "tires.wav", "tires_loop.wav");
-        audioManager.playMusic("background.mp3", 1f, true);
+        audioManager.playMusic("True_love.mp3", 1f, true);
         graphicsManager.load();
         graphicsManager.applySettings();
         goToMenu(); // Navigate to the menu screen
@@ -101,6 +101,9 @@ public class MazeRunnerGame extends Game {
      */
     public void goToMenu() {
         audioManager.stopAllSounds();
+        audioManager.stopPlaylist();
+        audioManager.playMusic("True_love.mp3", 1f, true);
+
         if (menuScreen == null) {
             menuScreen = new MenuScreen(this);
         }
@@ -112,6 +115,10 @@ public class MazeRunnerGame extends Game {
      */
     public void goToGame() {
         audioManager.stopAllSounds();
+        audioManager.stopMusic();
+        playDefaultPlaylist();
+
+
         if (survivalScreen != null) {
             survivalScreen.dispose();
             survivalScreen = null;
@@ -129,6 +136,8 @@ public class MazeRunnerGame extends Game {
      */
     public void goToEndless() {
         audioManager.stopAllSounds();
+        audioManager.stopMusic();
+        playDefaultPlaylist();
         if (gameScreen != null) {
             gameScreen.dispose();
             gameScreen = null;
@@ -148,6 +157,8 @@ public class MazeRunnerGame extends Game {
      */
     public void goToEndless(GameState gameState) {
         audioManager.stopAllSounds();
+        audioManager.stopMusic();
+        playDefaultPlaylist();
         if (gameState == null) {
             goToMenu();
             return;
@@ -177,6 +188,8 @@ public class MazeRunnerGame extends Game {
         // This will be the case after Try again/Next level
         // If this is not done, there will be a memory leak
         audioManager.stopAllSounds();
+        audioManager.stopMusic();
+        playDefaultPlaylist();
         if (gameScreen != null) {
             gameScreen.dispose();
             gameScreen = null;
@@ -198,6 +211,8 @@ public class MazeRunnerGame extends Game {
      */
     public void goToGame(GameState gameState) {
         audioManager.stopAllSounds();
+        audioManager.stopMusic();
+        playDefaultPlaylist();
         if (gameState == null) {
             goToMenu();
             return;
@@ -646,6 +661,19 @@ public class MazeRunnerGame extends Game {
 
     public boolean getSelectedScreen(){
         return selectedScreen;
+    }
+
+    private void playDefaultPlaylist(){
+        audioManager.playPlaylist(1f, true,
+                "Drift_City.mp3",
+                "Midnight_Ride.mp3",
+                "No_More_Heroes_2.mp3",
+                "one_last_drift.mp3",
+                "Race_to_Mt._Fuji.mp3",
+                "RETROPINK.mp3",
+                "shade_drift_phonk.mp3",
+                "Chase_Scene.mp3"
+        );
     }
 
     /**
