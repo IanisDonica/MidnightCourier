@@ -271,7 +271,7 @@ public class MazeRunnerGame extends Game {
      */
     public void goToSecondCutsceneScreen(int targetLevel) {
         audioManager.stopAllSounds();
-        audioManager.stopPlaylist();d
+        audioManager.stopPlaylist();
         this.setScreen(new SecondCutsceneScreen(this, targetLevel));
     }
 
