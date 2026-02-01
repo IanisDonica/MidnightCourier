@@ -1,0 +1,50 @@
+[
+{
+	"id": "complete_100_deliveries",
+	"name": "Certified Delivery Man",
+	"description": "Complete 100 deliveries",
+	"target": 100
+},
+{
+	"id": "first_delivery",
+	"name": "First delivery",
+	"description": "Complete your first delivery",
+	"target": 1
+},
+{
+	"id": "first_time_for_everything",
+	"name": "First time for everythihing",
+	"description": "Get arrested by a police officer for the first time",
+	"target": 1
+},
+{
+	"id": "first_upgrade",
+	"name": "First upgrade",
+	"description": "Buy your first upgrade",
+	"target": 1
+},
+{
+	"id": "mastery_upgrade",
+	"name": "Deep pockets",
+	"description": "Purchase the mastery upgrade",
+	"target": 1
+},
+{
+	"id": "third_strike_and_out",
+	"name": "Three strike rule",
+	"description": "Get arrested 3 times",
+	"target": 3
+},
+{
+	"id": "finish_level_5",
+	"name": "Vacation Money",
+	"description": "Compled the Campaign",
+	"target": 1
+},
+{
+	"id": "german_engineering",
+	"name": "German Engineering",
+	"description": "Get run over by a BMW",
+	"target": 1
+}
+]
