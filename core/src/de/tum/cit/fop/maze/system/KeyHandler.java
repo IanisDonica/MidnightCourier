@@ -246,7 +246,13 @@ public class KeyHandler extends InputListener {
             } else if (s instanceof PotholeDeathScreen || s instanceof DeathOverScreen || s instanceof GameOverScreen || s instanceof BmwExplosionDeathScreen || s instanceof FiredScreen) {
                 return true;
             } else if (s instanceof MenuScreen) {
-                return true;
+                if (game.getGameScreen() != null) {
+                    audioManager.playSound("Click.wav", 1);
+                    game.goToGame();
+                } else if (game.getSurvivalScreen() != null) {
+                    audioManager.playSound("Click.wav", 1);
+                    game.goToEndless();
+                }
             } else {
                 audioManager.playSound("Click.wav", 1);
                 game.goToMenu();

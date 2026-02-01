@@ -33,6 +33,10 @@ public class SettingsVideoScreen implements Screen {
     private final Texture vignetteTexture;
     /** Vignette image overlay. */
     private final Image vignetteImage;
+    /** Track window size to keep viewport in sync during runtime changes. */
+    private int lastWidth;
+    /** Track window size to keep viewport in sync during runtime changes. */
+    private int lastHeight;
     /** Graphics settings manager. */
     private final GraphicsManager graphicsManager;
     /** Dialog shown for restart-required changes. */
@@ -52,6 +56,8 @@ public class SettingsVideoScreen implements Screen {
 
         Viewport viewport = new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), camera);
         stage = new Stage(viewport, game.getSpriteBatch());
+        lastWidth = Gdx.graphics.getWidth();
+        lastHeight = Gdx.graphics.getHeight();
         restartDialog = new RestartDialog(game.getSkin(), stage, game);
 
         vignetteTexture = UiUtils.buildVignetteTexture(512, 512, 0.9f);
@@ -177,6 +183,13 @@ public class SettingsVideoScreen implements Screen {
         if (!game.shouldRenderMenuBackground()) {
             Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         }
+        int width = Gdx.graphics.getWidth();
+        int height = Gdx.graphics.getHeight();
+        if (width != lastWidth || height != lastHeight) {
+            stage.getViewport().update(width, height, true);
+            lastWidth = width;
+            lastHeight = height;
+        }
         vignetteImage.setVisible(!game.shouldRenderMenuBackground());
         stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
         stage.draw();
@@ -191,6 +204,8 @@ public class SettingsVideoScreen implements Screen {
     @Override
     public void resize(int width, int height) {
         stage.getViewport().update(width, height, true); // Update the stage viewport on resize
+        lastWidth = width;
+        lastHeight = height;
     }
 
     @Override
