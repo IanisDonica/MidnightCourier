@@ -25,13 +25,7 @@ import com.badlogic.gdx.utils.Array;
  * Enemy (Policeman/Jandarmeria class)
  */
 public class Enemy extends Obstacle {
-    private enum EnemyState {
-        CHASING,
-        PATROLLING,
-        PATROL_WAIT,
-        RETREATING,
-        RETREAT_WAIT
-    }
+    private enum EnemyState {CHASING,PATROLLING,PATROL_WAIT,RETREATING,RETREAT_WAIT}
 
     private static final float PATH_RECALC_INTERVAL = 0.5f;
     /** Target distance threshold for path steps */
@@ -42,40 +36,43 @@ public class Enemy extends Obstacle {
     private static final float PATROL_SPEED_SCALE = 0.5f;
     private static final int VISION_RANGE_TILES = 20;
     private static final float MAX_RETREAT_DURATION_SECONDS = 4f;
+    /** Time (seconds) for which the police will run after the player,
+     *  after that if they are still in chase mode, they will start running slower
+     *   to give the player a chance to escape them
+     * */
     private static final float RUN_DURATION_SECONDS = 10f;
     private static final float RUN_SPEED_MULTIPLIER = 2f;
     /** Collision layer for movement checks */
     private final TiledMapTileLayer collisionLayer;
     private final int mapWidth, mapHeight;
-    /** Base movement speed */
-    private final float speed;
+    private final float baseSpeed = 2.2f;
     /** Pathfinder for tile navigation */
     private final Pathfinder pathfinder;
-    /** Behavior controller for chasing */
+    /** Behavior controller for chasing/retreating/patroling states */
     private final ChaseBehavior chaseBehavior;
-    /** Behavior controller for retreating */
     private final RetreatBehavior retreatBehavior;
-    /** Behavior controller for patrolling */
     private final PatrolBehaviour patrolBehavior;
-    /** Global token to force all enemies to retreat */
+
+    /** This is for the global retreat functionality, (if the player gets hit, all enemies that chase him will go into retreat) the enemies
+     *  constantly checks to see if a retreat has been activated (global token is higher than local one), if yes - it increments
+     *  the local token (ack the retreat) and retreats if appropritate (chasing the player), doing it this way (as opposed to keeping a boolean value)
+     *  ensures that the player can still be targeted (by guards not witness to their arrest) and simplifies the logic.
+     *
+     *  the retreat check is done at the beginning of act(), and the global retreat token is done in the collision code.
+     * */
     private static int globalRetreatToken = 0;
+    private int lastRetreatToken = 0;
+
     /** Current path of tile points */
     private ArrayList<GridPoint2> path = new ArrayList<>();
     /** Current index in the path */
     private int pathIndex = 0;
     private float pathRecalcTimer = 0f;
-    /** Timer for retreat duration */
     private float retreatTimer = 0f;
-    /** Timer for running duration */
     private float runTimer = 0f;
-    /** Whether running is active */
-    private boolean running = false;
-    /** Last path goal x coordinate */
-    private int lastGoalX = Integer.MIN_VALUE;
-    /** Last path goal y coordinate */
-    private int lastGoalY = Integer.MIN_VALUE;
-    /** Last applied global retreat token */
-    private int lastRetreatToken = 0;
+    private boolean isRunning = false;
+    /** Last path goal x/y coordinates, MIN_VALUE to force a path recalc */
+    private int lastGoalX = Integer.MIN_VALUE, lastGoalY = Integer.MIN_VALUE;
     /** Current behavior state */
     private EnemyState state = EnemyState.CHASING; // Initial state
     /** Facing direction for animation */
@@ -93,13 +90,12 @@ public class Enemy extends Obstacle {
     public Enemy(TiledMapTileLayer collisionLayer, float x, float y) {
         super(x, y, 1,1, 0,0,3);
         this.collisionLayer = collisionLayer;
-        this.pathfinder = new Pathfinder(collisionLayer);
-        this.mapWidth = collisionLayer.getWidth();
-        this.mapHeight = collisionLayer.getHeight();
-        this.chaseBehavior = new ChaseBehavior(mapWidth, mapHeight, collisionLayer);
-        this.retreatBehavior = new RetreatBehavior(mapWidth, mapHeight, collisionLayer);
-        this.patrolBehavior = new PatrolBehaviour(mapWidth, mapHeight, collisionLayer);
-        this.speed = 2.2f;
+        pathfinder = new Pathfinder(collisionLayer);
+        mapWidth = collisionLayer.getWidth(); mapHeight = collisionLayer.getHeight();
+        chaseBehavior = new ChaseBehavior(mapWidth, mapHeight, collisionLayer);
+        retreatBehavior = new RetreatBehavior(mapWidth, mapHeight, collisionLayer);
+        patrolBehavior = new PatrolBehaviour(mapWidth, mapHeight, collisionLayer);
+
         initWalkAnimations();
     }
 
@@ -135,7 +131,6 @@ public class Enemy extends Obstacle {
      */
     @Override
     public void act(float delta) {
-        //TODO remove duplicate code
         super.act(delta);
 
         // If a global retreat has been called, only retreat if you are actually chasing the enemy.
@@ -182,8 +177,8 @@ public class Enemy extends Obstacle {
                     enterRetreating();
                     return;
                 }
-                if (!running && canSeePlayer()) {
-                    running = true;
+                if (!isRunning && canSeePlayer()) {
+                    isRunning = true;
                     runTimer = 0f;
                 }
                 break;
@@ -201,17 +196,18 @@ public class Enemy extends Obstacle {
         boolean pathExhausted = pathIndex >= path.size();
         if (pathRecalcTimer <= 0f && isCenteredOnTile()) {
             boolean needsRepath = path.isEmpty() || pathExhausted;
+
             int[] coords = computePathCoords();
-            int goalX = coords[2];
-            int goalY = coords[3];
+            int goalX = coords[2], goalY = coords[3];
+
             if (!needsRepath) {
                 needsRepath = goalX != lastGoalX || goalY != lastGoalY;
             }
+
             if (needsRepath) {
                 path = pathfinder.findPath(coords[0], coords[1], goalX, goalY);
                 pathIndex = 0;
-                lastGoalX = goalX;
-                lastGoalY = goalY;
+                lastGoalX = goalX; lastGoalY = goalY;
                 pathRecalcTimer = PATH_RECALC_INTERVAL;
             }
         }
@@ -225,18 +221,20 @@ public class Enemy extends Obstacle {
      * @param delta frame delta time
      */
     private void followPath(float delta) {
-        if (running) {
+        if (isRunning) {
             runTimer += delta;
             if (runTimer >= RUN_DURATION_SECONDS) {
-                running = false;
+                isRunning = false;
                 runTimer = 0f;
             }
         }
+
         if (pathIndex >= path.size()) {
             moveToTileCenter(delta);
             return;
         }
         GridPoint2 target = path.get(pathIndex);
+
         float targetX = target.x + 0.5f;
         float targetY = target.y + 0.5f;
         float centerX = getX() + getWidth() / 2f;
@@ -252,10 +250,10 @@ public class Enemy extends Obstacle {
 
         updateFacingDirection(dx, dy);
         float speedScale = (state == EnemyState.PATROLLING || state == EnemyState.RETREATING) ? PATROL_SPEED_SCALE : 1f;
-        if (running && state == EnemyState.CHASING) {
+        if (isRunning && state == EnemyState.CHASING) {
             speedScale *= RUN_SPEED_MULTIPLIER;
         }
-        float step = Math.min(speed * speedScale * delta, dist);
+        float step = Math.min(baseSpeed * speedScale * delta, dist);
         setPosition(getX() + (dx / dist) * step, getY() + (dy / dist) * step);
     }
 
@@ -277,7 +275,7 @@ public class Enemy extends Obstacle {
             return;
         }
         updateFacingDirection(dx, dy);
-        float step = Math.min(speed * delta, dist);
+        float step = Math.min(baseSpeed * delta, dist);
         setPosition(getX() + (dx / dist) * step, getY() + (dy / dist) * step);
     }
 
@@ -382,7 +380,7 @@ public class Enemy extends Obstacle {
         if (walkableTiles.isEmpty()) {
             return;
         }
-        List<GridPoint2> candidates = getSpawnCandidates(walkableTiles, player, 2, collisionLayer);
+        List<GridPoint2> candidates = getSpawnCandidates(walkableTiles, player, collisionLayer);
         int spawned = 0;
         while (spawned < amount && !candidates.isEmpty()) {
             int index = MathUtils.random(candidates.size() - 1);
@@ -430,18 +428,17 @@ public class Enemy extends Obstacle {
     /**
      * Filters spawn candidates by distance from the player.
      *
-     * @param tiles candidate tiles
-     * @param player player reference
-     * @param distance minimum distance in tiles
+     * @param tiles          candidate tiles
+     * @param player         player reference
      * @param collisionLayer collision layer for bounds
      * @return filtered candidate list
      */
-    private static List<GridPoint2> getSpawnCandidates(List<GridPoint2> tiles, Player player, int distance, TiledMapTileLayer collisionLayer) {
+    private static List<GridPoint2> getSpawnCandidates(List<GridPoint2> tiles, Player player, TiledMapTileLayer collisionLayer) {
         int playerTileX = clampTileCoord(player.getX() + player.getWidth() / 2f, collisionLayer.getWidth());
         int playerTileY = clampTileCoord(player.getY() + player.getHeight() / 2f, collisionLayer.getHeight());
         List<GridPoint2> candidates = new ArrayList<>(tiles.size());
         for (GridPoint2 tile : tiles) {
-            if (Math.abs(tile.x - playerTileX) <= distance && Math.abs(tile.y - playerTileY) <= distance) {
+            if (Math.abs(tile.x - playerTileX) <= 2 && Math.abs(tile.y - playerTileY) <= 2) {
                 continue;
             }
             candidates.add(tile);
@@ -645,7 +642,7 @@ public class Enemy extends Obstacle {
         patrolBehavior.clear();
         retreatBehavior.startRetreat();
         retreatTimer = 0f;
-        running = false;
+        isRunning = false;
         runTimer = 0f;
         resetPathing();
         chaseBehavior.reset();
@@ -658,7 +655,7 @@ public class Enemy extends Obstacle {
         state = EnemyState.PATROLLING;
         patrolBehavior.startPatrol();
         retreatTimer = 0f;
-        running = false;
+        isRunning = false;
         runTimer = 0f;
         resetPathing();
     }
@@ -670,7 +667,7 @@ public class Enemy extends Obstacle {
         state = EnemyState.PATROL_WAIT;
         patrolBehavior.startWaiting();
         retreatTimer = 0f;
-        running = false;
+        isRunning = false;
         runTimer = 0f;
         pathRecalcTimer = 0f;
     }
@@ -681,7 +678,7 @@ public class Enemy extends Obstacle {
     private void enterRetreatWait() {
         state = EnemyState.RETREAT_WAIT;
         retreatBehavior.startWaiting();
-        running = false;
+        isRunning = false;
         runTimer = 0f;
         pathRecalcTimer = 0f;
     }
@@ -699,23 +696,22 @@ public class Enemy extends Obstacle {
 
     /**
      * Resets pathing state and timers.
+     * Setting lastGoalX/Y to MIN_VALUE forces a path recalc
+     * next tick since there will be no matching real tile
      */
     private void resetPathing() {
         path.clear();
         pathIndex = 0;
         pathRecalcTimer = 0f;
-        lastGoalX = Integer.MIN_VALUE;
-        lastGoalY = Integer.MIN_VALUE;
+        lastGoalX = Integer.MIN_VALUE; lastGoalY = Integer.MIN_VALUE;
     }
 
-    //TODO see if this is needed
     /**
      * Ensures the enemy is drawn above collectibles.
      */
     private void ensureAboveCollectibles() {
-        if (getStage() == null) {
-            return;
-        }
+        // Find the highest z-index among collectibles, then place the enemy just above them
+        // while still staying below the player (if present) and within actor bounds.
         int maxPickupZ = -1;
         for (int i = 0; i < getStage().getActors().size; i++) {
             if (getStage().getActors().get(i) instanceof Collectible) {
