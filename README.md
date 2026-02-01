@@ -14,6 +14,7 @@ The game has 2 modes, Endless and Campain. In general the player must pick up a 
 During the gameplay loop, the player is targeted by policeman, bad infastructure (potholes) and BMW drivers that try to kill or bancrupt him, Potholes and BMW driver collisions result in an instant death, explostions will knock the player back and policemen will arrest the player if he runs out of bride money (HP).
 In Endless mode, dificualty scales over time: spawns accelerate the longer you survive, so the map gradually fills with more threats. The delivery timer adapts to player skill, finishing a delivery quickly reduces the next time limit more, while slower completions reduce it less.
 
+
 ## Code Organization
 - `MazeRunnerGame.java`: Central entry point and screen router; owns shared managers (audio, config, graphics, progression).
 - `maze/screen/`: One class per game state (menu, settings, gameplay, cutscenes, victory/game over).
