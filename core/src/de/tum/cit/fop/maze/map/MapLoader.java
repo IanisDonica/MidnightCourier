@@ -86,7 +86,7 @@ public class MapLoader {
             if (value == 7 || value == 2) {
                 layer.setCell(x, y, new TiledMapTileLayer.Cell());
             } else if (value == 10) {
-                for (int dx = 0; dx < 4; dx++) {
+                for (int dx = 0; dx < 3; dx++) {
                     for (int dy = 0; dy < 2; dy++) {
                         int cellX = x + dx;
                         int cellY = y + dy;

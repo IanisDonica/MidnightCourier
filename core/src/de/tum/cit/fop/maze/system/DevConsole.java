@@ -40,6 +40,7 @@ public class DevConsole {
     /** Whether the next typed character should be ignored. */
     private boolean ignoreNextTyped = false;
 
+    private boolean enabled = false;
     /**
      * Creates a new developer console.
      *
@@ -139,12 +140,23 @@ public class DevConsole {
      * @param stage stage to manage focus on
      */
     public void toggle(Stage stage) {
+        if (!enabled) {return;}
         if (visible) {
             hide(stage);
         } else {
             show(stage);
         }
     }
+
+    public void enable() {
+        enabled = true;
+    }
+
+    public void disable() {
+        visible = false;
+        enabled = false;
+    }
+
 
     /**
      * Shows the console and focuses the input field.

@@ -2,10 +2,7 @@ package de.tum.cit.fop.maze.screen;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Pixmap;
-import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
@@ -77,8 +74,9 @@ public abstract class BaseEndScreen implements Screen {
         }
         audioManager = game.getAudioManager();
         var graphicsManager = game.getGraphicsManager();
-
-        Viewport viewport = new FitViewport(graphicsManager.getWidth(), graphicsManager.getHeight());
+        var camera = new OrthographicCamera();
+        camera.zoom = 1f;
+        Viewport viewport = new FitViewport(graphicsManager.getWidth(), graphicsManager.getHeight(), camera);
         stage = new Stage(viewport, game.getSpriteBatch());
         backgroundTexture = new Texture(Gdx.files.internal(backgroundPath));
         backgroundImage = new Image(backgroundTexture);
