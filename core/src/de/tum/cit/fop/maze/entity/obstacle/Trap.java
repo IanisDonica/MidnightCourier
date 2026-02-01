@@ -6,7 +6,6 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Array;
 import de.tum.cit.fop.maze.entity.DeathCause;
-import de.tum.cit.fop.maze.system.PointManager;
 
 /**
  * Trap obstacle that damages the player on contact.
@@ -40,7 +39,6 @@ public class Trap extends Obstacle {
      */
     @Override
     protected void initAnimation() {
-        //This is kinda duplicate, but it will later be useful
         Texture textureSheet = new Texture(Gdx.files.internal("Pixel_manhole_open_16x16.png"));
         Array<TextureRegion> frames = new Array<>(TextureRegion.class);
 

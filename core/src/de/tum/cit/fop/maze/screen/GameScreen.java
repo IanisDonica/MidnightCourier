@@ -57,10 +57,6 @@ public class GameScreen implements Screen {
      */
     private static final float MAX_ZOOM = 0.3f;
     /**
-     * Fog intensity for early levels.
-     */
-    private static final float EARLY_LEVEL_FOG_INTENSITY = 50f;
-    /**
      * Game instance for navigation and resources.
      */
     private final MazeRunnerGame game;
@@ -341,15 +337,12 @@ public class GameScreen implements Screen {
         noireMode = !noireMode;
     }
 
-    // If I have more time ill make it, so this isn't polled every frame (the original idea was to make it fired in the upgrade classes),
-    // But for now this also works
-
     /**
      * Increases fog intensity for early levels.
      */
     private void applyEarlyLevelFog() {
         if (level == 1 || level == 2) {
-            fogIntensity = Math.max(fogIntensity, EARLY_LEVEL_FOG_INTENSITY);
+            fogIntensity = 99999;
         }
     }
 

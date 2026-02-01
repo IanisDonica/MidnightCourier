@@ -22,12 +22,9 @@ import java.util.List;
 import com.badlogic.gdx.utils.Array;
 
 /**
- * Enemy obstacle that uses pathfinding and AI behaviors.
+ * Enemy (Policeman/Jandarmeria class)
  */
 public class Enemy extends Obstacle {
-    /**
-     * Internal state for enemy behavior.
-     */
     private enum EnemyState {
         CHASING,
         PATROLLING,
@@ -36,75 +33,58 @@ public class Enemy extends Obstacle {
         RETREAT_WAIT
     }
 
-    /** Path recalculation interval in seconds. */
     private static final float PATH_RECALC_INTERVAL = 0.5f;
-    /** Target distance threshold for path steps. */
+    /** Target distance threshold for path steps */
     private static final float TARGET_EPS = 0.05f;
-    /** Centering threshold for tile alignment. */
+    /** The (game units) distance at which a tile is considered "centered" */
     private static final float CENTER_EPS = 0.02f;
-    /** Speed scale when patrolling or retreating. */
+    /** Speed scale when patrolling or retreating */
     private static final float PATROL_SPEED_SCALE = 0.5f;
-    /** Vision range in tiles. */
     private static final int VISION_RANGE_TILES = 20;
-    /** Maximum retreat duration in seconds. */
     private static final float MAX_RETREAT_DURATION_SECONDS = 4f;
-    /** Duration for running state in seconds. */
     private static final float RUN_DURATION_SECONDS = 10f;
-    /** Speed multiplier while running. */
     private static final float RUN_SPEED_MULTIPLIER = 2f;
-    /** Collision layer for movement checks. */
+    /** Collision layer for movement checks */
     private final TiledMapTileLayer collisionLayer;
-    /** Map width in tiles. */
-    private final int mapWidth;
-    /** Map height in tiles. */
-    private final int mapHeight;
-    /** Base movement speed. */
+    private final int mapWidth, mapHeight;
+    /** Base movement speed */
     private final float speed;
-    /** Pathfinder for tile navigation. */
+    /** Pathfinder for tile navigation */
     private final Pathfinder pathfinder;
-    /** Behavior controller for chasing. */
+    /** Behavior controller for chasing */
     private final ChaseBehavior chaseBehavior;
-    /** Behavior controller for retreating. */
+    /** Behavior controller for retreating */
     private final RetreatBehavior retreatBehavior;
-    /** Behavior controller for patrolling. */
+    /** Behavior controller for patrolling */
     private final PatrolBehaviour patrolBehavior;
-    /** Global token to force all enemies to retreat. */
+    /** Global token to force all enemies to retreat */
     private static int globalRetreatToken = 0;
-    /** Current path of tile points. */
+    /** Current path of tile points */
     private ArrayList<GridPoint2> path = new ArrayList<>();
-    /** Current index in the path. */
+    /** Current index in the path */
     private int pathIndex = 0;
-    /** Timer for path recalculation. */
     private float pathRecalcTimer = 0f;
-    /** Timer for retreat duration. */
+    /** Timer for retreat duration */
     private float retreatTimer = 0f;
-    /** Timer for running duration. */
+    /** Timer for running duration */
     private float runTimer = 0f;
-    /** Whether running is active. */
+    /** Whether running is active */
     private boolean running = false;
-    /** Last path goal x coordinate. */
-    private int lastGoalX = Integer.MIN_VALUE; // TODO Remove this
-    /** Last path goal y coordinate. */
+    /** Last path goal x coordinate */
+    private int lastGoalX = Integer.MIN_VALUE;
+    /** Last path goal y coordinate */
     private int lastGoalY = Integer.MIN_VALUE;
-    /** Last applied global retreat token. */
+    /** Last applied global retreat token */
     private int lastRetreatToken = 0;
-    /** Current behavior state. */
+    /** Current behavior state */
     private EnemyState state = EnemyState.CHASING; // Initial state
-    /** Facing direction for animation. */
+    /** Facing direction for animation */
     private char facingDirection = 'd';
-    /** Walk animation for north movement. */
-    private static Animation<TextureRegion> walkNorthAnimation;
-    /** Walk animation for south movement. */
-    private static Animation<TextureRegion> walkSouthAnimation;
-    /** Walk animation for east movement. */
-    private static Animation<TextureRegion> walkEastAnimation;
-    /** Walk animation for west movement. */
-    private static Animation<TextureRegion> walkWestAnimation;
-    /** Whether animations were initialized. */
+    private static Animation<TextureRegion> walkNorthAnimation, walkSouthAnimation, walkEastAnimation, walkWestAnimation;
     private static boolean animationsInitialized = false;
 
     /**
-     * Creates an enemy at a given position.
+     * Creates an enemy at a given position
      *
      * @param collisionLayer collision layer for movement checks
      * @param x spawn x position
@@ -133,7 +113,7 @@ public class Enemy extends Obstacle {
     }
 
     /**
-     * Initializes behavior once added to stage.
+     * Initializes behavior once added to the stage.
      */
     @Override
     protected void onAddedToStage() {
@@ -225,8 +205,7 @@ public class Enemy extends Obstacle {
             int goalX = coords[2];
             int goalY = coords[3];
             if (!needsRepath) {
-                boolean goalChanged = goalX != lastGoalX || goalY != lastGoalY;
-                needsRepath = goalChanged;
+                needsRepath = goalX != lastGoalX || goalY != lastGoalY;
             }
             if (needsRepath) {
                 path = pathfinder.findPath(coords[0], coords[1], goalX, goalY);
@@ -303,7 +282,7 @@ public class Enemy extends Obstacle {
     }
 
     /**
-     * Updates facing direction based on movement vector.
+     * Updates the facing direction based on the movement vector.
      *
      * @param dx delta x
      * @param dy delta y
@@ -317,7 +296,7 @@ public class Enemy extends Obstacle {
     }
 
     /**
-     * Initializes walking animations once.
+     * Initializes the walking animations once.
      */
     private void initWalkAnimations() {
         if (animationsInitialized) {
@@ -582,7 +561,7 @@ public class Enemy extends Obstacle {
     }
 
     /**
-     * Determines if the enemy has line of sight to the player.
+     * Determines if the enemy has a line of sight to the player.
      *
      * @return {@code true} if the player is visible
      */

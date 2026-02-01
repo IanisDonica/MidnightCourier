@@ -36,7 +36,7 @@ public class Shop extends MapObject {
      */
     @Override
     protected void updateBounds() {
-        // Since we want the game to actually show the open shop button even when the player isnt hugging it
+        // Since we want the game to actually show the open shop button even when the player i'snt hugging it
         bounds.set(getX() - 1f, getY() - 1f, getWidth() + 2f, getHeight() + 2f);
     }
 

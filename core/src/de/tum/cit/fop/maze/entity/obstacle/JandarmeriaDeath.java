@@ -7,7 +7,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 
 /**
- * Short-lived effect shown when a guard is hit by a BMW.
+ * Effect shown when a BMW hits a guard.
  */
 public class JandarmeriaDeath extends Actor {
     /** Lifetime of the effect in seconds. */

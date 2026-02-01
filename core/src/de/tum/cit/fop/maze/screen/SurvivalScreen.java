@@ -861,6 +861,7 @@ public class SurvivalScreen implements Screen {
     private void handleEndlessVictory() {
         hud.showKeyPreview(null, false);
         keyPreviewVisible = false;
+        game.getProgressionManager().addPoints(400);
         deliveryTimerActive = false;
         deliveryTimeLimit = computeNextDeliveryTimeLimit();
         deliveryTimer = 0f;
