@@ -5,11 +5,11 @@
     },
     "activeFile": "Assets_Map/THE_MAP.tmx",
     "expandedProjectPaths": [
-        "craft",
         "data",
-        "Assets_Map",
+        "craft",
+        ".",
         "Assets_Map/Intersection",
-        "."
+        "Assets_Map"
     ],
     "file.lastUsedOpenFilter": "All Files (*)",
     "fileStates": {
@@ -133,6 +133,9 @@
         "Assets_Map/RailTrack.tsx": {
             "scaleInDock": 1
         },
+        "Assets_Map/Restaurant96x128.tsx": {
+            "scaleInDock": 1
+        },
         "Assets_Map/Road_Intersection.tsx": {
             "scaleInDock": 1
         },
@@ -146,11 +149,11 @@
             "scaleInDock": 1
         },
         "Assets_Map/THE_MAP.tmx": {
-            "scale": 1,
+            "scale": 0.75,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 1646.5,
-                "y": 235.5
+                "x": 2966,
+                "y": 2619.333333333333
             }
         },
         "Assets_Map/TrainStation.tsx": {
@@ -219,16 +222,16 @@
     ],
     "project": "tiled.tiled-project",
     "recentFiles": [
-        "untitled.tmx",
-        "testmap.tmx",
-        "things.tsx",
-        "Assets_Map/BIBLIOTECA_NATIONALA_IMPARTITA.tsx",
-        "Assets_Map/APARTAMENT_RED.tsx",
-        "Assets_Map/BIBLIOTECA_NATIONALA_2.tsx",
         "basictiles.tsx",
+        "things.tsx",
+        "testmap.tmx",
+        "untitled.tmx",
         "Assets_Map/Block.tsx",
         "Assets_Map/BIG_ROAD.tsx",
         "Assets_Map/BIBLIOTECA_NATIONALA.tsx",
+        "Assets_Map/BIBLIOTECA_NATIONALA_IMPARTITA.tsx",
+        "Assets_Map/BIBLIOTECA_NATIONALA_2.tsx",
+        "Assets_Map/APARTAMENT_RED.tsx",
         "Assets_Map/4ParkRoad.tsx",
         "Assets_Map/96x160Block.tsx"
     ],

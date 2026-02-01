@@ -9,7 +9,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.FitViewport;
-import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import de.tum.cit.fop.maze.MazeRunnerGame;
 
@@ -57,7 +56,7 @@ public class AchievementPopupScreen {
      */
     public AchievementPopupScreen(MazeRunnerGame game) {
         this.game = game;
-        // ScreenViewport makes the overlay pixel-aligned to the window, independent of game camera zoom.
+        // FitViewport keeps the overlay consistent with other screens.
         var camera = new OrthographicCamera();
         this.viewport = new FitViewport(game.getGraphicsManager().getWidth(), game.getGraphicsManager().getHeight(), camera);
         this.batch = new SpriteBatch();

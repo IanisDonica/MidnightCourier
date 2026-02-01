@@ -6,8 +6,10 @@ import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Stack;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
@@ -60,6 +62,8 @@ public class SecondCutsceneScreen implements Screen {
     private final Table buttonTable;
     /** Button to accept and continue. */
     private final TextButton acceptButton;
+    /** Stack to match shop button styling. */
+    private final Stack acceptButtonStack;
     /** Elapsed time since start. */
     private float elapsed = 0f;
     /** Whether the cutscene has finished. */
@@ -158,10 +162,19 @@ public class SecondCutsceneScreen implements Screen {
                 finishCutscene();
             }
         });
+        Image acceptButtonBackground = new Image(game.getSkin().getDrawable("whiteBlack"));
+        acceptButtonBackground.setTouchable(Touchable.disabled);
+        Image acceptButtonBorder = new Image(game.getSkin().getDrawable("hoverBorder"));
+        acceptButtonBorder.setTouchable(Touchable.disabled);
+        acceptButtonStack = new Stack();
+        acceptButtonStack.add(acceptButtonBackground);
+        acceptButtonStack.add(acceptButton);
+        acceptButtonStack.add(acceptButtonBorder);
+        acceptButtonStack.setVisible(false);
         buttonTable = new Table();
         buttonTable.setFillParent(true);
         buttonTable.bottom().padBottom(70);
-        buttonTable.add(acceptButton).width(420).height(70);
+        buttonTable.add(acceptButtonStack).width(420).height(70);
         buttonTable.getColor().a = 0f;
         stage.addActor(buttonTable);
     }
@@ -273,6 +286,7 @@ public class SecondCutsceneScreen implements Screen {
                         state = CutsceneState.FADE_TO_BLACK;
                     } else {
                         acceptButton.setVisible(true);
+                        acceptButtonStack.setVisible(true);
                         buttonTable.getColor().a = 1f;
                     }
                 } else {
@@ -297,6 +311,7 @@ public class SecondCutsceneScreen implements Screen {
                             state = CutsceneState.FADE_TO_BLACK;
                         } else {
                             acceptButton.setVisible(true);
+                            acceptButtonStack.setVisible(true);
                             buttonTable.getColor().a = 1f;
                         }
                     }
@@ -324,6 +339,7 @@ public class SecondCutsceneScreen implements Screen {
                 textLabel.setText(FINAL_TEXT.substring(0, visibleChars));
                 if (visibleChars >= FINAL_TEXT.length()) {
                     acceptButton.setVisible(true);
+                    acceptButtonStack.setVisible(true);
                     buttonTimer += delta;
                     float buttonAlpha = Math.min(1f, buttonTimer / BOX_FADE_SECONDS);
                     buttonTable.getColor().a = buttonAlpha;
