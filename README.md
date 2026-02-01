@@ -58,7 +58,18 @@ Notes:
 
 ## How to run the game
 
-// TODO make a build of the game
+### Prerequisites
+- Java 17 (required by the Gradle toolchain)
+
+
+### Run (DesktopLauncher)
+If you want to launch it from your IDE, run the main class:
+
+```
+de.tum.cit.fop.maze.DesktopLauncher
+```
+
+Make sure the working directory is set to the root dir so the game can find the files.
 
 ## Developer Console
 Press tilda (`~`) during gameplay to open the console. Useful commands:
