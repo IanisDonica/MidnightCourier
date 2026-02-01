@@ -31,6 +31,8 @@ public class LevelSelectScreen implements Screen {
     private final AudioManager audioManager;
     /** Vignette texture overlay. */
     private final Texture vignetteTexture;
+    /** Vignette image overlay. */
+    private final Image vignetteImage;
 
     /**
      * Creates the level select screen.
@@ -47,7 +49,7 @@ public class LevelSelectScreen implements Screen {
         stage = new Stage(viewport, game.getSpriteBatch());
 
         vignetteTexture = UiUtils.buildVignetteTexture(512, 512, 0.9f);
-        Image vignetteImage = new Image(vignetteTexture);
+        vignetteImage = new Image(vignetteTexture);
         vignetteImage.setFillParent(true);
         vignetteImage.setTouchable(Touchable.disabled);
         stage.addActor(vignetteImage);
@@ -94,6 +96,7 @@ public class LevelSelectScreen implements Screen {
         if (!game.shouldRenderMenuBackground()) {
             Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         }
+        vignetteImage.setVisible(!game.shouldRenderMenuBackground());
         stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
         stage.draw();
     }

@@ -47,6 +47,8 @@ public class HighscoreScreen implements Screen {
     private final AudioManager audioManager;
     /** Vignette texture overlay. */
     private final Texture vignetteTexture;
+    /** Vignette image overlay. */
+    private final Image vignetteImage;
     /** Background texture for the screen. */
     private final Texture backgroundTexture;
 
@@ -70,7 +72,7 @@ public class HighscoreScreen implements Screen {
         stage.addActor(backgroundImage);
 
         vignetteTexture = UiUtils.buildVignetteTexture(512, 512, 0.9f);
-        Image vignetteImage = new Image(vignetteTexture);
+        vignetteImage = new Image(vignetteTexture);
         vignetteImage.setFillParent(true);
         vignetteImage.setTouchable(Touchable.disabled);
         stage.addActor(vignetteImage);
@@ -101,6 +103,7 @@ public class HighscoreScreen implements Screen {
         if (!game.shouldRenderMenuBackground()) {
             Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         }
+        vignetteImage.setVisible(!game.shouldRenderMenuBackground());
         stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
         stage.draw();
     }
