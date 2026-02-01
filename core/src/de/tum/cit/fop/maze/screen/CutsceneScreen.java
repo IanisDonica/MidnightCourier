@@ -11,6 +11,8 @@ import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.badlogic.gdx.scenes.scene2d.Touchable;
+import com.badlogic.gdx.scenes.scene2d.ui.Stack;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import de.tum.cit.fop.maze.MazeRunnerGame;
@@ -37,6 +39,8 @@ public class CutsceneScreen implements Screen {
     private final Image[] images = new Image[3];
     /** Button to start gameplay after cutscene. */
     private final TextButton startButton;
+    /** Stack to match shop button styling. */
+    private final Stack startButtonStack;
     /** Elapsed time since cutscene start. */
     private float elapsed = 0f;
 
@@ -76,10 +80,20 @@ public class CutsceneScreen implements Screen {
             }
         });
 
+        Image startButtonBackground = new Image(game.getSkin().getDrawable("whiteBlack"));
+        startButtonBackground.setTouchable(Touchable.disabled);
+        Image startButtonBorder = new Image(game.getSkin().getDrawable("hoverBorder"));
+        startButtonBorder.setTouchable(Touchable.disabled);
+        startButtonStack = new Stack();
+        startButtonStack.add(startButtonBackground);
+        startButtonStack.add(startButton);
+        startButtonStack.add(startButtonBorder);
+        startButtonStack.setVisible(false);
+
         Table buttonTable = new Table();
         buttonTable.setFillParent(true);
         buttonTable.bottom().padBottom(80);
-        buttonTable.add(startButton).width(520).height(80);
+        buttonTable.add(startButtonStack).width(520).height(80);
         stage.addActor(buttonTable);
     }
 
@@ -122,6 +136,7 @@ public class CutsceneScreen implements Screen {
                 images[i].getColor().a = 1f;
             }
             startButton.setVisible(true);
+            startButtonStack.setVisible(true);
         }
 
         stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));

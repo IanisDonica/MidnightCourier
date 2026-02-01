@@ -1,6 +1,6 @@
 {
 "targetFrameRate": 360,
 "vsyncEnabled": true,
-"antiAliasingMode": "MSAA_16",
+"antiAliasingMode": "MSAA_2",
 "displayMode": 0
 }

@@ -394,22 +394,21 @@ public class HUD {
         boolean hasExitTarget = !Float.isNaN(exitX) && !Float.isNaN(exitY);
         float targetX;
         float targetY;
-        if (canLeave && hasDropOffTarget) {
+        if (!canLeave && hasKey && hasDropOffTarget) {
             targetX = dropOffX;
             targetY = dropOffY;
-        } else if (hasKey && hasExitTarget) {
+        } else if (canLeave && hasExitTarget) {
             targetX = exitX;
             targetY = exitY;
-        } else if (hasKey && hasDropOffTarget) {
-            targetX = dropOffX;
-            targetY = dropOffY;
-        } else if (!Float.isNaN(keyX) && !Float.isNaN(keyY)) {
+        } else if (!hasKey && !Float.isNaN(keyX) && !Float.isNaN(keyY)) {
             targetX = keyX;
             targetY = keyY;
+        } else if (hasDropOffTarget) {
+            targetX = dropOffX;
+            targetY = dropOffY;
         } else {
             targetX = exitX;
             targetY = exitY;
-            ///return;
         }
         float dx = targetX - playerX;
         float dy = targetY - playerY;
