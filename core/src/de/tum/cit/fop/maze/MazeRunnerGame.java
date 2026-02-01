@@ -77,22 +77,18 @@ public class MazeRunnerGame extends Game {
         audioManager.loadSettings();
         AchievementManager.init();
         spriteBatch = new SpriteBatch(); // Create SpriteBatch
-
         TextureAtlas mainAtlas = new TextureAtlas(Gdx.files.internal("craft/craftacular-ui.atlas"));
         TextureAtlas extraAtlas = new TextureAtlas(Gdx.files.internal("craft/extra.atlas"));
 
         skin = new Skin();
         skin.addRegions(mainAtlas);
         skin.addRegions(extraAtlas);
-
         skin.load(Gdx.files.internal("craft/craftacular-ui.json"));
 
-        ///skin = new Skin(Gdx.files.internal("craft/craftacular-ui.json")); // Load UI skin
-        ///skin.addRegions(new TextureAtlas(Gdx.files.internal("craft/extra.atlas")));
         achievementPopupScreen = new AchievementPopupScreen(this);
         AchievementManager.setPopupScreen(achievementPopupScreen);
         progressionManager = new ProgressionManager(200);
-        audioManager.preloadSounds("Click.wav", "pickup.wav", "siren.ogg");
+        audioManager.preloadSounds("Click.wav", "pickup.wav", "siren.ogg", "decelerating.wav", "pedal.wav", "pickup.wav", "tires.wav", "tires_loop.wav");
         audioManager.playMusic("background.mp3", 1f, true);
         graphicsManager.load();
         graphicsManager.applySettings();
@@ -104,6 +100,7 @@ public class MazeRunnerGame extends Game {
      * Switches to the menu screen.
      */
     public void goToMenu() {
+        audioManager.stopAllSounds();
         if (menuScreen == null) {
             menuScreen = new MenuScreen(this);
         }
@@ -114,13 +111,15 @@ public class MazeRunnerGame extends Game {
      * Switches to the game screen.
      */
     public void goToGame() {
-        if (gameScreen == null) {
-            gameScreen = new GameScreen(this, Math.max(currentLevelNumber, 1));
-        }
+        audioManager.stopAllSounds();
         if (survivalScreen != null) {
             survivalScreen.dispose();
             survivalScreen = null;
         }
+        if (gameScreen == null) {
+            gameScreen = new GameScreen(this, Math.max(currentLevelNumber, 1));
+        }
+        audioManager.stopAllSounds();
         this.selectedScreen = false;
         this.setScreen(gameScreen);
     }
@@ -129,37 +128,16 @@ public class MazeRunnerGame extends Game {
      * Switches to endless mode from the current screen.
      */
     public void goToEndless() {
+        audioManager.stopAllSounds();
         if (gameScreen != null) {
             gameScreen.dispose();
             gameScreen = null;
         }
-        if (survivalScreen != null) {
-            survivalScreen.dispose();
-            survivalScreen = null;
+        if (survivalScreen == null) {
+            currentLevelNumber = 0;
+            survivalScreen = new SurvivalScreen(this);
         }
         this.selectedScreen = true;
-        survivalScreen = new SurvivalScreen(this);
-        currentLevelNumber = 0;
-        this.setScreen(survivalScreen);
-    }
-
-    /**
-     * Switches to endless mode while tracking a specific level number.
-     *
-     * @param levelNumber the level number to store for endless mode
-     */
-    public void goToEndless(int levelNumber) {
-        if (gameScreen != null) {
-            gameScreen.dispose();
-            gameScreen = null;
-        }
-        if (survivalScreen != null) {
-            survivalScreen.dispose();
-            survivalScreen = null;
-        }
-        this.selectedScreen = true;
-        currentLevelNumber = levelNumber;
-        survivalScreen = new SurvivalScreen(this);
         this.setScreen(survivalScreen);
     }
 
@@ -169,6 +147,7 @@ public class MazeRunnerGame extends Game {
      * @param gameState the state of the loaded game
      */
     public void goToEndless(GameState gameState) {
+        audioManager.stopAllSounds();
         if (gameState == null) {
             goToMenu();
             return;
@@ -197,6 +176,7 @@ public class MazeRunnerGame extends Game {
     public void goToGame(int levelNumber) {
         // This will be the case after Try again/Next level
         // If this is not done, there will be a memory leak
+        audioManager.stopAllSounds();
         if (gameScreen != null) {
             gameScreen.dispose();
             gameScreen = null;
@@ -217,6 +197,7 @@ public class MazeRunnerGame extends Game {
      * @param gameState the saved game state to load
      */
     public void goToGame(GameState gameState) {
+        audioManager.stopAllSounds();
         if (gameState == null) {
             goToMenu();
             return;
@@ -241,6 +222,7 @@ public class MazeRunnerGame extends Game {
      * Switches to the new game screen.
      */
     public void goToNewGameScreen() {
+        audioManager.stopAllSounds();
         this.setScreen(new NewGameScreen(this)); // Set the current screen to GameScreen
     }
 
@@ -248,6 +230,7 @@ public class MazeRunnerGame extends Game {
      * Switches to the first cutscene screen.
      */
     public void goToCutsceneScreen() {
+        audioManager.stopAllSounds();
         this.setScreen(new CutsceneScreen(this));
     }
 
@@ -257,6 +240,7 @@ public class MazeRunnerGame extends Game {
      * @param targetLevel the level number used by the cutscene
      */
     public void goToSecondCutsceneScreen(int targetLevel) {
+        audioManager.stopAllSounds();
         this.setScreen(new SecondCutsceneScreen(this, targetLevel));
     }
 
@@ -264,6 +248,7 @@ public class MazeRunnerGame extends Game {
      * Switches to the continue game screen.
      */
     public void goToContinueGameScreen() {
+        audioManager.stopAllSounds();
         this.setScreen(new ContinueGameScreen(this)); // Set the current screen to GameScreen
     }
 
@@ -271,6 +256,7 @@ public class MazeRunnerGame extends Game {
      * Switches to the level select screen.
      */
     public void goToLevelSelectScreen() {
+        audioManager.stopAllSounds();
         if (levelSelectScreen == null) {
             levelSelectScreen = new LevelSelectScreen(this);
         }
@@ -281,6 +267,7 @@ public class MazeRunnerGame extends Game {
      * Switches to the settings screen and remembers the current screen.
      */
     public void goToSettingsScreen() {
+        audioManager.stopAllSounds();
         Screen current = getScreen();
         if (!(current instanceof SettingsScreen
                 || current instanceof SettingsAudioScreen
@@ -299,6 +286,7 @@ public class MazeRunnerGame extends Game {
      * Returns from settings to the previously active screen.
      */
     public void goBackFromSettings() {
+        audioManager.stopAllSounds();
         if (settingsReturnScreen instanceof SurvivalScreen && survivalScreen != null) {
             this.setScreen(survivalScreen);
             return;
@@ -318,6 +306,7 @@ public class MazeRunnerGame extends Game {
      * Switches to the highscore screen.
      */
     public void goToHighscoreScreen() {
+        audioManager.stopAllSounds();
         if (highscoreScreen == null) {
             highscoreScreen = new HighscoreScreen(this);
         }
@@ -328,6 +317,7 @@ public class MazeRunnerGame extends Game {
      * Switches to the progression tree screen from gameplay.
      */
     public void goToProgressionTreeScreenFromGame() {
+        audioManager.stopAllSounds();
         if (progressionTreeScreen == null) {
             progressionTreeScreen = new ProgressionTreeScreen(this);
         }
@@ -338,6 +328,7 @@ public class MazeRunnerGame extends Game {
      * Returns from the progression tree to the previous game-related screen.
      */
     public void goBackFromProgressionTree() {
+        audioManager.stopAllSounds();
         if (gameScreen != null) {
             this.setScreen(gameScreen);
         } else if (survivalScreen != null) {
@@ -351,6 +342,7 @@ public class MazeRunnerGame extends Game {
      * Switches to the settings controls screen.
      */
     public void goToSettingsControlsScreen() {
+        audioManager.stopAllSounds();
         this.setScreen(new SettingsControlsScreen(this)); // Set the current screen to GameScreen
         if (settingsScreen != null) {
             settingsScreen.dispose(); // Dispose the menu screen if it exists
@@ -362,6 +354,7 @@ public class MazeRunnerGame extends Game {
      * Switches to the achievements screen.
      */
     public void goToAchievementsScreen() {
+        audioManager.stopAllSounds();
         this.setScreen(new AchievementsScreen(this)); // Set the current screen to GameScreen
     }
 
@@ -369,6 +362,7 @@ public class MazeRunnerGame extends Game {
      * Switches to the settings video screen.
      */
     public void goToSettingsVideoScreen() {
+        audioManager.stopAllSounds();
         this.setScreen(new SettingsVideoScreen(this)); // Set the current screen to GameScreen
         if (settingsScreen != null) {
             settingsScreen.dispose(); // Dispose the menu screen if it exists
@@ -380,6 +374,7 @@ public class MazeRunnerGame extends Game {
      * Switches to the settings audio screen.
      */
     public void goToSettingsAudioScreen() {
+        audioManager.stopAllSounds();
         this.setScreen(new SettingsAudioScreen(this)); // Set the current screen to GameScreen
         if (settingsScreen != null) {
             settingsScreen.dispose(); // Dispose the menu screen if it exists
@@ -391,6 +386,7 @@ public class MazeRunnerGame extends Game {
      * Switches to the settings game screen.
      */
     public void goToSettingsGameScreen() {
+        audioManager.stopAllSounds();
         this.setScreen(new SettingsGameScreen(this)); // Set the current screen to GameScreen
         if (settingsScreen != null) {
             settingsScreen.dispose(); // Dispose the menu screen if it exists
@@ -402,6 +398,7 @@ public class MazeRunnerGame extends Game {
      * Switches to the generic game over screen.
      */
     public void goToGameOverScreen() {
+        audioManager.stopAllSounds();
         this.setScreen(new GameOverScreen(this)); // Set the current screen to GameScreen
         if (settingsScreen != null) {
             settingsScreen.dispose(); // Dispose the menu screen if it exists
@@ -413,6 +410,7 @@ public class MazeRunnerGame extends Game {
      * Switches to the death-over screen for BMW-related death.
      */
     public void goToDeathOverScreen() {
+        audioManager.stopAllSounds();
         this.setScreen(new DeathOverScreen(this));
         if (settingsScreen != null) {
             settingsScreen.dispose(); // Dispose the menu screen if it exists
@@ -424,6 +422,7 @@ public class MazeRunnerGame extends Game {
      * Switches to the pothole death screen.
      */
     public void goToPotholeDeathScreen() {
+        audioManager.stopAllSounds();
         this.setScreen(new PotholeDeathScreen(this));
         if (settingsScreen != null) {
             settingsScreen.dispose(); // Dispose the menu screen if it exists
@@ -435,6 +434,7 @@ public class MazeRunnerGame extends Game {
      * Switches to the BMW explosion death screen.
      */
     public void goToBmwExplosionDeathScreen() {
+        audioManager.stopAllSounds();
         this.setScreen(new BmwExplosionDeathScreen(this));
         if (settingsScreen != null) {
             settingsScreen.dispose(); // Dispose the menu screen if it exists
@@ -446,6 +446,7 @@ public class MazeRunnerGame extends Game {
      * Switches to the timeout (fired) death screen.
      */
     public void goToFiredScreen() {
+        audioManager.stopAllSounds();
         this.setScreen(new FiredScreen(this));
         if (settingsScreen != null) {
             settingsScreen.dispose();
@@ -457,6 +458,7 @@ public class MazeRunnerGame extends Game {
      * Switches to the victory screen and awards progression points.
      */
     public void goToVictoryScreen() {
+        audioManager.stopAllSounds();
         progressionManager.addPoints(500);
         this.setScreen(new VictoryScreen(this)); // Set the current screen to GameScreen
         if (settingsScreen != null) {

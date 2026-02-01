@@ -9,6 +9,6 @@
 },
 "musicVolume": {
 	"class": "java.lang.Float",
-	"value": 0
+	"value": 0.16
 }
 }

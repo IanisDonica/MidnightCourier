@@ -1,19 +1,15 @@
 package de.tum.cit.fop.maze.system;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
-import com.badlogic.gdx.scenes.scene2d.ui.Image;
-import com.badlogic.gdx.scenes.scene2d.ui.Button;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.ui.Stack;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
@@ -21,77 +17,138 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import de.tum.cit.fop.maze.MazeRunnerGame;
-import com.badlogic.gdx.math.MathUtils;
 
 /**
  * Heads-up display for gameplay information and quick actions.
  */
 public class HUD {
-    /** Stage that hosts HUD actors. */
-    private Stage stage;
-    /** Viewport used for HUD layout. */
-    private Viewport viewport;
-    /** Texture region for heart icons. */
-    private TextureRegion heart_texture;
-
-    /** Label for the score. */
-    private Label scoreLabel;
-    /** Label for health/money. */
-    private Label healthLabel;
-    /** Table containing health elements. */
-    private Table healthTable;
-
-    /** Label for key status. */
-    private Label keyLabel;
-    /** Label for current level. */
-    private Label levelLabel;
-    /** Label for delivery timer title. */
-    private Label deliveryTimerLabel;
-    /** Label for timer value. */
-    private Label timerValueLabel;
-    /** Button to open the shop. */
-    private TextButton shopButton;
-    /** Container for shop button with border. */
+    /**
+     * Container for shop button with border.
+     */
     private final Stack shopButtonStack;
-    /** Configuration manager for key binding names. */
+    /**
+     * Configuration manager for key binding names.
+     */
     private final ConfigManager configManager;
-    /** Pause menu table. */
-    private Table pauseTable;
-    /** Pause menu content container with background. */
+    /**
+     * Pause menu content container with background.
+     */
     private final Table pauseBox;
-    /** Top HUD table. */
+    /**
+     * Top HUD table.
+     */
     private final Table topTable;
-    /** Table containing level/timer elements. */
+    /**
+     * Table containing level/timer elements.
+     */
     private final Table timerTable;
-    /** Container for HUD background. */
+    /**
+     * Container for HUD background.
+     */
     private final Table hudBox;
-    /** Background texture for the HUD box. */
+    /**
+     * Background texture for the HUD box.
+     */
     private final Texture hudBoxTexture;
-    /** Image showing regeneration status. */
-    private Image regenImage;
-    /** Animation for regeneration. */
-    private Animation<TextureRegion> regenAnimation;
-    /** Texture containing heart sprites. */
+    /**
+     * Texture containing heart sprites.
+     */
     private final Texture heartTexture;
-    /** Texture containing regen frames. */
+    /**
+     * Texture containing regen frames.
+     */
     private final Texture regenTexture;
-    /** Texture for the direction arrow. */
+    /**
+     * Texture for the direction arrow.
+     */
     private final Texture arrowTexture;
-    /** Arrow image pointing to objective. */
+    /**
+     * Arrow image pointing to objective.
+     */
     private final Image arrowImage;
-    /** Image showing key preview. */
+    /**
+     * Image showing key preview.
+     */
     private final Image keyPreviewImage;
-    /** Width of the key preview image. */
+    /**
+     * Width of the key preview image.
+     */
     private final float keyPreviewWidth = 400f;
-    /** Height of the key preview image. */
+    /**
+     * Height of the key preview image.
+     */
     private final float keyPreviewHeight = 200f;
-    /** Margin for key preview positioning. */
+    /**
+     * Margin for key preview positioning.
+     */
     private final float keyPreviewMargin = 20f;
-    /** Gap between key preview and HUD. */
+    /**
+     * Gap between key preview and HUD.
+     */
     private final float keyPreviewHudGap = 10f;
-    /** Spacing for arrow padding. */
+    /**
+     * Spacing for arrow padding.
+     */
     private final float arrowSpacing = 16f;
-    /** Whether to show the level label. */
+    /**
+     * Stage that hosts HUD actors.
+     */
+    private Stage stage;
+    /**
+     * Viewport used for HUD layout.
+     */
+    private Viewport viewport;
+    /**
+     * Texture region for heart icons.
+     */
+    private TextureRegion heart_texture;
+    /**
+     * Label for the score.
+     */
+    private Label scoreLabel;
+    /**
+     * Label for health/money.
+     */
+    private Label healthLabel;
+    /**
+     * Table containing health elements.
+     */
+    private Table healthTable;
+    /**
+     * Label for key status.
+     */
+    private Label keyLabel;
+    /**
+     * Label for current level.
+     */
+    private Label levelLabel;
+    /**
+     * Label for delivery timer title.
+     */
+    private Label deliveryTimerLabel;
+    /**
+     * Label for timer value.
+     */
+    private Label timerValueLabel;
+    /**
+     * Button to open the shop.
+     */
+    private TextButton shopButton;
+    /**
+     * Pause menu table.
+     */
+    private Table pauseTable;
+    /**
+     * Image showing regeneration status.
+     */
+    private Image regenImage;
+    /**
+     * Animation for regeneration.
+     */
+    private Animation<TextureRegion> regenAnimation;
+    /**
+     * Whether to show the level label.
+     */
     private boolean showLevel = true;
 
     /**
@@ -99,7 +156,7 @@ public class HUD {
      *
      * @param game game instance providing skin and config
      */
-    public HUD(MazeRunnerGame game){
+    public HUD(MazeRunnerGame game) {
         //this.game = game;
         this.configManager = game.getConfigManager();
         var graphicsManager = game.getGraphicsManager();
@@ -192,6 +249,17 @@ public class HUD {
         });
         pauseBox.add(unpause).width(400).padBottom(10).row();
 
+        Button save = new TextButton("Save/Load Game", game.getSkin());
+        save.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                if (pauseTable.isVisible()) {
+                    game.goToContinueGameScreen();
+                }
+            }
+        });
+        pauseBox.add(save).width(400).padBottom(10).row();
+
         Button settings = new TextButton("Settings", game.getSkin());
         settings.addListener(new ChangeListener() {
             @Override
@@ -259,23 +327,23 @@ public class HUD {
     /**
      * Updates HUD state for the current frame.
      *
-     * @param levelNumber current level number
-     * @param hp current health
-     * @param score current score
-     * @param hasKey whether the player has the key
-     * @param canLeave whether the player can leave
-     * @param hasRegen whether regeneration is active
-     * @param regenTimerSeconds current regen timer
+     * @param levelNumber          current level number
+     * @param hp                   current health
+     * @param score                current score
+     * @param hasKey               whether the player has the key
+     * @param canLeave             whether the player can leave
+     * @param hasRegen             whether regeneration is active
+     * @param regenTimerSeconds    current regen timer
      * @param regenIntervalSeconds regen interval duration
      * @param deliveryTimerSeconds delivery timer, or negative if inactive
-     * @param playerX player x position
-     * @param playerY player y position
-     * @param keyX key x position
-     * @param keyY key y position
-     * @param exitX exit x position
-     * @param exitY exit y position
-     * @param dropOffX drop-off x position
-     * @param dropOffY drop-off y position
+     * @param playerX              player x position
+     * @param playerY              player y position
+     * @param keyX                 key x position
+     * @param keyY                 key y position
+     * @param exitX                exit x position
+     * @param exitY                exit y position
+     * @param dropOffX             drop-off x position
+     * @param dropOffY             drop-off y position
      */
     public void update(int levelNumber, int hp, int score, boolean hasKey, boolean canLeave, boolean hasRegen,
                        float regenTimerSeconds, float regenIntervalSeconds,
@@ -355,7 +423,7 @@ public class HUD {
     /**
      * Shows or hides the key preview image.
      *
-     * @param region texture region to display
+     * @param region  texture region to display
      * @param visible whether the preview should be visible
      */
     public void showKeyPreview(TextureRegion region, boolean visible) {
@@ -384,7 +452,7 @@ public class HUD {
      *
      * @return HUD stage
      */
-    public Stage getStage(){
+    public Stage getStage() {
         return stage;
     }
 
@@ -393,14 +461,14 @@ public class HUD {
      *
      * @return HUD viewport
      */
-    public Viewport getViewport(){
+    public Viewport getViewport() {
         return viewport;
     }
 
     /**
      * Resizes the HUD layout.
      *
-     * @param width new width in pixels
+     * @param width  new width in pixels
      * @param height new height in pixels
      */
     public void resize(int width, int height) {
@@ -418,16 +486,6 @@ public class HUD {
         regenTexture.dispose();
         arrowTexture.dispose();
         hudBoxTexture.dispose();
-    }
-
-    /**
-     * Sets visibility of the shop button.
-     *
-     * @param visible whether the button should be visible
-     */
-    public void setShopButtonVisible(boolean visible) {
-        shopButton.setVisible(visible);
-        shopButtonStack.setVisible(visible);
     }
 
     /**
@@ -455,6 +513,16 @@ public class HUD {
      */
     public boolean isShopButtonVisible() {
         return shopButton.isVisible();
+    }
+
+    /**
+     * Sets visibility of the shop button.
+     *
+     * @param visible whether the button should be visible
+     */
+    public void setShopButtonVisible(boolean visible) {
+        shopButton.setVisible(visible);
+        shopButtonStack.setVisible(visible);
     }
 
     /**
