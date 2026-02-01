@@ -64,7 +64,7 @@ public class ContinueGameScreen implements Screen {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 audioManager.playSound("Click.wav", 1);
-                if (SaveManager.getSaveInfo(3)) {
+                if (SaveManager.getSaveInfo(0)) {
                     game.goToEndless(SaveManager.loadGame("autosave"));
                 } else {
                     game.goToGame(SaveManager.loadGame("autosave"));

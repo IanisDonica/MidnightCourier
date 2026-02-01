@@ -12,13 +12,21 @@ import de.tum.cit.fop.maze.screen.*;
  * Handles key input and routes actions to the appropriate screens.
  */
 public class KeyHandler extends InputListener {
-    /** Game instance used for screen navigation. */
+    /**
+     * Game instance used for screen navigation.
+     */
     private final MazeRunnerGame game;
-    /** Configuration manager for key bindings. */
+    /**
+     * Configuration manager for key bindings.
+     */
     private final ConfigManager configManager;
-    /** Audio manager for click sounds. */
+    /**
+     * Audio manager for click sounds.
+     */
     private final AudioManager audioManager;
-    /** Current player instance for movement input. */
+    /**
+     * Current player instance for movement input.
+     */
     private Player player;
 
     /**
@@ -35,7 +43,7 @@ public class KeyHandler extends InputListener {
     /**
      * Handles key-down events.
      *
-     * @param event input event
+     * @param event   input event
      * @param keycode key code
      * @return {@code true} if the event was handled
      */
@@ -47,7 +55,7 @@ public class KeyHandler extends InputListener {
     /**
      * Handles key-up events.
      *
-     * @param event input event
+     * @param event   input event
      * @param keycode key code
      * @return {@code true} if the event was handled
      */
@@ -59,9 +67,9 @@ public class KeyHandler extends InputListener {
     /**
      * Handles scroll events for zoom control.
      *
-     * @param event input event
-     * @param x scroll x
-     * @param y scroll y
+     * @param event   input event
+     * @param x       scroll x
+     * @param y       scroll y
      * @param amountX scroll amount x
      * @param amountY scroll amount y
      * @return {@code true} if the event was handled
@@ -87,7 +95,7 @@ public class KeyHandler extends InputListener {
      * Routes key input between movement and screen commands.
      *
      * @param keycode key code
-     * @param isDown whether the key is pressed
+     * @param isDown  whether the key is pressed
      * @return {@code true} if handled
      */
     private boolean handleKey(int keycode, boolean isDown) {
@@ -106,7 +114,7 @@ public class KeyHandler extends InputListener {
      * Handles movement and sprint keys for the player.
      *
      * @param keycode key code
-     * @param isDown whether the key is pressed
+     * @param isDown  whether the key is pressed
      * @return {@code true} if handled
      */
     private boolean checkMovementKeys(int keycode, boolean isDown) {
@@ -154,10 +162,7 @@ public class KeyHandler extends InputListener {
             return true;
         }
 
-        if (keycode == configManager.getKeyBinding("openShop")
-                && (s instanceof GameScreen || s instanceof SurvivalScreen)
-                && gameScreen != null
-                && gameScreen.getHud().isShopButtonVisible()) {
+        if (keycode == configManager.getKeyBinding("openShop") && (s instanceof GameScreen || s instanceof SurvivalScreen) && gameScreen != null && gameScreen.getHud().isShopButtonVisible()) {
             audioManager.playSound("Click.wav", 1);
             game.goToProgressionTreeScreenFromGame();
             return true;
@@ -222,18 +227,31 @@ public class KeyHandler extends InputListener {
             if (s instanceof CutsceneScreen || s instanceof SecondCutsceneScreen || s instanceof BaseEndScreen) {
                 return true;
             }
-            audioManager.playSound("Click.wav", 1);
+
             if (s instanceof GameScreen || s instanceof SurvivalScreen) {
+                audioManager.playSound("Click.wav", 1);
                 game.pause();
             } else if (s instanceof ProgressionTreeScreen) {
+                audioManager.playSound("Click.wav", 1);
                 game.goBackFromProgressionTree();
             } else if (s instanceof SettingsScreen) {
+                audioManager.playSound("Click.wav", 1);
                 game.goBackFromSettings();
             } else if (s instanceof SettingsGameScreen || s instanceof SettingsVideoScreen || s instanceof SettingsAudioScreen || s instanceof SettingsControlsScreen) {
+                audioManager.playSound("Click.wav", 1);
                 game.goToSettingsScreen();
             } else if (s instanceof PotholeDeathScreen || s instanceof DeathOverScreen || s instanceof GameOverScreen || s instanceof BmwExplosionDeathScreen || s instanceof FiredScreen) {
                 return true;
+            } else if (s instanceof MenuScreen) {
+                if (game.getGameScreen() != null) {
+                    audioManager.playSound("Click.wav", 1);
+                    game.goToGame();
+                } else if (game.getSurvivalScreen() != null) {
+                    audioManager.playSound("Click.wav", 1);
+                    game.goToEndless();
+                }
             } else {
+                audioManager.playSound("Click.wav", 1);
                 game.goToMenu();
             }
             return true;

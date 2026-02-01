@@ -90,7 +90,7 @@ public class SaveManager {
 
     public static void saveInfo(boolean selectedScreen, int slot) {
         Boolean[] saveInfo = loadSaveInfo();
-        saveInfo[slot-1] = selectedScreen;
+        saveInfo[slot] = selectedScreen;
         java.io.File directory = new java.io.File(SAVE_DIR);
         if (!directory.exists()) {
             directory.mkdirs();
