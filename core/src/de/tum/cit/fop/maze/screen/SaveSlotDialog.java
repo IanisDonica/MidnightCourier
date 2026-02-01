@@ -1,10 +1,13 @@
 package de.tum.cit.fop.maze.screen;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.utils.Align;
 import de.tum.cit.fop.maze.MazeRunnerGame;
 import de.tum.cit.fop.maze.system.SaveManager;
@@ -89,7 +92,7 @@ public class SaveSlotDialog extends Dialog {
         this.setPosition((Gdx.graphics.getWidth() - this.getWidth()) / 2f, (Gdx.graphics.getHeight() - this.getHeight()) / 2f);
 
         // Show the dialog
-        this.show(stage);
+        this.show(stage, Actions.alpha(1f));
     }
 
     public void showNew(int slotName) {
@@ -130,7 +133,7 @@ public class SaveSlotDialog extends Dialog {
         this.setPosition((Gdx.graphics.getWidth() - this.getWidth()) / 2f, (Gdx.graphics.getHeight() - this.getHeight()) / 2f);
 
         // Show the dialog
-        this.show(stage);
+        this.show(stage, Actions.alpha(1f));
     }
 
     /**
@@ -175,6 +178,7 @@ public class SaveSlotDialog extends Dialog {
                 game.getAudioManager().playSound("Click.wav", 1);
                 break;
         }
+        this.hide(Actions.alpha(1f));
     }
 
 }
