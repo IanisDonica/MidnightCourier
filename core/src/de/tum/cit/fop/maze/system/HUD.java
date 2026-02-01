@@ -7,9 +7,11 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Stack;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
@@ -49,10 +51,14 @@ public class HUD {
     private Label timerValueLabel;
     /** Button to open the shop. */
     private TextButton shopButton;
+    /** Container for shop button with border. */
+    private final Stack shopButtonStack;
     /** Configuration manager for key binding names. */
     private final ConfigManager configManager;
     /** Pause menu table. */
     private Table pauseTable;
+    /** Pause menu content container with background. */
+    private final Table pauseBox;
     /** Top HUD table. */
     private final Table topTable;
     /** Table containing level/timer elements. */
@@ -167,6 +173,13 @@ public class HUD {
         pauseTable.setFillParent(true);
         pauseTable.setVisible(false);
 
+        pauseBox = new Table();
+        pauseBox.pad(30);
+        Stack pauseBoxStack = new Stack();
+        pauseBoxStack.add(new Image(game.getSkin().getDrawable("whiteBlack")));
+        pauseBoxStack.add(new Image(game.getSkin().getDrawable("hoverBorder")));
+        pauseBoxStack.add(pauseBox);
+        pauseTable.add(pauseBoxStack).center();
 
         Button unpause = new TextButton("Continue to Game", game.getSkin());
         unpause.addListener(new ChangeListener() {
@@ -177,7 +190,7 @@ public class HUD {
                 }
             }
         });
-        pauseTable.add(unpause).width(400).row();
+        pauseBox.add(unpause).width(400).padBottom(10).row();
 
         Button settings = new TextButton("Settings", game.getSkin());
         settings.addListener(new ChangeListener() {
@@ -188,7 +201,7 @@ public class HUD {
                 }
             }
         });
-        pauseTable.add(settings).width(400).row();
+        pauseBox.add(settings).width(400).padBottom(10).row();
 
         Button backMain = new TextButton("Main Menu", game.getSkin());
         backMain.addListener(new ChangeListener() {
@@ -199,7 +212,7 @@ public class HUD {
                 }
             }
         });
-        pauseTable.add(backMain).width(400).row();
+        pauseBox.add(backMain).width(400).padBottom(10).row();
 
 
         Button exit = new TextButton("Exit game", game.getSkin());
@@ -209,7 +222,7 @@ public class HUD {
                 Gdx.app.exit();
             }
         });
-        pauseTable.add(exit).width(400).row();
+        pauseBox.add(exit).width(400).row();
 
         shopButton = new TextButton("Open Shop", game.getSkin());
         shopButton.setVisible(false);
@@ -221,11 +234,20 @@ public class HUD {
                 }
             }
         });
+        Image shopButtonBackground = new Image(game.getSkin().getDrawable("whiteBlack"));
+        shopButtonBackground.setTouchable(Touchable.disabled);
+        Image shopButtonBorder = new Image(game.getSkin().getDrawable("hoverBorder"));
+        shopButtonBorder.setTouchable(Touchable.disabled);
+        shopButtonStack = new Stack();
+        shopButtonStack.add(shopButtonBackground);
+        shopButtonStack.add(shopButton);
+        shopButtonStack.add(shopButtonBorder);
+        shopButtonStack.setVisible(false);
 
         Table bottomTable = new Table();
         bottomTable.setFillParent(true);
         bottomTable.bottom();
-        bottomTable.add(shopButton).padBottom(30);
+        bottomTable.add(shopButtonStack).width(520).height(80).padBottom(30);
 
         stage.addActor(arrowImage);
         stage.addActor(hudBox);
@@ -404,6 +426,7 @@ public class HUD {
      */
     public void setShopButtonVisible(boolean visible) {
         shopButton.setVisible(visible);
+        shopButtonStack.setVisible(visible);
     }
 
     /**

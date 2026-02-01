@@ -3,7 +3,7 @@
 	"id": "complete_100_deliveries",
 	"name": "Certified Delivery Man",
 	"description": "Complete 100 deliveries",
-	"progress": 1,
+	"progress": 3,
 	"target": 100
 },
 {
@@ -32,7 +32,9 @@
 	"id": "mastery_upgrade",
 	"name": "Deep pockets",
 	"description": "Purchase the mastery upgrade",
-	"target": 1
+	"progress": 1,
+	"target": 1,
+	"unlocked": true
 },
 {
 	"id": "third_strike_and_out",

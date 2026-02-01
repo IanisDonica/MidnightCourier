@@ -28,8 +28,8 @@ public class Obstacle extends MapObject {
      * @param y y position
      * @param w width in tiles
      * @param h height in tiles
-     * @param textureOffsetX x offset in sprite sheet
-     * @param textureOffsetY y offset in sprite sheet
+     * @param textureOffsetX x offset in the sprite sheet
+     * @param textureOffsetY y offset in the sprite sheet
      * @param animationFrames number of animation frames
      */
     public Obstacle(float x, float y, int w, int h, int textureOffsetX, int textureOffsetY, int animationFrames) {

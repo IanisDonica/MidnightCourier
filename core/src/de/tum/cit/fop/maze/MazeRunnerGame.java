@@ -91,7 +91,7 @@ public class MazeRunnerGame extends Game {
         ///skin.addRegions(new TextureAtlas(Gdx.files.internal("craft/extra.atlas")));
         achievementPopupScreen = new AchievementPopupScreen(this);
         AchievementManager.setPopupScreen(achievementPopupScreen);
-        progressionManager = new ProgressionManager(2000);
+        progressionManager = new ProgressionManager(200);
         audioManager.preloadSounds("Click.wav", "pickup.wav", "siren.ogg");
         audioManager.playMusic("background.mp3", 1f, true);
         graphicsManager.load();
@@ -593,7 +593,7 @@ public class MazeRunnerGame extends Game {
      * Starts a new progression run with default points.
      */
     public void startNewGameProgression() {
-        progressionManager = new ProgressionManager(2000);
+        progressionManager = new ProgressionManager(200);
     }
 
     /**
@@ -654,7 +654,7 @@ public class MazeRunnerGame extends Game {
     private void loadProgressionFromGameState(GameState gameState) {
         int points = gameState.getProgressionPoints();
         if (gameState.getOwnedUpgrades() == null) {
-            points = 2000;
+            points = 200;
         }
         ProgressionManager loaded = new ProgressionManager(points);
         loaded.setOwnedUpgrades(gameState.getOwnedUpgrades());
