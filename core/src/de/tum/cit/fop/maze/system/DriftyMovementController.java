@@ -229,6 +229,24 @@ public class DriftyMovementController {
     }
 
     /**
+     * Returns the current speed magnitude.
+     *
+     * @return maximum speed value
+     */
+    public float getMaxSpeed() {
+        return maxSpeed;
+    }
+
+    /**
+     * Returns the current speed magnitude.
+     *
+     * @return acceleration value
+     */
+    public float getAcceleration() {
+        return acceleration;
+    }
+
+    /**
      * Sets the acceleration strength.
      *
      * @param acceleration new acceleration

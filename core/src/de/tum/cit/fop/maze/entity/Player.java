@@ -213,6 +213,9 @@ public class Player extends Entity {
      * @param speedMultiplier new multiplier
      */
     public void setSpeedMultiplier(float speedMultiplier) {
+        var df = this.driftyMovementController;
+        df.setAcceleration(df.getAcceleration() / this.speedMultiplier * speedMultiplier);
+        df.setMaxSpeed(df.getMaxSpeed() / this.speedMultiplier * speedMultiplier);
         this.speedMultiplier = speedMultiplier;
     }
 
@@ -222,6 +225,9 @@ public class Player extends Entity {
      * @param debugSpeedMultiplier new debug multiplier
      */
     public void setDebugSpeedMultiplier(float debugSpeedMultiplier) {
+        var df = this.driftyMovementController;
+        df.setAcceleration(df.getAcceleration() / this.debugSpeedMultiplier * debugSpeedMultiplier);
+        df.setMaxSpeed(df.getMaxSpeed() / this.debugSpeedMultiplier * debugSpeedMultiplier);
         this.debugSpeedMultiplier = debugSpeedMultiplier;
     }
 
@@ -356,6 +362,7 @@ public class Player extends Entity {
         hp -= damage;
         if (hp <= 0 && !gameOverTriggered) {
             gameOverTriggered = true;
+            audioManager.stopAllSounds();
             if (deathCauseListener != null) {
                 deathCauseListener.onDeath(cause);
             } else if (gameOverListener != null) {
@@ -377,7 +384,7 @@ public class Player extends Entity {
     }
 
     /**
-     * Plays a sound effect if audio manager is available.
+     * Plays a sound effect if the audio manager is available.
      *
      * @param soundPath sound file path relative to Sound/
      * @param volume    volume multiplier

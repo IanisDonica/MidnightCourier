@@ -483,7 +483,7 @@ public class GameScreen implements Screen {
         if (autosaveTimer == 60) {
             autosaveTimer = 0;
             SaveManager.saveGame(gameState);
-            SaveManager.saveInfo(false, 4);
+            SaveManager.saveInfo(false, 0);
         }
     }
 
@@ -514,6 +514,7 @@ public class GameScreen implements Screen {
         if (paused) {
             resume();
         } else {
+            game.getAudioManager().stopAllSounds();
             paused = true;
             hud.setPauseMenuVisible(true);
         }
