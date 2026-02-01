@@ -84,7 +84,10 @@ public class DriftParticleSystem extends Actor {
         if (isDrifting()) {
             if (!isPlayingDrift) audioManager.playSoundLooping("tires_loop.wav", speedBasedVolume, 0.7f, 0);
             isPlayingDrift = true;
-            if (spawnCooldown <= 0) spawnDriftParticles();
+            if (spawnCooldown <= 0) {
+                spawnCooldown = SPAWN_INTERVAL;
+                spawnDriftParticles();
+            }
         } else {
             audioManager.stopSound("tires_loop.wav");
             if (isPlayingDrift) {
@@ -115,7 +118,6 @@ public class DriftParticleSystem extends Actor {
         }
 
 
-        spawnCooldown = SPAWN_INTERVAL;
     }
 
     /**
