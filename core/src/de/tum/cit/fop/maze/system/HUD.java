@@ -339,8 +339,9 @@ public class HUD {
             targetX = keyX;
             targetY = keyY;
         } else {
-            arrowImage.setVisible(false);
-            return;
+            targetX = exitX;
+            targetY = exitY;
+            ///return;
         }
         float dx = targetX - playerX;
         float dy = targetY - playerY;
