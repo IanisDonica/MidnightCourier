@@ -137,7 +137,10 @@ public class MazeRunnerGame extends Game {
         audioManager.stopMusic();
         playDefaultPlaylist();
 
-
+        if (menuScreen != null) {
+            menuScreen.dispose();
+            menuScreen = null;
+        }
         if (survivalScreen != null) {
             survivalScreen.dispose();
             survivalScreen = null;
@@ -157,6 +160,10 @@ public class MazeRunnerGame extends Game {
         audioManager.stopAllSounds();
         audioManager.stopMusic();
         playDefaultPlaylist();
+        if (menuScreen != null) {
+            menuScreen.dispose();
+            menuScreen = null;
+        }
         if (gameScreen != null) {
             gameScreen.dispose();
             gameScreen = null;
@@ -183,6 +190,10 @@ public class MazeRunnerGame extends Game {
             return;
         }
         loadProgressionFromGameState(gameState);
+        if (menuScreen != null) {
+            menuScreen.dispose();
+            menuScreen = null;
+        }
         if (gameScreen != null) {
             gameScreen.dispose();
             gameScreen = null;
@@ -209,6 +220,10 @@ public class MazeRunnerGame extends Game {
         audioManager.stopAllSounds();
         audioManager.stopMusic();
         playDefaultPlaylist();
+        if (menuScreen != null) {
+            menuScreen.dispose();
+            menuScreen = null;
+        }
         if (gameScreen != null) {
             gameScreen.dispose();
             gameScreen = null;
@@ -237,6 +252,10 @@ public class MazeRunnerGame extends Game {
             return;
         }
         loadProgressionFromGameState(gameState);
+        if (menuScreen != null) {
+            menuScreen.dispose();
+            menuScreen = null;
+        }
         if (gameScreen != null) {
             gameScreen.dispose();
             gameScreen = null;
