@@ -157,7 +157,6 @@ public class HUD {
      * @param game game instance providing skin and config
      */
     public HUD(MazeRunnerGame game) {
-        //this.game = game;
         this.configManager = game.getConfigManager();
         var graphicsManager = game.getGraphicsManager();
         viewport = new ExtendViewport(graphicsManager.getWidth(), graphicsManager.getHeight());
@@ -165,7 +164,7 @@ public class HUD {
         scoreLabel = new Label("Score: ", game.getSkin());
         scoreLabel.setFontScale(2.0f);
 
-        healthLabel = new Label("Money: ", game.getSkin());
+        healthLabel = new Label("Cash: ", game.getSkin());
         healthLabel.setFontScale(2.0f);
 
         keyLabel = new Label("Key: no", game.getSkin());
@@ -184,7 +183,7 @@ public class HUD {
         heart_texture = new TextureRegion(heartTexture, 0, 64, 16, 16);
         regenTexture = new Texture(Gdx.files.internal("CoinRegen.png"));
         Array<TextureRegion> regenFrames = new Array<>(TextureRegion.class);
-        for (int col = 5; col > 1; col--) {
+        for (int col = 5; col > 0; col--) {
             regenFrames.add(new TextureRegion(regenTexture, col * 16, 0, 16, 16));
         }
         regenAnimation = new Animation<>(0.25f, regenFrames);
