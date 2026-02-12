@@ -76,7 +76,7 @@ public class AchievementsScreen implements Screen {
         audioManager = game.getAudioManager();
         var graphicsManager = game.getGraphicsManager();
 
-        Viewport viewport = new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), camera);
+        Viewport viewport = new FitViewport(graphicsManager.getWidth(), graphicsManager.getHeight(), camera);
         stage = new Stage(viewport, game.getSpriteBatch()); // Create a stage for UI elements
         vignetteTexture = UiUtils.buildVignetteTexture(512, 512, 0.9f);
         vignetteImage = new Image(vignetteTexture);

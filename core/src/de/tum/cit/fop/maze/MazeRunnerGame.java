@@ -62,6 +62,8 @@ public class MazeRunnerGame extends Game {
     private boolean enforcingAspect = false;
     /** Screen to return to after leaving the continue game screen. */
     private Screen continueReturnScreen;
+    /** Whether the developer console is enabled globally. */
+    private boolean devConsoleEnabled = false;
 
 
     /**
@@ -83,6 +85,8 @@ public class MazeRunnerGame extends Game {
     @Override
     public void create() {
         configManager.loadKeyBindings();
+        configManager.loadGameSettings();
+        devConsoleEnabled = configManager.isDevConsoleEnabled();
         audioManager.loadSettings();
         AchievementManager.init();
         spriteBatch = new SpriteBatch(); // Create SpriteBatch
@@ -718,6 +722,32 @@ public class MazeRunnerGame extends Game {
      */
     public GraphicsManager getGraphicsManager() {
         return graphicsManager;
+    }
+
+    /**
+     * Returns whether the developer console should be enabled.
+     *
+     * @return true if enabled
+     */
+    public boolean isDevConsoleEnabled() {
+        return devConsoleEnabled;
+    }
+
+    /**
+     * Updates and persists developer console enabled state.
+     *
+     * @param enabled new enabled state
+     */
+    public void setDevConsoleEnabled(boolean enabled) {
+        this.devConsoleEnabled = enabled;
+        configManager.setDevConsoleEnabled(enabled);
+        configManager.saveGameSettings();
+        if (gameScreen != null) {
+            gameScreen.setDevConsole(enabled);
+        }
+        if (survivalScreen != null) {
+            survivalScreen.setDevConsole(enabled);
+        }
     }
 
     /**

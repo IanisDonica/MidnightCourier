@@ -18,10 +18,14 @@ public class ConfigManager {
     private static final String KEYBINDINGS_CONFIG_FILE = "config/keybindings.json";
     /** Path to the audio settings configuration file. */
     private static final String AUDIO_CONFIG_FILE = "config/audio.json";
+    /** Path to game settings configuration file. */
+    private static final String GAME_CONFIG_FILE = "config/game-settings.json";
     /** Map of action names to key codes. */
     private Map<String, Integer> keyBindings;
     /** Map of audio setting names to volume values. */
     private Map<String, Float> audioSettings;
+    /** Map of game setting names to boolean values. */
+    private Map<String, Boolean> gameSettings;
 
     /**
      * Creates a configuration manager with empty settings maps.
@@ -29,6 +33,8 @@ public class ConfigManager {
     public ConfigManager() {
         keyBindings = new HashMap<>();
         audioSettings = new HashMap<>();
+        gameSettings = new HashMap<>();
+        initializeGameSettings();
     }
 
     /**
@@ -56,6 +62,13 @@ public class ConfigManager {
         audioSettings.put("masterVolume", 1f);
         audioSettings.put("soundEffectsVolume", 1f);
         audioSettings.put("musicVolume", 1f);
+    }
+
+    /**
+     * Initializes default game settings.
+     */
+    private void initializeGameSettings() {
+        gameSettings.put("devConsoleEnabled", false);
     }
 
     /**
@@ -218,5 +231,70 @@ public class ConfigManager {
      */
     public void setVolume(String type, float volume) {
         audioSettings.put(type, volume);
+    }
+
+    /**
+     * Loads game settings from disk.
+     */
+    public void loadGameSettings() {
+        try {
+            FileHandle file = Gdx.files.local(GAME_CONFIG_FILE);
+            if (file.exists()) {
+                Json json = new Json();
+                @SuppressWarnings("unchecked")
+                Map<String, Object> loaded = json.fromJson(HashMap.class, file);
+                if (loaded != null) {
+                    for (Map.Entry<String, Object> entry : loaded.entrySet()) {
+                        Object value = entry.getValue();
+                        if (value instanceof Boolean) {
+                            gameSettings.put(entry.getKey(), (Boolean) value);
+                        }
+                    }
+                }
+            }
+            if (!gameSettings.containsKey("devConsoleEnabled")) {
+                gameSettings.put("devConsoleEnabled", false);
+            }
+        } catch (Exception e) {
+            System.err.println("Could not load game settings, using defaults: " + e.getMessage());
+            initializeGameSettings();
+        }
+    }
+
+    /**
+     * Saves current game settings to disk.
+     */
+    public void saveGameSettings() {
+        try {
+            java.io.File directory = new java.io.File("config");
+            if (!directory.exists()) {
+                directory.mkdirs();
+            }
+
+            Json json = new Json();
+            json.setOutputType(JsonWriter.OutputType.json);
+            FileHandle file = Gdx.files.local(GAME_CONFIG_FILE);
+            file.writeString(json.prettyPrint(gameSettings), false);
+        } catch (Exception e) {
+            System.err.println("Could not save game settings: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Returns whether developer console is enabled.
+     *
+     * @return true if enabled
+     */
+    public boolean isDevConsoleEnabled() {
+        return gameSettings.getOrDefault("devConsoleEnabled", false);
+    }
+
+    /**
+     * Sets developer console enabled state.
+     *
+     * @param enabled new enabled state
+     */
+    public void setDevConsoleEnabled(boolean enabled) {
+        gameSettings.put("devConsoleEnabled", enabled);
     }
 }

@@ -77,9 +77,11 @@ public class SaveSlotDialog extends Dialog {
         // Pack the dialog to fit content
         this.pack();
 
-        // Ensure dialog doesn't exceed screen bounds
-        float maxWidth = Gdx.graphics.getWidth() * 0.9f;
-        float maxHeight = Gdx.graphics.getHeight() * 0.9f;
+        // Keep dialog sizing anchored to the stage's virtual UI size.
+        float uiWidth = stage.getViewport().getWorldWidth();
+        float uiHeight = stage.getViewport().getWorldHeight();
+        float maxWidth = uiWidth * 0.9f;
+        float maxHeight = uiHeight * 0.9f;
 
         if (this.getWidth() > maxWidth) {
             this.setWidth(maxWidth);
@@ -88,8 +90,8 @@ public class SaveSlotDialog extends Dialog {
             this.setHeight(maxHeight);
         }
 
-        // Center on screen
-        this.setPosition((Gdx.graphics.getWidth() - this.getWidth()) / 2f, (Gdx.graphics.getHeight() - this.getHeight()) / 2f);
+        // Center inside the virtual UI space.
+        this.setPosition((uiWidth - this.getWidth()) / 2f, (uiHeight - this.getHeight()) / 2f);
 
         // Show the dialog
         this.show(stage, Actions.alpha(1f));
@@ -118,9 +120,11 @@ public class SaveSlotDialog extends Dialog {
         // Pack the dialog to fit content
         this.pack();
 
-        // Ensure dialog doesn't exceed screen bounds
-        float maxWidth = Gdx.graphics.getWidth() * 0.9f;
-        float maxHeight = Gdx.graphics.getHeight() * 0.9f;
+        // Keep dialog sizing anchored to the stage's virtual UI size.
+        float uiWidth = stage.getViewport().getWorldWidth();
+        float uiHeight = stage.getViewport().getWorldHeight();
+        float maxWidth = uiWidth * 0.9f;
+        float maxHeight = uiHeight * 0.9f;
 
         if (this.getWidth() > maxWidth) {
             this.setWidth(maxWidth);
@@ -129,8 +133,8 @@ public class SaveSlotDialog extends Dialog {
             this.setHeight(maxHeight);
         }
 
-        // Center on screen
-        this.setPosition((Gdx.graphics.getWidth() - this.getWidth()) / 2f, (Gdx.graphics.getHeight() - this.getHeight()) / 2f);
+        // Center inside the virtual UI space.
+        this.setPosition((uiWidth - this.getWidth()) / 2f, (uiHeight - this.getHeight()) / 2f);
 
         // Show the dialog
         this.show(stage, Actions.alpha(1f));

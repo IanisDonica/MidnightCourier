@@ -3,7 +3,7 @@
 	"id": "complete_100_deliveries",
 	"name": "Certified Delivery Man",
 	"description": "Complete 100 deliveries",
-	"progress": 24,
+	"progress": 4,
 	"target": 100
 },
 {
@@ -18,9 +18,7 @@
 	"id": "first_time_for_everything",
 	"name": "First time for everythihing",
 	"description": "Get arrested by a police officer for the first time",
-	"progress": 1,
-	"target": 1,
-	"unlocked": true
+	"target": 1
 },
 {
 	"id": "first_upgrade",
@@ -42,7 +40,6 @@
 	"id": "third_strike_and_out",
 	"name": "Three strike rule",
 	"description": "Get arrested 3 times",
-	"progress": 2,
 	"target": 3
 },
 {
