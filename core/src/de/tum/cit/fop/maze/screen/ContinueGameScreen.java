@@ -42,10 +42,11 @@ public class ContinueGameScreen implements Screen {
      */
     public ContinueGameScreen(MazeRunnerGame game) {
         this.game = game;
+        var graphicsManager = game.getGraphicsManager();
         var camera = new OrthographicCamera();
         camera.zoom = 1f; // Set camera zoom for a closer view
 
-        Viewport viewport = new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), camera);
+        Viewport viewport = new FitViewport(graphicsManager.getWidth(), graphicsManager.getHeight(), camera);
         stage = new Stage(viewport, game.getSpriteBatch()); // Create a stage for UI elements
 
         audioManager = game.getAudioManager();

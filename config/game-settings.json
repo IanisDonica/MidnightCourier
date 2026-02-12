@@ -1,0 +1,6 @@
+{
+"devConsoleEnabled": {
+	"class": "java.lang.Boolean",
+	"value": true
+}
+}

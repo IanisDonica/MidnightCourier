@@ -80,10 +80,11 @@ public class ProgressionTreeScreen implements Screen {
     public ProgressionTreeScreen(MazeRunnerGame game) {
         this.game = game;
         audioManager = game.getAudioManager();
+        var graphicsManager = game.getGraphicsManager();
         var camera = new OrthographicCamera();
         camera.zoom = 1f; // Set camera zoom for a closer view
 
-        Viewport viewport = new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), camera);
+        Viewport viewport = new FitViewport(graphicsManager.getWidth(), graphicsManager.getHeight(), camera);
         stage = new Stage(viewport, game.getSpriteBatch());
         shapeRenderer = new ShapeRenderer();
         backgroundTexture = new Texture(Gdx.files.internal("Assets_Map/mega_inside.png"));

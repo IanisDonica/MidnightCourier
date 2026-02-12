@@ -222,6 +222,7 @@ public class GameScreen implements Screen {
         devConsole.setPlayer(player);
         devConsole.setSpawnLayers(collisionLayer, roadLayer);
         devConsole.addToStage(hud.getStage());
+        setDevConsole(game.isDevConsoleEnabled());
 
     }
 
@@ -270,6 +271,7 @@ public class GameScreen implements Screen {
         devConsole.setPlayer(player);
         devConsole.setSpawnLayers(collisionLayer, roadLayer);
         devConsole.addToStage(hud.getStage());
+        setDevConsole(game.isDevConsoleEnabled());
 
         this.player.setX(gameState.getPlayerX());
         this.player.setY(gameState.getPlayerY());

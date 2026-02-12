@@ -50,7 +50,7 @@ public class SettingsAudioScreen implements Screen {
         var camera = new OrthographicCamera();
         camera.zoom = 1f; // Set camera zoom for a closer view
 
-        Viewport viewport = new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), camera);
+        Viewport viewport = new FitViewport(graphicsManager.getWidth(), graphicsManager.getHeight(), camera);
         stage = new Stage(viewport, game.getSpriteBatch());
 
         vignetteTexture = UiUtils.buildVignetteTexture(512, 512, 0.9f);

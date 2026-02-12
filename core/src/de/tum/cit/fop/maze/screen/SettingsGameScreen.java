@@ -39,10 +39,11 @@ public class SettingsGameScreen implements Screen {
     public SettingsGameScreen(MazeRunnerGame game) {
         this.game = game;
         audioManager = game.getAudioManager();
+        var graphicsManager = game.getGraphicsManager();
         var camera = new OrthographicCamera();
         camera.zoom = 1f; // Set camera zoom for a closer view
 
-        Viewport viewport = new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), camera);
+        Viewport viewport = new FitViewport(graphicsManager.getWidth(), graphicsManager.getHeight(), camera);
         stage = new Stage(viewport, game.getSpriteBatch());
         vignetteTexture = UiUtils.buildVignetteTexture(512, 512, 0.9f);
         vignetteImage = new Image(vignetteTexture);
@@ -57,16 +58,12 @@ public class SettingsGameScreen implements Screen {
         Label devConsoleLabel = new Label("Development Console", game.getSkin(), "title");
         CheckBox devConsoleCheckbox = new CheckBox("", game.getSkin());
         devConsoleCheckbox.getImageCell().padRight(10);
+        devConsoleCheckbox.setChecked(game.isDevConsoleEnabled());
         devConsoleCheckbox.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 audioManager.playSound("Click.wav", 1);
-                if (game.getGameScreen() != null){
-                    game.getGameScreen().setDevConsole(devConsoleCheckbox.isChecked());
-                }
-                if (game.getSurvivalScreen() != null){
-                    game.getSurvivalScreen().setDevConsole(devConsoleCheckbox.isChecked());
-                }
+                game.setDevConsoleEnabled(devConsoleCheckbox.isChecked());
             }
         });
 

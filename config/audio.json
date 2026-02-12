@@ -1,7 +1,7 @@
 {
 "masterVolume": {
 	"class": "java.lang.Float",
-	"value": 0.29
+	"value": 0.14
 },
 "soundEffectsVolume": {
 	"class": "java.lang.Float",
