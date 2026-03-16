@@ -107,7 +107,7 @@ You can remap controls in the Settings -> Controls menu, which updates this file
 
 ## Bonus Additions
 - **Fog of War:** Implemented as a multi-pass post-processing pipeline writen in OpenGL in both `GameScreen` (only appears after level 2) and `SurvivalScreen`. The world is rendered to an FBO, then `shaders/fog.frag` darkens everything outside a radius around the player (`fogIntensity`), `shaders/collision.frag` uses a collision mask FBO (one pixel per tile) to keep the collision tiles visible but dimmed, and `shaders/combination.frag` merges the two so walls stay faintly visible outside the fog. In noire mode the scene is passed through `shaders/grayscale.frag` first. The “new glasses” upgrade raises the radius by increasing `fogIntensity`.
-- **Noire Mode:** Uses the grayscale shader (`shaders/grayscale.frag`) on the same FBO pipeline. It auto-triggers when HP is low (`player.getHp() <= 1`) and can also be toggled via input for manual testing.
+- **Noire Mode:** Uses the grayscale shader (`shaders/grayscale.frag`) on the same FBO pipeline. It auto-triggers when HP is low (`player.getHp() < 2  `) and can also be toggled via input for manual testing.
 - **Webserver Leaderboards:** `PointManager` writes local scores to `assets/data/highscore.json` and sends a JSON payload via `Gdx.net` to `transprut.solutions` (need to manage the DNS). It’s fire-and-forget, so networking never blocks gameplay. The webserver is a simple Django webapp; [source code](https://github.com/IanisDonica/webserverTransprut)
 - **Anti-Aliasing** 
 - **Endless Minimap (Key Preview):** A second `FrameBuffer` (`keyPreviewFbo`) renders a zoomed-out view centered on the key/exit target. The HUD shows this preview window to reduce dead-end frustration in survival mode.
