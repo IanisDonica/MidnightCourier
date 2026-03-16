@@ -107,7 +107,7 @@ You can remap controls in the Settings -> Controls menu, which updates this file
 
 ## Bonus Additions
 - **Fog of War:** Implemented as a post-processing shaderc (`shaders/combined.frag`) writen in OpenGL in both `GameScreen` (only appears after level 2) and `SurvivalScreen`. The world is rendered to an FBO, then a shader is applied around the player using `fogIntensity`. The “new glasses” upgrade raises the radius by increasing that value.
-- **Noire Mode:** Uses the grayscale shader (`shaders/grayscale.frag`) on the same FBO pipeline. It auto-triggers when HP is low (`player.getHp() <= 1`) and can also be toggled via input for manual testing.
+- **Noire Mode:** Uses the grayscale shader (`shaders/grayscale.frag`) on the same FBO pipeline. It auto-triggers when HP is low (`player.getHp() < 2  `) and can also be toggled via input for manual testing.
 - **Webserver Leaderboards:** `PointManager` writes local scores to `assets/data/highscore.json` and sends a JSON payload via `Gdx.net` to `transprut.solutions` (need to manage the DNS). It’s fire-and-forget, so networking never blocks gameplay. The webserver is a simple Django webapp; [source code](https://github.com/IanisDonica/webserverTransprut)
 - **Anti-Aliasing** 
 - **Endless Minimap (Key Preview):** A second `FrameBuffer` (`keyPreviewFbo`) renders a zoomed-out view centered on the key/exit target. The HUD shows this preview window to reduce dead-end frustration in survival mode.
